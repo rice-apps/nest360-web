@@ -1,4 +1,4 @@
-// temporary, will likely be changed in the future
+// this is a draft, will likely be changed later
 
 export type ResourceType =
   | "guide"
