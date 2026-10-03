@@ -36,7 +36,9 @@ const AFRICA_BOUNDS: Feature = {
 // Where each NEST360 country's hover label sits, as [longitude, latitude],
 // keyed by ISO numeric code. Hand-placed near each country's middle; a
 // country only gets a hover label once it has an entry here.
-const LABEL_POSITIONS: Record<string, [number, number]> = {};
+const LABEL_POSITIONS: Record<string, [number, number]> = {
+  "231": [39.6, 8.6], // Ethiopia
+};
 
 // Renders at build/request time as plain SVG (no client JS). Each country is
 // its own <path> tagged with data-iso. Hover labels are drawn in a layer on
