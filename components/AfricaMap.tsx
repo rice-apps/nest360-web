@@ -39,6 +39,7 @@ const AFRICA_BOUNDS: Feature = {
 const LABEL_POSITIONS: Record<string, [number, number]> = {
   "231": [39.6, 8.6], // Ethiopia
   "404": [37.9, 0.4], // Kenya
+  "454": [34.2, -13.3], // Malawi
 };
 
 // Renders at build/request time as plain SVG (no client JS). Each country is
