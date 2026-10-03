@@ -4,22 +4,14 @@ import { feature } from "topojson-client";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import world from "world-atlas/countries-110m.json";
+import type { CountryPageData } from "@/lib/data/countries";
 
-export interface MapCountry {
-  // ISO 3166-1 numeric code, as used by world-atlas (e.g. "404" for Kenya)
-  isoNumeric: string;
-  name: string;
-  href: string;
-}
-
-interface Props {
-  countries: MapCountry[];
-}
+type MapCountry = Pick<CountryPageData, "slug" | "name" | "isoNumeric" | "mapLabelPosition">;
 
 const WIDTH = 600;
 const HEIGHT = 640;
 
-// Corners of a rough bounding box around Africa, used to frame the projection.
+// Corners of a rough bounding box around Africa, used to frame the map.
 // (MultiPoint rather than Polygon so d3's winding-order rules don't apply.)
 const AFRICA_BOUNDS: Feature = {
   type: "Feature",
@@ -33,22 +25,12 @@ const AFRICA_BOUNDS: Feature = {
   },
 };
 
-// Where each NEST360 country's hover label sits, as [longitude, latitude],
-// keyed by ISO numeric code. Hand-placed near each country's middle; a
-// country only gets a hover label once it has an entry here.
-const LABEL_POSITIONS: Record<string, [number, number]> = {
-  "231": [39.6, 8.6], // Ethiopia
-  "404": [37.9, 0.4], // Kenya
-  "454": [34.2, -13.3], // Malawi
-  "566": [8.1, 9.5], // Nigeria
-  "834": [34.8, -6.4], // Tanzania
-};
-
-// Renders at build/request time as plain SVG (no client JS). Each country is
-// its own <path> tagged with data-iso. Hover labels are drawn in a layer on
-// top of every country (so neighbors don't cover them) and shown with CSS
-// :has() when their country is hovered or keyboard-focused.
-export default function AfricaMap({ countries }: Props) {
+// Map of Africa with NEST360's countries highlighted and linked to their
+// pages. Drawn on the server as plain SVG (no client JavaScript). Each
+// country's hover label sits at its `mapLabelPosition` (lib/data/countries);
+// labels are drawn above every country and shown with CSS :has() when their
+// country is hovered or keyboard-focused.
+export default function AfricaMap({ countries }: { countries: MapCountry[] }) {
   const topology = world as unknown as Topology<{
     countries: GeometryCollection<{ name: string }>;
   }>;
@@ -60,8 +42,8 @@ export default function AfricaMap({ countries }: Props) {
   const projection = geoMercator().fitSize([WIDTH, HEIGHT], AFRICA_BOUNDS);
   const path = geoPath(projection);
   const highlighted = new Map(countries.map((c) => [c.isoNumeric, c]));
-  const labelled = countries.filter((c) => LABEL_POSITIONS[c.isoNumeric]);
-  const labelCss = labelled
+
+  const labelCss = countries
     .map(
       ({ isoNumeric: iso }) =>
         `.africa-map:has([data-iso="${iso}"]:hover) [data-label-for="${iso}"],` +
@@ -71,11 +53,10 @@ export default function AfricaMap({ countries }: Props) {
 
   return (
     <svg
-      className="africa-map"
+      className="africa-map h-auto w-full max-w-xl"
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       role="img"
       aria-label="Map of Africa highlighting the countries where NEST360 works"
-      style={{ width: "100%", maxWidth: WIDTH, height: "auto" }}
     >
       {all.features.map((f) => {
         // A few world-atlas shapes (e.g. Kosovo, Somaliland) have no ISO id,
@@ -86,23 +67,21 @@ export default function AfricaMap({ countries }: Props) {
 
         if (!country) {
           return (
-            <path key={f.properties.name} d={d} data-iso={id} fill="#e5e7eb" stroke="#fff" strokeWidth={0.5} />
+            <path key={f.properties.name} d={d} data-iso={id} className="fill-gray-200 stroke-white" strokeWidth={0.5} />
           );
         }
 
         return (
-          <Link key={f.properties.name} href={country.href} aria-label={country.name}>
-            <path d={d} data-iso={id} fill="#094267" stroke="#fff" strokeWidth={0.5}>
-              {!LABEL_POSITIONS[id] && <title>{country.name}</title>}
-            </path>
+          <Link key={f.properties.name} href={`/${country.slug}`} aria-label={country.name}>
+            <path d={d} data-iso={id} className="fill-brand-primary stroke-white" strokeWidth={0.5} />
           </Link>
         );
       })}
 
       <style>{labelCss}</style>
       <g aria-hidden="true" pointerEvents="none">
-        {labelled.map((c) => {
-          const [x, y] = projection(LABEL_POSITIONS[c.isoNumeric]) ?? [0, 0];
+        {countries.map((c) => {
+          const [x, y] = projection(c.mapLabelPosition) ?? [0, 0];
           return (
             <text
               key={c.isoNumeric}
@@ -111,10 +90,7 @@ export default function AfricaMap({ countries }: Props) {
               y={y}
               textAnchor="middle"
               dominantBaseline="middle"
-              fontSize={14}
-              fontWeight={600}
-              fill="#004167"
-              stroke="#fff"
+              className="fill-brand-primary stroke-white text-sm font-semibold"
               strokeWidth={3}
               paintOrder="stroke"
               opacity={0}
