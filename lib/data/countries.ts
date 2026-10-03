@@ -721,12 +721,16 @@ const tanzania: CountryPageData = {
       title: "The First Hours of Life: Why Breast Milk Matters for Newborns",
       href: "/the-first-hours-of-life-why-breast-milk-matters-for-newborns",
       image: "/images/countries/tanzania/news/breast-milk.jpg",
+      excerpt:
+        "Tanzania is making significant progress towards establishing its first Human Milk Bank at Muhimbili National Hospital, Mloganzila aspart of a broader effort in Tanzania to improve ...",
     },
     ISQUA_NEWS,
     {
       title: "Kangaroo Mother Care (KMC) at Mabwepande District Hospital in Tanzania",
       href: "/kangaroo-mother-care-kmcat-mabwepande-district-hospital-in-tanzania",
       image: "/images/countries/tanzania/news/kmc-mabwepande.jpg",
+      excerpt:
+        "Mabwepande District Hospital officially launched its Neonatal Care Unit (NCU) following a major renovation supported by NEST360. This initiative marked a significant milestone in s...",
     },
   ],
 };
