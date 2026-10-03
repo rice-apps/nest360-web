@@ -28,3 +28,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* A link (or PendingLink placeholder) wrapping an image is only as wide as
+   its content, so the clickable area doesn't stretch across the page. */
+main a:has(img),
+main [data-link-to]:has(img) {
+  display: block;
+  width: fit-content;
+}
