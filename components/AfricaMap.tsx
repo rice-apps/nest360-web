@@ -33,9 +33,15 @@ const AFRICA_BOUNDS: Feature = {
   },
 };
 
+// Where each NEST360 country's hover label sits, as [longitude, latitude],
+// keyed by ISO numeric code. Hand-placed near each country's middle; a
+// country only gets a hover label once it has an entry here.
+const LABEL_POSITIONS: Record<string, [number, number]> = {};
+
 // Renders at build/request time as plain SVG (no client JS). Each country is
-// its own <path> tagged with data-iso, so hover/click behavior can be added
-// later without changing how the map is drawn.
+// its own <path> tagged with data-iso. Hover labels are drawn in a layer on
+// top of every country (so neighbors don't cover them) and shown with CSS
+// :has() when their country is hovered or keyboard-focused.
 export default function AfricaMap({ countries }: Props) {
   const topology = world as unknown as Topology<{
     countries: GeometryCollection<{ name: string }>;
@@ -48,9 +54,18 @@ export default function AfricaMap({ countries }: Props) {
   const projection = geoMercator().fitSize([WIDTH, HEIGHT], AFRICA_BOUNDS);
   const path = geoPath(projection);
   const highlighted = new Map(countries.map((c) => [c.isoNumeric, c]));
+  const labelled = countries.filter((c) => LABEL_POSITIONS[c.isoNumeric]);
+  const labelCss = labelled
+    .map(
+      ({ isoNumeric: iso }) =>
+        `.africa-map:has([data-iso="${iso}"]:hover) [data-label-for="${iso}"],` +
+        `.africa-map:has(a:focus-visible [data-iso="${iso}"]) [data-label-for="${iso}"] { opacity: 1; }`,
+    )
+    .join("\n");
 
   return (
     <svg
+      className="africa-map"
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       role="img"
       aria-label="Map of Africa highlighting the countries where NEST360 works"
@@ -72,11 +87,37 @@ export default function AfricaMap({ countries }: Props) {
         return (
           <Link key={f.properties.name} href={country.href} aria-label={country.name}>
             <path d={d} data-iso={id} fill="#094267" stroke="#fff" strokeWidth={0.5}>
-              <title>{country.name}</title>
+              {!LABEL_POSITIONS[id] && <title>{country.name}</title>}
             </path>
           </Link>
         );
       })}
+
+      <style>{labelCss}</style>
+      <g aria-hidden="true" pointerEvents="none">
+        {labelled.map((c) => {
+          const [x, y] = projection(LABEL_POSITIONS[c.isoNumeric]) ?? [0, 0];
+          return (
+            <text
+              key={c.isoNumeric}
+              data-label-for={c.isoNumeric}
+              x={x}
+              y={y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontSize={14}
+              fontWeight={600}
+              fill="#004167"
+              stroke="#fff"
+              strokeWidth={3}
+              paintOrder="stroke"
+              opacity={0}
+            >
+              {c.name}
+            </text>
+          );
+        })}
+      </g>
     </svg>
   );
 }
