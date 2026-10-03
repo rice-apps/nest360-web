@@ -1,69 +1,123 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { getPillars, getImpactStats } from "@/lib/data/site";
 
-export default function Home() {
+const colors = [
+  { title: "text-red-300", button: "bg-red-400" },
+  { title: "text-blue-300", button: "bg-blue-400" },
+  { title: "text-green-300", button: "bg-green-400" },
+];
+
+export default async function Home() {
+  const pillars = await getPillars();
+  const stats = await getImpactStats();
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main>
+        <nav className="sticky top-0 z-50 flex items-center justify-between bg-white px-6 py-4 shadow-sm">
+            <div className="text-xl font-bold">NEST360</div>
+            <ul className="flex gap-6">
+                <li>
+                <Link href="/" className="hover:text-blue-600">Who We Are</Link>
+                </li>
+                <li>
+                <Link href="/about" className="hover:text-blue-600">Where We Work</Link>
+                </li>
+                <li>
+                <Link href="/contact" className="hover:text-blue-600">What We Do</Link>
+                </li>
+                        <li>
+                <Link href="/contact" className="hover:text-blue-600">Knowledge Hub</Link>
+                </li>
+                        <li>
+                <Link href="/contact" className="hover:text-blue-600">News & Highlight</Link>
+                </li>
+            </ul>
+        </nav>
+      <section>
+        <h2>What We Do</h2>
+
+        <div>
+          <div>
+            <h3>Data-Driven Action</h3>
+            <p>
+              We use locally owned data to help healthcare teams and governments
+              improve newborn care.
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </section>
+
+      {}
+      <section className="px-6 py-12 md:px-16 lg:px-24">
+  <h2 className="text-2xl font-bold">Our progress in numbers</h2>
+
+  <dl className="mt-8 grid gap-8 md:grid-cols-3">
+    {stats.map((stat) => (
+      <div key={stat.label} className="flex flex-col bg-gray-100 p-6 text-gray-900">
+        <dt className="order-2 mt-2">{stat.label}</dt>
+        <dd className="order-1 text-4xl font-bold">{stat.value}</dd>
+      </div>
+    ))}
+  </dl>
+</section>
+
+      {/** This is the impact section, it is connected to the site.ts with designs from types.ts */}
+      <section className = 'px-6 py-12'>
+      <div className="mx-auto max-w-6xl">
+      <h2 className="text-2xl font-bold">Our Impact</h2>
+      <p>
+        We partner with governments, hospitals, educational institutions, professional societies, and national non-governmental organizations (NGOs) to catalyze country-led change through:
+      </p>
+      <div className="mt-8 grid gap-6 md:grid-cols-3">
+    {pillars.map((pillar, index) => {
+      const color = colors[index % colors.length];
+
+      return (
+        <div
+          key={pillar.title}
+          className="flex flex-col bg-gray-100 p-6 text-gray-900"
+        >
+          {/* Image placeholder */}
+          <div className="flex h-40 items-center justify-center bg-gray-200 text-sm text-gray-500">
+            Image placeholder
+          </div>
+
+          <h3 className={`mt-4 text-lg font-semibold ${color.title}`}>
+            {pillar.title}
+          </h3>
+          <p className="mt-2 flex-1">{pillar.body}</p>
+
+          <button
+            type="button"
+            className={`mt-4 self-start px-4 py-2 text-sm font-medium text-white ${color.button}`}
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {pillar.link.label}
+          </button>
         </div>
-      </main>
+      );
+    })}
+  </div>
+  </div>
+</section>
+
+  <section>
+    <div className="mx-auto max-w-6xl">
+    <h2 className="text-2xl font-bold"> Our Progress in Numbers </h2>
+    <>
+    </>
     </div>
+  </section>
+
+
+      {/** The Resources Section: In this section we add on the numbers */ }
+      <section>
+        
+        <h2>Resources</h2>
+
+        <p>
+          Explore clinical and biomedical resources, training materials, and
+          other tools for newborn healthcare teams.
+        </p>
+      </section>
+    </main>
   );
 }

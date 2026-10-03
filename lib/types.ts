@@ -49,3 +49,13 @@ export interface ImpactStat {
   label: string;
   value: string;
 }
+
+export interface LinkItem {
+  label: string;
+  href: string;
+}
+export interface Pillar {
+  title: string;
+  body: string;
+  link: LinkItem;
+}
