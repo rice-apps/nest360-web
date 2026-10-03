@@ -6,15 +6,18 @@ import type { ReactNode } from "react";
 // exists.
 export default function PendingLink({
   to,
+  className,
   children,
 }: {
   to: string;
+  className?: string;
   children: ReactNode;
 }) {
   return (
     <span
       title="Hyperlink must be added"
       data-link-to={to}
+      className={className}
       style={{ textDecoration: "underline", cursor: "help" }}
     >
       {children}
