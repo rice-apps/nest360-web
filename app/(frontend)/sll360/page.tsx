@@ -98,6 +98,8 @@ const news: NewsItem[] = [
       "News | Keeping small and sick newborns safe starts with safe medical devices",
     href: "/keeping-small-and-sick-newborns-safe-starts-with-safe-medical-devices",
     image: "/images/countries/ethiopia/news/safe-medical-devices.jpg",
+    excerpt:
+      "In Ethiopia, initiatives such as the SLL360-SSNC Program, led by the Ministry of Health, are contributing to SDG 3 by strengthening human capacity, providing essential medical devi...",
   },
   {
     title:
