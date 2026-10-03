@@ -30,9 +30,12 @@ body {
 }
 
 /* A link (or PendingLink placeholder) wrapping an image is only as wide as
-   its content, so the clickable area doesn't stretch across the page. */
-main a:has(img),
-main [data-link-to]:has(img) {
-  display: block;
-  width: fit-content;
+   its content, so the clickable area doesn't stretch across the page. In the
+   base layer so a utility class (e.g. w-full on a card) can override it. */
+@layer base {
+  main a:has(img),
+  main [data-link-to]:has(img) {
+    display: block;
+    width: fit-content;
+  }
 }
