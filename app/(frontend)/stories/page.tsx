@@ -25,7 +25,7 @@ export default function Home() {
             className="object-cover"
             priority
             />
-            <div className="absolute inset-0 flex flex-col items-center justify-center pr-200 text-center text-white">
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center xl:pr-200 text-white">
                 <h1 className="text-4xl font-bold">Stories and News</h1>
                 <p className="mt-2 text-lg">Add stuff to here as needed</p>
             </div>
@@ -65,8 +65,8 @@ export default function Home() {
         
 
 
-        <div className="px-50">
-            <div className="grid grid-cols-3 gap-6 p-8">
+        <div className="px-4 lg:px-50">
+            <div className="grid grid-cols-1 gap-6 py-8 sm:grid-cols-2 sm:p-8 lg:grid-cols-3">
                 {cards.map((card) => (
                 <div
                     key={card.picture}
