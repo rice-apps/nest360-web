@@ -250,12 +250,16 @@ const kenya: CountryPageData = {
       title: "Clean hands saved newborns’ lives in our hospitals: A responsibility for All",
       href: "/clean-hands-saved-newborns-lives-in-our-hospitals-a-responsibility-for-all",
       image: "/images/countries/kenya/news/clean-hands.jpg",
+      excerpt:
+        "On this World Patient Safety Day, let us commit to a culture of “regular hand washing, peer accountability, and a ban to shortcuts and culture of silence. The survival of our new...",
     },
     {
       title:
         "International Women’s Day | “I did it. You can do it.” How Women Are Saving Kenya’s Smallest Lives",
       href: "/how-women-are-saving-kenyas-smallest-lives",
       image: "/images/countries/kenya/news/womens-day.jpeg",
+      excerpt:
+        "In neonatal wards across Kenya, some of the most powerful leaders are mothers. On International Women’s Day, we celebrate women who lead, nurture, and change systems often withou...",
     },
     {
       title: "News | Kenya’s National Investment Case for Newborn Care",
