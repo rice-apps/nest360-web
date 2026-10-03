@@ -69,6 +69,8 @@ export interface CountryPageData {
     heading: string;
     paragraph: string;
     logos: PageImage[];
+    // Logos per row on desktop; nest360.org uses 4 for Malawi, 5 elsewhere.
+    columns?: 4 | 5;
   };
   news: NewsItem[];
 }
@@ -414,6 +416,7 @@ const malawi: CountryPageData = {
   },
   partners: {
     heading: "OUR PARTNERS IN MALAWI",
+    columns: 4,
     paragraph:
       "We work closely with the Ministry of Health, Kamuzu University of Health Sciences, Malawi University of Business & Applied Sciences, Malawi University of Science & Technology, Hatch Technologies, and Rice360 Institute for Global Health Technologies.",
     logos: [
