@@ -445,6 +445,8 @@ const malawi: CountryPageData = {
       title: "World Prematurity Day 2024",
       href: "/world-prematurity-day-2024",
       image: "/images/countries/malawi/news/world-prematurity-day.jpg",
+      excerpt:
+        "This year, The NEST360 countries celebrated World Prematurity Day 2024 with partnering hospitals, representatives from ministries of health, and community leaders. World Prematur...",
     },
   ],
 };
