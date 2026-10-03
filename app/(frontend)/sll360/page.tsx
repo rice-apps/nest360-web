@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { LatestNews, PartnersSection } from "@/components/CountrySections";
 import PendingLink from "@/components/PendingLink";
+import type { NewsItem, PageImage } from "@/lib/data/countries";
 
 export const metadata: Metadata = {
   title: "Ethiopia (SLL360) | NEST360",
@@ -70,24 +72,24 @@ const skillsLabs = [
   "Hawassa University Comprehensive Specialized Hospital",
 ];
 
-const partnerLogos = [
-  { src: "moh-ethiopia.png", alt: "Ministry of Health Ethiopia", width: 705, height: 210 },
-  { src: "unicef.png", alt: "UNICEF", width: 220, height: 124 },
-  { src: "who.png", alt: "World Health Organization", width: 436, height: 137 },
-  { src: "global-financing-facility.png", alt: "Global Financing Facility", width: 226, height: 110 },
-  { src: "gates-foundation.jpg", alt: "Gates Foundation", width: 521, height: 134 },
-  { src: "laerdal-foundation.png", alt: "Laerdal Foundation", width: 368, height: 216 },
-  { src: "addis-ababa-university.jpg", alt: "Addis Ababa University", width: 358, height: 238 },
-  { src: "hawassa-university.png", alt: "Hawassa University", width: 748, height: 375 },
-  { src: "emory-university.png", alt: "Emory University", width: 332, height: 188 },
-  { src: "many-more.jpg", alt: "+ many more...", width: 450, height: 92 },
+const partnerLogos: PageImage[] = [
+  { src: "/images/countries/ethiopia/partners/moh-ethiopia.png", alt: "Ministry of Health Ethiopia", width: 705, height: 210 },
+  { src: "/images/countries/ethiopia/partners/unicef.png", alt: "UNICEF", width: 220, height: 124 },
+  { src: "/images/countries/ethiopia/partners/who.png", alt: "World Health Organization", width: 436, height: 137 },
+  { src: "/images/countries/ethiopia/partners/global-financing-facility.png", alt: "Global Financing Facility", width: 226, height: 110 },
+  { src: "/images/countries/ethiopia/partners/gates-foundation.jpg", alt: "Gates Foundation", width: 521, height: 134 },
+  { src: "/images/countries/ethiopia/partners/laerdal-foundation.png", alt: "Laerdal Foundation", width: 368, height: 216 },
+  { src: "/images/countries/ethiopia/partners/addis-ababa-university.jpg", alt: "Addis Ababa University", width: 358, height: 238 },
+  { src: "/images/countries/ethiopia/partners/hawassa-university.png", alt: "Hawassa University", width: 748, height: 375 },
+  { src: "/images/countries/ethiopia/partners/emory-university.png", alt: "Emory University", width: 332, height: 188 },
+  { src: "/images/countries/ethiopia/partners/many-more.jpg", alt: "+ many more...", width: 450, height: 92 },
 ];
 
-const news = [
+const news: NewsItem[] = [
   {
     title: "Research | Examining the perceptions of preterm birth in Ethiopia",
     href: "/research-examining-the-perceptions-of-preterm-birth-in-ethiopia",
-    image: "preterm-birth-perceptions.jpg",
+    image: "/images/countries/ethiopia/news/preterm-birth-perceptions.jpg",
     excerpt:
       "Research explores the impact of preterm birth perceptions in Ethiopia Researchers, including NEST360 partners in Ethiopia, recently published a work examining the beliefs,...",
   },
@@ -95,14 +97,13 @@ const news = [
     title:
       "News | Keeping small and sick newborns safe starts with safe medical devices",
     href: "/keeping-small-and-sick-newborns-safe-starts-with-safe-medical-devices",
-    image: "safe-medical-devices.jpg",
-    excerpt: null,
+    image: "/images/countries/ethiopia/news/safe-medical-devices.jpg",
   },
   {
     title:
       "Research | NEST360 team presented NEST360 quality improvement approach at ISQua 2025",
     href: "/research-nest360-team-presented-nest360-quality-improvement-approach-at-isqua-2025",
-    image: "isqua-2025.jpeg",
+    image: "/images/countries/ethiopia/news/isqua-2025.jpeg",
     excerpt:
       "NEST360 Research Presentation at ISQua 2025 in BrazilQuality Improvement Approach to Improving Newborn Care NEST360 team members, Nebiyou Hailemariam, Hannah Mwaniki, and Kylie...",
   },
@@ -275,49 +276,13 @@ export default function EthiopiaPage() {
         </ul>
       </section>
 
-      <section>
-        <h2>OUR PARTNERS IN ETHIOPIA</h2>
-        <p>
-          We work closely with the Federal Ministry of Health, Addis Ababa
-          University &ndash; Institute of Technology Addis Ababa University
-          &ndash; Aklilu Lema Health Research Institute, Center for
-          Implementation Sciences, Emory University, London School of Hygiene
-          and Tropical Medicine, Mekelle University, Hawassa University, Hatch
-          Technologies, and Rice360 Institute for Global Health Technologies.
-        </p>
-        {partnerLogos.map((logo) => (
-          <Image
-            key={logo.src}
-            src={`/images/countries/ethiopia/partners/${logo.src}`}
-            alt={logo.alt}
-            width={logo.width}
-            height={logo.height}
-            style={{ width: 150, height: "auto" }}
-          />
-        ))}
-      </section>
+      <PartnersSection
+        heading="OUR PARTNERS IN ETHIOPIA"
+        paragraph="We work closely with the Federal Ministry of Health, Addis Ababa University – Institute of Technology Addis Ababa University – Aklilu Lema Health Research Institute, Center for Implementation Sciences, Emory University, London School of Hygiene and Tropical Medicine, Mekelle University, Hawassa University, Hatch Technologies, and Rice360 Institute for Global Health Technologies."
+        logos={partnerLogos}
+      />
 
-      <section>
-        <h4>LATEST NEWS</h4>
-        {news.map((item) => (
-          <article key={item.href}>
-            <PendingLink to={item.href}>
-              <Image
-                src={`/images/countries/ethiopia/news/${item.image}`}
-                alt={item.title}
-                width={400}
-                height={250}
-                style={{ width: 300, height: "auto" }}
-              />
-            </PendingLink>
-            <h4>
-              <PendingLink to={item.href}>{item.title}</PendingLink>
-            </h4>
-            {item.excerpt && <p>{item.excerpt}</p>}
-            <PendingLink to={item.href}>Read More</PendingLink>
-          </article>
-        ))}
-      </section>
+      <LatestNews news={news} />
     </main>
   );
 }
