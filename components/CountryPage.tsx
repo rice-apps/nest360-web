@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { LatestNews, PartnersSection } from "@/components/CountrySections";
 import PendingLink from "@/components/PendingLink";
 import type { CountryPageData } from "@/lib/data/countries";
 
@@ -127,42 +128,14 @@ export default function CountryPage({ country }: { country: CountryPageData }) {
         ))}
       </section>
 
-      <section>
-        <h2>{partners.heading}</h2>
-        <p>{partners.paragraph}</p>
-        {partners.logos.map((logo) => (
-          <Image
-            key={logo.src}
-            src={logo.src}
-            alt={logo.alt}
-            width={logo.width}
-            height={logo.height}
-            style={{ width: 150, height: "auto" }}
-          />
-        ))}
-      </section>
+      <PartnersSection
+        heading={partners.heading}
+        paragraph={partners.paragraph}
+        logos={partners.logos}
+        columns={partners.columns}
+      />
 
-      <section>
-        <h4>LATEST NEWS</h4>
-        {country.news.map((item) => (
-          <article key={item.href}>
-            <PendingLink to={item.href}>
-              <Image
-                src={item.image}
-                alt={item.title}
-                width={400}
-                height={250}
-                style={{ width: 300, height: "auto" }}
-              />
-            </PendingLink>
-            <h4>
-              <PendingLink to={item.href}>{item.title}</PendingLink>
-            </h4>
-            {item.excerpt && <p>{item.excerpt}</p>}
-            <PendingLink to={item.href}>Read More</PendingLink>
-          </article>
-        ))}
-      </section>
+      <LatestNews news={country.news} />
     </main>
   );
 }
