@@ -9,7 +9,7 @@ export interface Resource {
 }
 
 const RESOURCES_DATA: Resource[] = [
-    //Healthcare workers
+    //healthcare workers
   
   {
     id: '1',
@@ -35,7 +35,7 @@ const RESOURCES_DATA: Resource[] = [
     title: 'BME/T Modules',
     description: 'BME/T education modules prepare biomedical technicians on the technical use of technologies for newborn care in resource limited settings.',
   },
-  // Innovators & Manufacturers
+  // innovators + manufacturers 
   {
     id: '5',
     category: 'innovators',
@@ -59,16 +59,24 @@ const RESOURCES_DATA: Resource[] = [
     category: 'innovators',
     title: 'Newborn & Maternal Technology Landscape Survey',
     description: 'Do you have a technology that you would like to be considered for the next edition of the Newborn & Maternal Technology Landscape? If so, please fill out our survey form.',
+  },
+  //Implementors 
+  {
+    id: '9', 
+    category: 'implementors', 
+    title: "Implementation Toolkit", 
+    description: 'The Implementation Toolkit for small and sick newborn care, codesigned by UNICEF and NEST360, is an open-access, online toolkit enabling implementors to reach every newborn.'
   }
 ];
 
 export default function ResourcesPage() {
   const healthcareResources = RESOURCES_DATA.filter((r) => r.category === 'healthcare');
   const innovatorResources = RESOURCES_DATA.filter((r) => r.category === 'innovators');
+  const implementorResources = RESOURCES_DATA.filter((r)=> r.category ==='implementors');
 
   return (
     <main className="min-h-screen bg-slate-50 pb-16">
-      {/* Search Header Section */}
+      {/* search header section */}
       <section className="bg-white py-12 px-4 border-b border-gray-100 text-center">
         <div className="max-w-4xl mx-auto space-y-4">
           <h1 className="text-4xl font-bold text-gray-800">Resources</h1>
@@ -89,30 +97,11 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      {/* Category Filter Navigation Bar */}
-      <section className="bg-[#E0F3F7] py-6 px-4">
-        <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-3">
-          <button className="bg-[#0A4162] text-white px-5 py-2.5 rounded-md font-medium text-xs sm:text-sm hover:opacity-95">
-            For healthcare professionals
-          </button>
-          <button className="bg-[#0A4162] text-white px-5 py-2.5 rounded-md font-medium text-xs sm:text-sm hover:opacity-95">
-            For innovators & manufacturers
-          </button>
-          <button className="bg-[#0A4162] text-white px-5 py-2.5 rounded-md font-medium text-xs sm:text-sm hover:opacity-95">
-            For implementors
-          </button>
-          <button className="bg-[#0A4162] text-white px-5 py-2.5 rounded-md font-medium text-xs sm:text-sm hover:opacity-95">
-            For families
-          </button>
-          <button className="bg-[#0A4162] text-white px-5 py-2.5 rounded-md font-medium text-xs sm:text-sm hover:opacity-95">
-            Dashboards
-          </button>
-        </div>
-      </section>
+     
 
-      {/* Results Section */}
+      {/* results section */}
       <div className="max-w-6xl mx-auto px-4 py-12 space-y-12">
-        {/* Healthcare Section */}
+        {/* healthcare */}
         <section>
           <h2 className="text-xl sm:text-2xl font-bold text-[#0A4162] mb-6">
             Resources for healthcare professionals & BMETs
@@ -136,7 +125,7 @@ export default function ResourcesPage() {
           </div>
         </section>
 
-        {/* Innovators Section */}
+        {/* innovators*/}
         <section>
           <h2 className="text-xl sm:text-2xl font-bold text-[#0A4162] mb-6">
             Resources for innovators & manufacturers
@@ -159,6 +148,31 @@ export default function ResourcesPage() {
             ))}
           </div>
         </section>
+        {/*implentors*/}
+        <section>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#0A4162] mb-6">
+            Resources for Implementors
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {implementorResources.map((item) => (
+              <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                <div className="h-44 bg-[#0A4162] flex items-center justify-center p-4">
+                  <span className="text-white text-xs font-semibold text-center uppercase tracking-wider">
+                    {item.title}
+                  </span>
+                </div>
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-semibold text-[#41B6C4] text-sm mb-2">{item.title}</h3>
+                    <p className="text-xs text-gray-600 leading-relaxed">{item.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
       </div>
     </main>
   );

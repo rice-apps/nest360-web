@@ -31,12 +31,40 @@ export default function Home() {
             </div>
         </div>
         
+        <div className="flex max-w-2xl mx-auto mt-6 shadow-sm rounded-md overflow-hidden border border-gray-200 mb-10">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="flex-1 px-4 py-3 outline-none text-gray-700 placeholder-gray-400 text-sm"
+            />
+            <button className="bg-[#41B6C4] text-white px-8 font-medium hover:bg-[#3298a4] transition-colors text-sm">
+              Search
+            </button>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto mb-10">
+            <button className="px-4 py-1.5 rounded-full text-sm font-medium bg-[#41B6C4] text-white">
+                All
+            </button>
+            <button className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-300 text-gray-700 hover:border-[#41B6C4] hover:text-[#41B6C4] transition-colors">
+                Section A
+            </button>
+            <button className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-300 text-gray-700 hover:border-[#41B6C4] hover:text-[#41B6C4] transition-colors">
+                Section B
+            </button>
+            <button className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-300 text-gray-700 hover:border-[#41B6C4] hover:text-[#41B6C4] transition-colors">
+                Section C
+            </button>
+        </div>
+
         <div className="inset-0 flex flex-col text-center text-black">
             <h1 className="text-4xl font-bold">Stories, News, and More!</h1>
             <p className="mt-2 text-lg">Read the latest stories, and news from the NEST360 Alliance of experts who advance quality newborn care </p>
             <p className="mt-2 text-lg">through innovation, policy, and education.</p>
         </div>
         
+
+
         <div className="px-50">
             <div className="grid grid-cols-3 gap-6 p-8">
                 {cards.map((card) => (
