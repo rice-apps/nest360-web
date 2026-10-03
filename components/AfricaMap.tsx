@@ -41,6 +41,7 @@ const LABEL_POSITIONS: Record<string, [number, number]> = {
   "404": [37.9, 0.4], // Kenya
   "454": [34.2, -13.3], // Malawi
   "566": [8.1, 9.5], // Nigeria
+  "834": [34.8, -6.4], // Tanzania
 };
 
 // Renders at build/request time as plain SVG (no client JS). Each country is
