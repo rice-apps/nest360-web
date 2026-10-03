@@ -1,28 +1,27 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CountryPage from "@/components/CountryPage";
-import { countryPages } from "@/lib/data/countries";
+import { countries, getCountry } from "@/lib/data/countries";
+import { site } from "@/lib/data/site";
 
-// Country pages for Kenya, Malawi, Nigeria, and Tanzania, at the same paths
-// as nest360.org. Ethiopia has its own page at /sll360.
-
-// Only the slugs in countryPages are valid; anything else 404s.
+// One page per country in lib/data/countries, at /<slug> (e.g. /kenya,
+// /sll360 for Ethiopia). Any other address shows "page not found".
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return Object.keys(countryPages).map((country) => ({ country }));
+  return countries.map((country) => ({ country: country.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[country]">): Promise<Metadata> {
   const { country } = await params;
-  return { title: `${countryPages[country].name} | NEST360` };
+  return { title: `${getCountry(country)?.name} | ${site.name}` };
 }
 
 export default async function Page({ params }: PageProps<"/[country]">) {
   const { country } = await params;
-  const data = countryPages[country];
+  const data = getCountry(country);
   if (!data) notFound();
 
   return <CountryPage country={data} />;
