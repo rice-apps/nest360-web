@@ -1,39 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import { site } from "@/lib/data/site";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Site font. Change it here (and the weights you need); globals.css picks it
+// up as the default font through --font-brand.
+const brandFont = Poppins({
+  variable: "--font-brand",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// nest360.org's header and footer use Poppins.
-const poppins = Poppins({
-  variable: "--font-poppins-next",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["300", "400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "NEST360",
-  description:
-    "NEST360 works with governments in Africa to end preventable newborn deaths in hospitals.",
+  title: site.name,
+  description: site.description,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className={`${brandFont.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col">
         <Header />
         {/* flex-1 keeps the footer at the bottom even on short pages. */}
         <div className="flex-1">{children}</div>
