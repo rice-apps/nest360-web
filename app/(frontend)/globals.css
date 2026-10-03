@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ------------------------------------------------------------------
+   Design settings. These are placeholders taken from nest360.org; change
+   them here to restyle the whole site. Components use them through
+   Tailwind classes such as text-brand-primary, bg-brand-accent,
+   border-brand-highlight, bg-surface-muted, and font-sans.
+   ------------------------------------------------------------------ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Main brand color: headings, links, nav text */
+  --color-brand-primary: #004167;
+  /* Secondary color: buttons, section labels */
+  --color-brand-accent: #6ccad0;
+  /* Small highlights, e.g. the line on top of dropdown menus */
+  --color-brand-highlight: #bfa1cc;
+  /* Light background for the footer and other quiet areas */
+  --color-surface-muted: #f7f7f7;
+
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+
+  /* Site font (loaded in layout.tsx) */
+  --font-sans: var(--font-brand), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Standard page width: full width minus a small margin on phones, 80% of the
+   screen (up to 1280px) on larger screens. */
+@utility page-container {
+  margin-inline: auto;
+  width: calc(100% - 2rem);
+  max-width: 80rem;
+
+  @media (width >= 40rem) {
+    width: 80%;
   }
 }
 
+/* Always light (no dark mode). */
+:root {
+  color-scheme: light;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+@layer base {
+  /* Pages that don't set their own layout get the standard page width, so
+     text never runs into the screen edges. */
+  main:not([class]) {
+    margin-inline: auto;
+    width: calc(100% - 2rem);
+    max-width: 80rem;
+    padding-block: 2rem;
+
+    @media (width >= 40rem) {
+      width: 80%;
+    }
+  }
+
+  /* Long words and URLs wrap instead of making the page wider than the
+     screen. */
+  main {
+    overflow-wrap: anywhere;
+  }
+
+  /* Embedded videos shrink to fit the screen. */
+  main iframe {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  /* A link (or PendingLink placeholder) wrapping an image is only as wide as
+     its content, so the clickable area doesn't stretch across the page. A
+     utility class (e.g. w-full on a card) can override this. */
+  main a:has(img),
+  main [data-link-to]:has(img) {
+    display: block;
+    width: fit-content;
+  }
 }
