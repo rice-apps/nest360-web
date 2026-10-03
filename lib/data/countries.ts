@@ -568,12 +568,16 @@ const nigeria: CountryPageData = {
       title: "Starting Life Too Soon Inspires Teen to Make Big Impact for Newborns",
       href: "/starting-life-too-soon-inspires-teen-to-make-big-impact-for-newborns",
       image: "/images/countries/nigeria/news/teen-impact.jpg",
+      excerpt:
+        "Eden Jarrett was born prematurely at 29 weeks and under two pounds in a New York hospital a little over 17 years ago. Today, she draws on her own vulnerable beginning to make a big...",
     },
     {
       title:
         "A Day in the Life Of Nurse Gabriel Oluremi, A Neonatal Nurse in the Neonatal Unit of the Lagos University Teaching Hospital, Lagos, Nigeria",
       href: "/a-day-in-the-life-of-nurse-gabriel-oluremi-a-neonatal-nurse-in-the-neonatal-unit-of-the-lagos-university-teaching-hospital-lagos-nigeria",
       image: "/images/countries/nigeria/news/nurse-gabriel.jpg",
+      excerpt:
+        "Nurse Gabriel Oluremi is among the heroes providing quality care to small and sick babies in the neonatal unit (NNU) at Lagos University Teaching Hospital. She shared with us a typ...",
     },
     ISQUA_NEWS,
   ],
