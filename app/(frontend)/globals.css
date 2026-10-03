@@ -10,13 +10,17 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-poppins: var(--font-poppins-next);
+
+  /* NEST360 brand colors, taken from nest360.org */
+  --color-nest-navy: #004167;
+  --color-nest-teal: #6ccad0;
+  --color-nest-lilac: #bfa1cc;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Always light, like nest360.org (no dark mode). */
+:root {
+  color-scheme: light;
 }
 
 body {
