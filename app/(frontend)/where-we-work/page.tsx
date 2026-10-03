@@ -69,38 +69,51 @@ const countries = [
 
 export default function WhereWeWorkPage() {
   return (
-    <main>
-      <h1>Where We Work</h1>
-      <p>
+    <main className="mx-auto w-4/5 max-w-[1280px] py-16 font-poppins">
+      <h1 className="text-center text-[30px] font-semibold text-[#333]">
+        Where We Work
+      </h1>
+      <p className="mt-8 font-light text-black">
         NEST360 is a multidisciplinary alliance of 23 institutions, 18 of which
         are in Africa, working in partnership with national governments to end
         preventable newborn deaths in Ethiopia, Kenya, Malawi, Nigeria,
         Tanzania, and beyond.
       </p>
-      <p>
+      <p className="font-light text-black">
         Each country has a unique locally driven approach to achieving
         Sustainable Development Goals. Learn more about each country&rsquo;s
         implementation of high-quality small and sick newborn care below.
       </p>
 
-      <section>
+      {/* Three-across card grid, matching nest360.org/where-we-work */}
+      <section className="mt-8 grid grid-cols-1 gap-x-[5.5%] gap-y-16 py-[30px] sm:grid-cols-2 lg:grid-cols-3">
         {countries.map((country) => (
-          <Link key={country.name} href={country.href}>
+          <Link
+            key={country.name}
+            href={country.href}
+            className="block w-full bg-white p-2.5 shadow-[0_12px_18px_-6px_rgba(0,0,0,0.3)] transition-opacity hover:opacity-90"
+          >
             <Image
               src={country.image.src}
               alt={country.image.alt}
               width={country.image.width}
               height={country.image.height}
-              style={{ width: 300, height: "auto" }}
+              className="aspect-[329/239] w-full object-cover py-2.5"
             />
-            <h3>{country.name}</h3>
+            <h3 className="text-xl font-semibold tracking-[2px] text-nest-navy uppercase">
+              {country.name}
+            </h3>
           </Link>
         ))}
       </section>
 
-      <section>
-        <h2>NEST360 Africa Map</h2>
-        <AfricaMap countries={countries} />
+      <section className="mt-16">
+        <h2 className="text-center text-[22px] font-semibold text-nest-teal">
+          NEST360 Africa Map
+        </h2>
+        <div className="mt-8 flex justify-center">
+          <AfricaMap countries={countries} />
+        </div>
       </section>
     </main>
   );
