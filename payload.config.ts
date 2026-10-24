@@ -7,7 +7,9 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { Documents } from './collections/Documents'
 import { Media } from './collections/Media'
+import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 
 const filename = fileURLToPath(import.meta.url)
@@ -20,7 +22,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [Users, Media, Documents, Tags],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -44,7 +46,8 @@ export default buildConfig({
       // Skip S3 when no bucket is configured so the app still runs locally
       enabled: Boolean(process.env.S3_BUCKET),
       collections: {
-        media: true,
+        media: { prefix: 'media' },
+        documents: { prefix: 'documents' },
       },
       bucket: process.env.S3_BUCKET || '',
       // Browser uploads straight to S3, avoiding Vercel's 4.5 MB request limit
