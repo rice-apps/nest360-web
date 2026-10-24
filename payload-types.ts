@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     documents: Document;
     tags: Tag;
+    articles: Article;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +83,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -214,6 +216,77 @@ export interface Tag {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: number;
+  title: string;
+  /**
+   * Used in URLs. Filled in from the title if left blank.
+   */
+  slug: string;
+  publishedDate: string;
+  /**
+   * People or organizations credited on the article.
+   */
+  authors?:
+    | {
+        name: string;
+        /**
+         * Job title or organization, e.g. "Neonatal Nurse, Lagos University Teaching Hospital".
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  tags: (number | Tag)[];
+  /**
+   * Shown on the article card and at the top of the article.
+   */
+  featuredImage: number | Media;
+  /**
+   * Short summary that is shown on article cards.
+   */
+  excerpt: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * PDFs linked from the article, if any.
+   */
+  attachments?: (number | Document)[] | null;
+  meta?: {
+    /**
+     * Title shown in Google and link previews. Keep under about 60 characters.
+     */
+    title?: string | null;
+    /**
+     * One or two sentences shown under the title. Keep under about 160 characters.
+     */
+    description?: string | null;
+    /**
+     * Image shown when the link is shared. Wide images (1200×630) work best.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -251,6 +324,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: number | Tag;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: number | Article;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -376,6 +453,37 @@ export interface TagsSelect<T extends boolean = true> {
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  publishedDate?: T;
+  authors?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  tags?: T;
+  featuredImage?: T;
+  excerpt?: T;
+  content?: T;
+  attachments?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
