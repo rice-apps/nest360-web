@@ -3,6 +3,7 @@ import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import fs from 'fs'
+import net from 'net'
 import path from 'path'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
@@ -18,6 +19,28 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const isProduction = process.env.NODE_ENV === 'production'
+
+// True if something accepts connections at the database URL's host and port within a second
+function databaseAnswers(url: string) {
+  const { hostname, port } = new URL(url)
+  const socket = net.connect({ host: hostname, port: Number(port) || 5432, timeout: 1000 })
+  return new Promise<boolean>((resolve) => {
+    socket.once('connect', () => resolve(true))
+    socket.once('timeout', () => resolve(false))
+    socket.once('error', () => resolve(false))
+  }).finally(() => socket.destroy())
+}
+
+// Postgres when DATABASE_URL is set. In development, a DATABASE_URL with no server behind it (such as a
+// leftover .env) falls back to the SQLite file too, so `npm run dev` always starts.
+const databaseUrl = process.env.DATABASE_URL
+const usePostgres = Boolean(databaseUrl) && (isProduction || (await databaseAnswers(databaseUrl!)))
+// Next loads this file in several places, so warn only once per process
+const warned = globalThis as { warnedNoDatabase?: boolean }
+if (databaseUrl && !usePostgres && !warned.warnedNoDatabase) {
+  warned.warnedNoDatabase = true
+  console.warn(`Nothing answers at DATABASE_URL (${new URL(databaseUrl).host}), so using local.db (SQLite) instead.`)
+}
 
 export default buildConfig({
   admin: {
@@ -38,12 +61,11 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  // Postgres when DATABASE_URL is set (production, or local Postgres). Otherwise a SQLite file in the
-  // project, so `npm run dev` works with no database to install.
-  db: process.env.DATABASE_URL
+  // Otherwise a SQLite file in the project, so `npm run dev` works with no database to install
+  db: usePostgres
     ? postgresAdapter({
         pool: {
-          connectionString: process.env.DATABASE_URL,
+          connectionString: databaseUrl,
           // RDS requires SSL with Amazon's CA; local Postgres doesn't
           ssl:
             process.env.DATABASE_SSL === 'true'
