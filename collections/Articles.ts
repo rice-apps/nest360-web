@@ -64,6 +64,7 @@ fields: [
         position: 'sidebar',
         date: {
           pickerAppearance: 'dayOnly',
+          displayFormat: 'MMM d, yyyy', // e.g. "Sep 17, 2026", matching the stories page
         },
       },
     },
