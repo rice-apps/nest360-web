@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import fs from 'fs'
@@ -16,6 +17,8 @@ import { Users } from './collections/Users'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -30,22 +33,29 @@ export default buildConfig({
   },
   collections: [Users, Media, Documents, Tags, Projects],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  // Development falls back to a fixed secret so a fresh clone runs without a .env; production must set one
+  secret: process.env.PAYLOAD_SECRET || (isProduction ? '' : 'nest360-local-development-only'),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: postgresAdapter({
-    pool: {
-      connectionString: process.env.DATABASE_URL || '',
-      // RDS requires SSL with Amazon's CA; local Postgres doesn't
-      ssl:
-        process.env.DATABASE_SSL === 'true'
-          ? { ca: fs.readFileSync(path.resolve(dirname, 'certs/rds-global-bundle.pem')).toString() }
-          : undefined,
-      // Keep low: each serverless function instance opens its own pool
-      max: 5,
-    },
-  }),
+  // Postgres when DATABASE_URL is set (production, or local Postgres). Otherwise a SQLite file in the
+  // project, so `npm run dev` works with no database to install.
+  db: process.env.DATABASE_URL
+    ? postgresAdapter({
+        pool: {
+          connectionString: process.env.DATABASE_URL,
+          // RDS requires SSL with Amazon's CA; local Postgres doesn't
+          ssl:
+            process.env.DATABASE_SSL === 'true'
+              ? { ca: fs.readFileSync(path.resolve(dirname, 'certs/rds-global-bundle.pem')).toString() }
+              : undefined,
+          // Keep low: each serverless function instance opens its own pool
+          max: 5,
+        },
+      })
+    : sqliteAdapter({
+        client: { url: `file:${path.resolve(dirname, 'local.db')}` },
+      }),
   sharp,
   plugins: [
     s3Storage({

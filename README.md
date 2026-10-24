@@ -45,29 +45,31 @@ Most visitors are on phones and pay for data by the gigabyte. Every decision in 
 
 ## Getting started
 
-You need Git, the Node.js version listed in `.nvmrc`, and PostgreSQL running locally (through [Homebrew](https://formulae.brew.sh/formula/postgresql@17) or Docker).
+You need Git and the Node.js version listed in `.nvmrc`. Nothing else: no database, Docker, or `.env` file.
 
 ```bash
 git clone https://github.com/rice-apps/nest360-web.git
 cd nest360-web
 npm install
-cp .env.example .env
-createdb nest360
-npm run seed
 npm run dev
 ```
 
-In `.env`, set `DATABASE_URL` to match your local Postgres user, and set `PAYLOAD_SECRET` to the output of `openssl rand -hex 32`.
+Then open [http://localhost:3000](http://localhost:3000) for the site and [http://localhost:3000/admin](http://localhost:3000/admin) for Payload. The first time you open the admin, it asks you to create a user. Run `npm run seed` if you want the starting tags.
 
-If you use Docker instead of Homebrew, this creates a database that matches `.env.example`:
+Without a `DATABASE_URL`, the site keeps its data in a SQLite file, `local.db`, in the project folder, and uploads in `media/` and `documents/`. All three are gitignored. Delete them to start over.
+
+### Optional: use Postgres locally
+
+Production runs on Postgres. To match it locally, start a database and point the site at it:
 
 ```bash
 docker run --name nest360-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=nest360 -p 5432:5432 -d postgres:17
+cp .env.example .env
 ```
 
-Then open [http://localhost:3000](http://localhost:3000) for the site and [http://localhost:3000/admin](http://localhost:3000/admin) for Payload. The first time you open the admin, it asks you to create a user.
+Then uncomment `DATABASE_URL` in `.env`. The site uses Postgres whenever `DATABASE_URL` is set. In `.env` you can also set `PAYLOAD_AUTOLOGIN_EMAIL` to an existing user to skip the admin login page while developing.
 
-Uploads are saved to a local `media/` folder unless `S3_BUCKET` is set in `.env`.
+Development uses a built-in `PAYLOAD_SECRET` when none is set. Production must set its own, generated with `openssl rand -hex 32`. Uploads go to S3 only when `S3_BUCKET` is set.
 
 ## Scripts
 
@@ -95,7 +97,7 @@ app/
       [slug]/page.tsx        one resource
     search/page.tsx          search results
     where-we-work/page.tsx   country map
-collections/                 Payload collections: users, media, documents, tags
+collections/                 Payload collections: users, media, documents, tags, projects
 components/                  shared interface components
 lib/
   types.ts                   shared TypeScript types
