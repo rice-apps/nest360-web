@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     documents: Document;
     tags: Tag;
+    articles: Article;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +83,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -214,6 +216,18 @@ export interface Tag {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: number;
+  title: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -251,6 +265,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: number | Tag;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: number | Article;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -376,6 +394,17 @@ export interface TagsSelect<T extends boolean = true> {
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
