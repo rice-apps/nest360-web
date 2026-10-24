@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 
 import { Documents } from './collections/Documents'
 import { Media } from './collections/Media'
+import { Projects } from './collections/Projects'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 
@@ -18,11 +19,16 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: Users.slug,
+    // Skips the login page by signing every visitor in as this user, so it only ever works under `next dev`
+    autoLogin:
+      process.env.NODE_ENV === 'development' && process.env.PAYLOAD_AUTOLOGIN_EMAIL
+        ? { email: process.env.PAYLOAD_AUTOLOGIN_EMAIL }
+        : false,
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Documents, Tags],
+  collections: [Users, Media, Documents, Tags, Projects],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
