@@ -53,6 +53,7 @@ cd nest360-web
 npm install
 cp .env.example .env
 createdb nest360
+npm run seed
 npm run dev
 ```
 
@@ -76,6 +77,7 @@ Uploads are saved to a local `media/` folder unless `S3_BUCKET` is set in `.env`
 | `npm run build` | Builds the site for production |
 | `npm run generate:types` | Regenerates `payload-types.ts` after you change a collection |
 | `npm run generate:importmap` | Regenerates the admin import map after you add admin components or plugins |
+| `npm run seed` | Adds the starting tags (safe to run more than once) |
 | `npm run payload migrate:create` | Creates a database migration for production |
 
 Test with `dev`, and then run `build` before opening a pull request.
@@ -93,7 +95,7 @@ app/
       [slug]/page.tsx        one resource
     search/page.tsx          search results
     where-we-work/page.tsx   country map
-collections/                 Payload collections (content types)
+collections/                 Payload collections: users, media, documents, tags
 components/                  shared interface components
 lib/
   types.ts                   shared TypeScript types
