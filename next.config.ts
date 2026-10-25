@@ -6,10 +6,17 @@ import { fileURLToPath } from "url";
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-  // Ship the RDS CA bundle with the serverless functions
+  // Ship the RDS CA bundle, and the fonts pdfjs needs for PDF previews, with the serverless functions
   outputFileTracingIncludes: {
-    "/**": ["./certs/**"],
+    "/**": [
+      "./certs/**",
+      "./node_modules/pdfjs-dist/cmaps/**",
+      "./node_modules/pdfjs-dist/standard_fonts/**",
+      "./node_modules/pdfjs-dist/wasm/**",
+    ],
   },
+  // Loaded from node_modules at runtime: pdfjs loads its worker by path, and canvas is a native module
+  serverExternalPackages: ["pdfjs-dist", "@napi-rs/canvas"],
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       ".cjs": [".cts", ".cjs"],

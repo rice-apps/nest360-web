@@ -21,7 +21,7 @@ const payload = await getPayload({ config })
 for (const name of tags) {
   const { totalDocs } = await payload.count({ collection: 'tags', where: { name: { equals: name } } })
   if (totalDocs === 0) {
-    await payload.create({ collection: 'tags', data: { name, slug: '' } })
+    await payload.create({ collection: 'tags', data: { name, slug: '', usedFor: 'pages' } })
     payload.logger.info(`Created tag: ${name}`)
   }
 }
