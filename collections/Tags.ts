@@ -4,6 +4,7 @@ export const Tags: CollectionConfig = {
   slug: 'tags',
   admin: {
     useAsTitle: 'name',
+    defaultColumns: ['name', 'usedFor'],
   },
   // Public can read; creating, editing and deleting require login (Payload's default)
   access: {
@@ -15,6 +16,19 @@ export const Tags: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
+    },
+    {
+      // Keeps page tags and file tags apart: each tag field only offers tags meant for it
+      name: 'usedFor',
+      type: 'radio',
+      label: 'Use this tag for',
+      required: true,
+      defaultValue: 'pages',
+      options: [
+        { label: 'Pages', value: 'pages' },
+        { label: 'Files', value: 'files' },
+        { label: 'Both pages and files', value: 'both' },
+      ],
     },
     {
       name: 'slug',
