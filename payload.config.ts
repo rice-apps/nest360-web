@@ -55,7 +55,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Documents, Tags, Articles],
+  collections: [Users, Media, Documents, Tags, Articles, Projects],
   editor: lexicalEditor(),
   // Development falls back to a fixed secret so a fresh clone runs without a .env; production must set one
   secret: process.env.PAYLOAD_SECRET || (isProduction ? '' : 'nest360-local-development-only'),

@@ -72,6 +72,7 @@ export interface Config {
     documents: Document;
     tags: Tag;
     articles: Article;
+    projects: Project;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +85,7 @@ export interface Config {
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -232,6 +234,119 @@ export interface Article {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  /**
+   * Used in URLs. Filled in from the title if left blank.
+   */
+  slug: string;
+  /**
+   * Shown on this page’s card in the resource library.
+   */
+  featuredImage?: (number | null) | Media;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * One tag for the whole page. Only tags set to be used for pages are offered.
+   */
+  tag: number | Tag;
+  layout: 'list' | 'groups';
+  files?:
+    | {
+        /**
+         * The link text visitors see, e.g. "Canta V8-WN-NS".
+         */
+        label: string;
+        kind: 'file' | 'video' | 'link';
+        file?: (number | null) | Document;
+        /**
+         * Vimeo or YouTube link.
+         */
+        videoUrl?: string | null;
+        /**
+         * Full web address, starting with https://
+         */
+        url?: string | null;
+        language: 'en' | 'fr' | 'pt' | 'sw';
+        /**
+         * Only tags set to be used for files are offered.
+         */
+        tags?: (number | Tag)[] | null;
+        /**
+         * Shows a NEW badge next to the file.
+         */
+        isNew?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  fileGroups?:
+    | {
+        /**
+         * For example "Bubble CPAP".
+         */
+        title: string;
+        files: {
+          /**
+           * The link text visitors see, e.g. "Canta V8-WN-NS".
+           */
+          label: string;
+          kind: 'file' | 'video' | 'link';
+          file?: (number | null) | Document;
+          /**
+           * Vimeo or YouTube link.
+           */
+          videoUrl?: string | null;
+          /**
+           * Full web address, starting with https://
+           */
+          url?: string | null;
+          language: 'en' | 'fr' | 'pt' | 'sw';
+          /**
+           * Only tags set to be used for files are offered.
+           */
+          tags?: (number | Tag)[] | null;
+          /**
+           * Shows a NEW badge next to the file.
+           */
+          isNew?: boolean | null;
+          id?: string | null;
+        }[];
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional single file that combines everything on the page.
+   */
+  downloadAll?: (number | null) | Document;
+  /**
+   * How to cite these materials, if the page needs it.
+   */
+  citation?: string | null;
+  /**
+   * Other project pages to link to, e.g. a device page linking to Clinical Job Aids.
+   */
+  relatedProjects?: (number | Project)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -273,6 +388,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'articles';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: number | Project;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -402,6 +521,17 @@ export interface TagsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
@@ -448,17 +578,6 @@ export interface ProjectsSelect<T extends boolean = true> {
   relatedProjects?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles_select".
- */
-export interface ArticlesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
