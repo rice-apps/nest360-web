@@ -152,15 +152,7 @@ export const Resources: CollectionConfig = {
       // Offers only file tags, and rejects others on save
       filterOptions: { usedFor: { in: ['files', 'both'] } },
     },
-    {
-      name: 'isNew',
-      type: 'checkbox',
-      label: 'Mark as new',
-      defaultValue: false,
-      admin: {
-        description: 'Shows a NEW badge next to the resource on project pages.',
-      },
-    },
+    // "New" is set per group on each project (resourceGroups.resources.isNew), not here
 
     // Publication details
     {
@@ -212,9 +204,9 @@ export const Resources: CollectionConfig = {
       name: 'projects',
       type: 'join',
       collection: 'projects',
-      on: 'resourceGroups.resources',
-      // Payload 3.92 returns a project once per resource group it has (a join into an array repeats the
-      // parent per array row), so drop the repeats. The higher limit keeps repeats from crowding real
+      on: 'resourceGroups.resources.resource',
+      // Payload 3.92 returns a project once per array row it has (a join into an array repeats the
+      // parent per row), so drop the repeats. The higher limit keeps repeats from crowding real
       // projects off the first page.
       defaultLimit: 100,
       hooks: {

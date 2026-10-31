@@ -342,10 +342,6 @@ export interface Resource {
    */
   tags?: (number | Tag)[] | null;
   /**
-   * Shows a NEW badge next to the resource on project pages.
-   */
-  isNew?: boolean | null;
-  /**
    * Author names, entered in a consistent citation format.
    */
   authors?: string | null;
@@ -416,9 +412,16 @@ export interface Project {
     title?: string | null;
     description?: string | null;
     /**
-     * Choose resources for this group and arrange them in display order.
+     * Choose resources for this group. Drag rows to set the display order.
      */
-    resources: (number | Resource)[];
+    resources: {
+      resource: number | Resource;
+      /**
+       * Shows a NEW badge next to this resource in this group only.
+       */
+      isNew?: boolean | null;
+      id?: string | null;
+    }[];
     id?: string | null;
   }[];
   /**
@@ -700,7 +703,6 @@ export interface ResourcesSelect<T extends boolean = true> {
   thumbnail?: T;
   language?: T;
   tags?: T;
-  isNew?: T;
   authors?: T;
   journalOrPublisher?: T;
   publicationDate?: T;
@@ -727,7 +729,13 @@ export interface ProjectsSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
-        resources?: T;
+        resources?:
+          | T
+          | {
+              resource?: T;
+              isNew?: T;
+              id?: T;
+            };
         id?: T;
       };
   downloadAll?: T;

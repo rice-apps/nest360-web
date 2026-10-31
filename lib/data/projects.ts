@@ -28,7 +28,6 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
         thumbnail: true,
         language: true,
         tags: true,
-        isNew: true,
       },
       // Payload builds url from filename, so both are needed
       documents: { filename: true, url: true, mimeType: true, preview: true },

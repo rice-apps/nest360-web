@@ -107,16 +107,38 @@ export const Projects: CollectionConfig = {
           type: 'textarea',
         },
         {
+          // One row per resource, so "new" can differ between groups and pages
           name: 'resources',
-          type: 'relationship',
-          relationTo: 'resources',
-          hasMany: true,
+          type: 'array',
           required: true,
-          admin: {
-            description: 'Choose resources for this group and arrange them in display order.',
-            isSortable: true,
-            allowCreate: false,
+          minRows: 1,
+          labels: {
+            singular: 'Resource',
+            plural: 'Resources',
           },
+          admin: {
+            description: 'Choose resources for this group. Drag rows to set the display order.',
+          },
+          fields: [
+            {
+              name: 'resource',
+              type: 'relationship',
+              relationTo: 'resources',
+              required: true,
+              admin: {
+                allowCreate: false,
+              },
+            },
+            {
+              name: 'isNew',
+              type: 'checkbox',
+              label: 'Mark as new',
+              defaultValue: false,
+              admin: {
+                description: 'Shows a NEW badge next to this resource in this group only.',
+              },
+            },
+          ],
         },
       ],
     },

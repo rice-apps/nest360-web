@@ -28,7 +28,6 @@ type SampleResource = {
   externalUrl?: string
   language: 'en' | 'fr' | 'pt' | 'sw'
   tags?: string[] // file tags, created if missing
-  isNew?: boolean
   publication?: { authors: string; journalOrPublisher: string; publicationDate: string; doi: string }
   draft?: boolean // left unpublished
 }
@@ -73,7 +72,6 @@ const resources = {
     file: `${UPLOADS}/2026/01/Clinical-Job-Aid_Conductive-Warmer-Celsi_Final-WEB_01-28-2026.pdf`,
     language: 'en',
     tags: ['Thermal Care'],
-    isNew: true,
   },
   airsep: {
     title: 'CAIRE AirSep NewLife Intensity 10',
@@ -170,7 +168,8 @@ type SampleProject = {
   description: Text[][] // paragraphs made of text runs, some of them links
   tag: string // the page's one tag
   layout: 'list' | 'groups'
-  resourceGroups: { title?: string; description?: string; resources: ResourceKey[] }[]
+  // isNew: resources marked NEW in this group only
+  resourceGroups: { title?: string; description?: string; resources: ResourceKey[]; isNew?: ResourceKey[] }[]
   relatedProjects?: string[] // slugs
 }
 
@@ -213,10 +212,11 @@ const projects: SampleProject[] = [
     layout: 'groups',
     resourceGroups: [
       { title: 'Bubble CPAP', resources: ['diamedica', 'pumani'] },
-      { title: 'Conductive Warmer', resources: ['celsi'] },
+      { title: 'Conductive Warmer', resources: ['celsi'], isNew: ['celsi'] },
       { title: 'Oxygen Concentrator', resources: ['airsep', 'canta', 'cantaPortuguese'] },
-      // The same two resources as Warming Series Guidelines, as on the real site
-      { title: 'Warming Series', resources: ['keepingBabiesWarm', 'roomTemperature'] },
+      // The same two resources as Warming Series Guidelines, as on the real site. One is marked NEW here
+      // but not on that page, since "new" is set per group.
+      { title: 'Warming Series', resources: ['keepingBabiesWarm', 'roomTemperature'], isNew: ['keepingBabiesWarm'] },
       {
         title: 'Extras (sample only)',
         description: 'Not on the real page: one of each other file format and resource type.',
@@ -301,7 +301,6 @@ async function saveResource(sample: SampleResource) {
     externalUrl: sample.externalUrl ?? null,
     language: sample.language,
     tags: await Promise.all((sample.tags ?? []).map((name) => tagId(name, 'files'))),
-    isNew: sample.isNew ?? false,
     authors: sample.publication?.authors ?? null,
     journalOrPublisher: sample.publication?.journalOrPublisher ?? null,
     publicationDate: sample.publication?.publicationDate ?? null,
@@ -373,7 +372,10 @@ for (const sample of projects) {
     resourceGroups: sample.resourceGroups.map((group) => ({
       title: group.title,
       description: group.description,
-      resources: group.resources.map((key) => resourceIds[key]),
+      resources: group.resources.map((key) => ({
+        resource: resourceIds[key],
+        isNew: group.isNew?.includes(key) ?? false,
+      })),
     })),
     relatedProjects: await Promise.all(
       (sample.relatedProjects ?? []).map(async (slug) => {

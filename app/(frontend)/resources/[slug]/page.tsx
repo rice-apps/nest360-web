@@ -8,7 +8,8 @@ import React from 'react';
 import { getProjectBySlug } from '@/lib/data/projects';
 import type { Document, Media, Project, Resource, Tag } from '@/payload-types';
 
-type Item = Resource;
+// A resource as listed in one group, with that group's "new" setting
+type Item = Resource & { isNew: boolean };
 
 const LANGUAGES: Record<Item['language'], string> = {
   en: 'English',
@@ -150,7 +151,12 @@ export default async function ProjectPage({ params }: PageProps<'/resources/[slu
   // Each group's resources, skipping any the visitor can't see (unpublished ones arrive as bare IDs)
   const groups = (project.resourceGroups ?? []).map((group) => ({
     ...group,
-    resources: group.resources.map((resource) => populated<Resource>(resource)).filter((item) => item !== null),
+    resources: group.resources
+      .map((row) => {
+        const resource = populated<Resource>(row.resource);
+        return resource ? { ...resource, isNew: Boolean(row.isNew) } : null;
+      })
+      .filter((item) => item !== null),
   }));
   // The "one list" layout shows every group's resources together, without group titles
   const files = project.layout === 'list' ? groups.flatMap((group) => group.resources) : [];
