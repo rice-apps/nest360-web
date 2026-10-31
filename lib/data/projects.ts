@@ -15,6 +15,33 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     depth: 3,
     limit: 1,
     overrideAccess: false,
+    // Only the fields the page reads from each linked document. Without this, related projects come
+    // with all their groups and resources, and every resource with its "used on" list of projects.
+    populate: {
+      projects: { title: true, slug: true, featuredImage: true, description: true },
+      resources: {
+        title: true,
+        resourceType: true,
+        document: true,
+        videoUrl: true,
+        externalUrl: true,
+        thumbnail: true,
+        language: true,
+        tags: true,
+        isNew: true,
+      },
+      // Payload builds url from filename, so both are needed
+      documents: { filename: true, url: true, mimeType: true, preview: true },
+      media: {
+        filename: true,
+        url: true,
+        alt: true,
+        width: true,
+        height: true,
+        sizes: { thumbnail: { filename: true, url: true } },
+      },
+      tags: { name: true },
+    },
   });
   return docs[0] ?? null;
 }

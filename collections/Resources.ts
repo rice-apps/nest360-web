@@ -226,7 +226,11 @@ export const Resources: CollectionConfig = {
               const id = typeof doc === 'object' ? doc.id : doc
               return seen.has(id) ? false : (seen.add(id), true)
             })
-            return { ...value, docs }
+            // Payload's count includes the repeats too. With everything on one page the real count is
+            // just the list's length; otherwise take off the repeats removed here.
+            if (typeof value.totalDocs !== 'number') return { ...value, docs }
+            const totalDocs = value.hasNextPage ? value.totalDocs - (value.docs.length - docs.length) : docs.length
+            return { ...value, docs, totalDocs }
           },
         ],
       },
