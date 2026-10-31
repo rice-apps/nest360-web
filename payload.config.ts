@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { searchPlugin } from '@payloadcms/plugin-search'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -16,6 +17,7 @@ import { Projects } from './collections/Projects'
 import { Resources } from './collections/Resources'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
+import { searchPluginConfig } from './lib/searchIndex'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -82,6 +84,8 @@ export default buildConfig({
       }),
   sharp,
   plugins: [
+    // Site search over resources, projects and articles. See lib/searchIndex.ts
+    searchPlugin(searchPluginConfig),
     s3Storage({
       // Skip S3 when no bucket is configured so the app still runs locally
       enabled: Boolean(process.env.S3_BUCKET),

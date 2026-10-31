@@ -74,6 +74,7 @@ export interface Config {
     articles: Article;
     resources: Resource;
     projects: Project;
+    search: Search;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    search: SearchSelect<false> | SearchSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -340,10 +342,6 @@ export interface Resource {
    */
   tags?: (number | Tag)[] | null;
   /**
-   * Shows a NEW badge next to the resource on project pages.
-   */
-  isNew?: boolean | null;
-  /**
    * Author names, entered in a consistent citation format.
    */
   authors?: string | null;
@@ -414,9 +412,16 @@ export interface Project {
     title?: string | null;
     description?: string | null;
     /**
-     * Choose resources for this group and arrange them in display order.
+     * Choose resources for this group. Drag rows to set the display order.
      */
-    resources: (number | Resource)[];
+    resources: {
+      resource: number | Resource;
+      /**
+       * Shows a NEW badge next to this resource in this group only.
+       */
+      isNew?: boolean | null;
+      id?: string | null;
+    }[];
     id?: string | null;
   }[];
   /**
@@ -431,6 +436,42 @@ export interface Project {
    * Other project pages to link to, e.g. a device page linking to Clinical Job Aids.
    */
   relatedProjects?: (number | Project)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search".
+ */
+export interface Search {
+  id: number;
+  title?: string | null;
+  priority?: number | null;
+  doc:
+    | {
+        relationTo: 'resources';
+        value: number | Resource;
+      }
+    | {
+        relationTo: 'projects';
+        value: number | Project;
+      }
+    | {
+        relationTo: 'articles';
+        value: number | Article;
+      };
+  slug?: string | null;
+  /**
+   * Short text to show in search results.
+   */
+  summary?: string | null;
+  /**
+   * All the searchable text from the document.
+   */
+  content?: string | null;
+  tags?: (number | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -485,6 +526,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'projects';
         value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'search';
+        value: number | Search;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -658,7 +703,6 @@ export interface ResourcesSelect<T extends boolean = true> {
   thumbnail?: T;
   language?: T;
   tags?: T;
-  isNew?: T;
   authors?: T;
   journalOrPublisher?: T;
   publicationDate?: T;
@@ -685,12 +729,33 @@ export interface ProjectsSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
-        resources?: T;
+        resources?:
+          | T
+          | {
+              resource?: T;
+              isNew?: T;
+              id?: T;
+            };
         id?: T;
       };
   downloadAll?: T;
   citation?: T;
   relatedProjects?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search_select".
+ */
+export interface SearchSelect<T extends boolean = true> {
+  title?: T;
+  priority?: T;
+  doc?: T;
+  slug?: T;
+  summary?: T;
+  content?: T;
+  tags?: T;
   updatedAt?: T;
   createdAt?: T;
 }
