@@ -364,6 +364,8 @@ for (const sample of projects) {
   const data = {
     title: sample.title,
     slug: sample.slug,
+    // Both sample pages are clinical material
+    category: 'healthcare' as const,
     featuredImage: sample.featuredImage
       ? await upload('media', sample.featuredImage.url, docs[0]?.featuredImage, { alt: sample.featuredImage.alt })
       : null,
