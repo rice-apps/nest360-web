@@ -3,7 +3,7 @@ import type { Block } from "payload";
 //Plain section of formatted test
 export const RichText: Block = {
     //block name
-    slug: 'richTest', 
+    slug: 'richText', 
     //the name of the generated TS type
     interfaceName: 'RichTextBlock', 
     labels: { singular: 'Text', plural: 'Text sections'},

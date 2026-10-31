@@ -13,7 +13,7 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title', // must match a field name below
-    defaultColumns: ['title', 'slug', '_status', 'updateAt'],
+    defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     preview: previewFor('pages', (slug) => `/${slug}`),
   },
 
