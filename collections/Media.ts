@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-// Images only. PDFs go in Documents.
+// Images only. Downloadable files go in Documents.
 export const Media: CollectionConfig = {
   slug: 'media',
   // Public can read; creating, editing and deleting require login (Payload's default)

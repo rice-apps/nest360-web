@@ -1,14 +1,7 @@
 
-import type { Access, CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-// Staff to see drafts and publishedarticles: 
-// the public only sees published articles
-
-const publishedOrLoggedIn: Access = ({ req: { user } }) => {
-    if (user)
-        return true
-    return { _status: { equals: 'published' } }
-}
+import { previewFor, publishedOrLoggedIn } from '../lib/preview'
 
 // A NEST360 article
 export const Articles: CollectionConfig = {
@@ -16,8 +9,10 @@ export const Articles: CollectionConfig = {
   admin: {
     useAsTitle: 'title', // must match a field name below
     defaultColumns: ['title', 'publishedDate', '_status'],
+    preview: previewFor('articles', (slug) => `/stories/${slug}`),
   },
 
+  // Staff see drafts and published articles; the public only sees published ones
   access: {
     read: publishedOrLoggedIn,
   },
