@@ -72,19 +72,25 @@ export interface Config {
     documents: Document;
     tags: Tag;
     articles: Article;
+    resources: Resource;
     projects: Project;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    resources: {
+      projects: 'projects';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    resources: ResourcesSelect<false> | ResourcesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -292,6 +298,78 @@ export interface Article {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Individual searchable documents, videos, links, and publications.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resources".
+ */
+export interface Resource {
+  id: number;
+  /**
+   * The link text visitors see, e.g. "Canta V8-WN-NS".
+   */
+  title: string;
+  /**
+   * Used in URLs. Filled in from the title if left blank.
+   */
+  slug: string;
+  /**
+   * One or two sentences on what this is and who it is for. Used in search results.
+   */
+  summary: string;
+  resourceType: 'document' | 'video' | 'link' | 'publication';
+  /**
+   * The uploaded file. A publication needs this or an external URL.
+   */
+  document?: (number | null) | Document;
+  /**
+   * YouTube, Vimeo, or another video URL.
+   */
+  videoUrl?: string | null;
+  /**
+   * Full web address, starting with https://
+   */
+  externalUrl?: string | null;
+  /**
+   * Optional. PDFs already get a preview of their first page; set this to use a different picture.
+   */
+  thumbnail?: (number | null) | Media;
+  language: 'en' | 'fr' | 'pt' | 'sw';
+  /**
+   * Add relevant country, subject, and audience tags. Only tags set to be used for files are offered.
+   */
+  tags?: (number | Tag)[] | null;
+  /**
+   * Shows a NEW badge next to the resource on project pages.
+   */
+  isNew?: boolean | null;
+  /**
+   * Author names, entered in a consistent citation format.
+   */
+  authors?: string | null;
+  journalOrPublisher?: string | null;
+  publicationDate?: string | null;
+  /**
+   * Digital Object Identifier, if available.
+   */
+  doi?: string | null;
+  /**
+   * Full citation, if different from the fields above.
+   */
+  citation?: string | null;
+  /**
+   * Project pages that list this resource. Add it to a page from that project.
+   */
+  projects?: {
+    docs?: (number | Project)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
@@ -330,69 +408,21 @@ export interface Project {
    */
   tag: number | Tag;
   layout: 'list' | 'groups';
-  files?:
-    | {
-        /**
-         * The link text visitors see, e.g. "Canta V8-WN-NS".
-         */
-        label: string;
-        kind: 'file' | 'video' | 'link';
-        file?: (number | null) | Document;
-        /**
-         * Vimeo or YouTube link.
-         */
-        videoUrl?: string | null;
-        /**
-         * Full web address, starting with https://
-         */
-        url?: string | null;
-        language: 'en' | 'fr' | 'pt' | 'sw';
-        /**
-         * Only tags set to be used for files are offered.
-         */
-        tags?: (number | Tag)[] | null;
-        /**
-         * Shows a NEW badge next to the file.
-         */
-        isNew?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  fileGroups?:
-    | {
-        /**
-         * For example "Bubble CPAP".
-         */
-        title: string;
-        files: {
-          /**
-           * The link text visitors see, e.g. "Canta V8-WN-NS".
-           */
-          label: string;
-          kind: 'file' | 'video' | 'link';
-          file?: (number | null) | Document;
-          /**
-           * Vimeo or YouTube link.
-           */
-          videoUrl?: string | null;
-          /**
-           * Full web address, starting with https://
-           */
-          url?: string | null;
-          language: 'en' | 'fr' | 'pt' | 'sw';
-          /**
-           * Only tags set to be used for files are offered.
-           */
-          tags?: (number | Tag)[] | null;
-          /**
-           * Shows a NEW badge next to the file.
-           */
-          isNew?: boolean | null;
-          id?: string | null;
-        }[];
-        id?: string | null;
-      }[]
-    | null;
+  /**
+   * With the "one list" layout, add one group: its title and description are not shown, and every group's resources form the list.
+   */
+  resourceGroups: {
+    /**
+     * For example "Bubble CPAP". Required for the titled-groups layout.
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Choose resources for this group and arrange them in display order.
+     */
+    resources: (number | Resource)[];
+    id?: string | null;
+  }[];
   /**
    * Optional single file that combines everything on the page.
    */
@@ -451,6 +481,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'articles';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'resources';
+        value: number | Resource;
       } | null)
     | ({
         relationTo: 'projects';
@@ -615,6 +649,32 @@ export interface ArticlesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "resources_select".
+ */
+export interface ResourcesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  resourceType?: T;
+  document?: T;
+  videoUrl?: T;
+  externalUrl?: T;
+  thumbnail?: T;
+  language?: T;
+  tags?: T;
+  isNew?: T;
+  authors?: T;
+  journalOrPublisher?: T;
+  publicationDate?: T;
+  doi?: T;
+  citation?: T;
+  projects?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
@@ -625,36 +685,12 @@ export interface ProjectsSelect<T extends boolean = true> {
   description?: T;
   tag?: T;
   layout?: T;
-  files?:
-    | T
-    | {
-        label?: T;
-        kind?: T;
-        file?: T;
-        videoUrl?: T;
-        url?: T;
-        language?: T;
-        tags?: T;
-        isNew?: T;
-        id?: T;
-      };
-  fileGroups?:
+  resourceGroups?:
     | T
     | {
         title?: T;
-        files?:
-          | T
-          | {
-              label?: T;
-              kind?: T;
-              file?: T;
-              videoUrl?: T;
-              url?: T;
-              language?: T;
-              tags?: T;
-              isNew?: T;
-              id?: T;
-            };
+        description?: T;
+        resources?: T;
         id?: T;
       };
   downloadAll?: T;

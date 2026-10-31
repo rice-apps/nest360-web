@@ -1,7 +1,8 @@
-// Mock resource pages for trying out the resource library cards: a mix of featured
-// images, PDF previews, videos, outside links, "New" badges, page and file tags, both layouts and a
-// "Download all" file. Every mock page's title starts with "[Mock]" and its slug with "mock-", so they're
-// easy to tell apart from real content and to find and delete in the admin. Safe to run more than once: anything that already exists is skipped.
+// Mock resource pages for trying out the resource library cards: a mix of featured images, PDF previews,
+// videos, outside links, a publication, "New" badges, publication dates, page and resource tags, both
+// layouts and a "Download all" file. Every mock page and resource's title starts with "[Mock]" and its slug
+// with "mock-", so they're easy to tell apart from real content and to find and delete in the admin. Safe to
+// run more than once: existing tags, files and resources are reused, and mock pages are brought up to date.
 //
 //   npm run seed:resources
 import path from 'path'
@@ -10,7 +11,7 @@ import { fileURLToPath } from 'url'
 import { getPayload } from 'payload'
 
 import config from '../payload.config'
-import type { Project } from '../payload-types'
+import type { Project, Resource } from '../payload-types'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const publicDir = path.resolve(dirname, '../public')
@@ -93,24 +94,38 @@ async function pdf(title: string) {
   return created.id
 }
 
-// Starts every mock page's title, so nobody mistakes a mock card for real content
+// Starts every mock title, so nobody mistakes a mock card or resource for real content
 const MOCK_LABEL = '[Mock] '
 
+type ResourceData = Pick<Resource, 'title' | 'slug' | 'summary' | 'resourceType' | 'language'> &
+  Partial<Pick<Resource, 'document' | 'videoUrl' | 'externalUrl' | 'tags' | 'isNew' | 'authors' | 'publicationDate'>>
+
+// A published resource, found by slug or created. Returns its id for a project's resourceGroups.
+async function resource(data: ResourceData) {
+  const { docs } = await payload.find({ collection: 'resources', where: { slug: { equals: data.slug } }, limit: 1, draft: true })
+  if (docs[0]) return docs[0].id
+  const created = await payload.create({
+    collection: 'resources',
+    data: { ...data, title: MOCK_LABEL + data.title, _status: 'published' },
+  })
+  payload.logger.info(`Created resource: ${data.slug}`)
+  return created.id
+}
+
+// Creates the mock page, or brings an existing one up to date. Mock pages are disposable, so edits made to
+// them in the admin are overwritten.
 async function project(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) {
-  const title = MOCK_LABEL + data.title
+  const full = { ...data, title: MOCK_LABEL + data.title }
   const { docs } = await payload.find({ collection: 'projects', where: { slug: { equals: data.slug } }, limit: 1 })
-  const existing = docs[0]
-  if (existing) {
-    // Labels mock pages made before the label existed; otherwise leaves them as edited in the admin
-    if (existing.title.startsWith(MOCK_LABEL)) return payload.logger.info(`Skipped (already exists): ${data.slug}`)
-    await payload.update({ collection: 'projects', id: existing.id, data: { title: MOCK_LABEL + existing.title } })
-    return payload.logger.info(`Labeled as mock: ${data.slug}`)
+  if (docs[0]) {
+    await payload.update({ collection: 'projects', id: docs[0].id, data: full })
+    return payload.logger.info(`Updated page: ${data.slug}`)
   }
-  await payload.create({ collection: 'projects', data: { ...data, title } })
+  await payload.create({ collection: 'projects', data: full })
   payload.logger.info(`Created page: ${data.slug}`)
 }
 
-// Page tags (one per page) and file tags (on individual files)
+// Page tags (one per page) and resource tags
 const training = await tag('Training', 'pages')
 const technology = await tag('Technology', 'pages')
 const research = await tag('Research', 'pages')
@@ -125,7 +140,9 @@ const bannerImage = await image('story_banner.jpg', 'Mock: health workers caring
 const photoA = await image('placeholder1.jpg', 'Mock: newborn care equipment')
 const photoB = await image('placeholder2.jpg', 'Mock: hospital ward')
 
-// 1. Featured image, "New" badge, PDF + video + link, page and file tags, Download all button
+const VIDEO = 'https://vimeo.com/76979871'
+
+// 1. Featured image, "New" badge, document + video + link, page and resource tags, Download all button
 await project({
   title: 'Bubble CPAP Clinical Job Aids',
   slug: 'mock-bubble-cpap-job-aids',
@@ -136,10 +153,39 @@ await project({
   ),
   tag: training,
   layout: 'list',
-  files: [
-    { label: 'Bubble CPAP job aid', kind: 'file', file: await pdf('Bubble CPAP Job Aid'), language: 'en', tags: [clinical, jobAid, bubbleCpap], isNew: true },
-    { label: 'Bubble CPAP setup video', kind: 'video', videoUrl: 'https://vimeo.com/76979871', language: 'en', tags: [clinical] },
-    { label: 'WHO guidance on CPAP', kind: 'link', url: 'https://www.who.int', language: 'en' },
+  resourceGroups: [
+    {
+      resources: [
+        await resource({
+          title: 'Bubble CPAP job aid',
+          slug: 'mock-bubble-cpap-job-aid',
+          resourceType: 'document',
+          summary: 'One-page job aid for setting up bubble CPAP.',
+          document: await pdf('Bubble CPAP Job Aid'),
+          language: 'en',
+          tags: [clinical, jobAid, bubbleCpap],
+          isNew: true,
+          publicationDate: '2026-09-17T12:00:00.000Z',
+        }),
+        await resource({
+          title: 'Bubble CPAP setup video',
+          slug: 'mock-bubble-cpap-video',
+          resourceType: 'video',
+          summary: 'Video walkthrough of bubble CPAP setup.',
+          videoUrl: VIDEO,
+          language: 'en',
+          tags: [clinical],
+        }),
+        await resource({
+          title: 'WHO guidance on CPAP',
+          slug: 'mock-who-cpap-guidance',
+          resourceType: 'link',
+          summary: 'WHO guidance on CPAP for newborns.',
+          externalUrl: 'https://www.who.int',
+          language: 'en',
+        }),
+      ],
+    },
   ],
   downloadAll: await pdf('Bubble CPAP Job Aids Complete Set'),
 })
@@ -152,9 +198,30 @@ await project({
   description: richText('A short training video on resuscitating newborns who are not breathing at birth. Suitable for refresher sessions.'),
   tag: training,
   layout: 'list',
-  files: [
-    { label: 'Neonatal resuscitation (English)', kind: 'video', videoUrl: 'https://vimeo.com/76979871', language: 'en', tags: [clinical] },
-    { label: 'Réanimation néonatale (French)', kind: 'video', videoUrl: 'https://vimeo.com/76979871', language: 'fr', tags: [clinical] },
+  resourceGroups: [
+    {
+      resources: [
+        await resource({
+          title: 'Neonatal resuscitation (English)',
+          slug: 'mock-neonatal-resuscitation-en',
+          resourceType: 'video',
+          summary: 'Neonatal resuscitation training video.',
+          videoUrl: VIDEO,
+          language: 'en',
+          tags: [clinical],
+          publicationDate: '2025-03-02T12:00:00.000Z',
+        }),
+        await resource({
+          title: 'Réanimation néonatale (French)',
+          slug: 'mock-neonatal-resuscitation-fr',
+          resourceType: 'video',
+          summary: 'Vidéo de formation sur la réanimation néonatale.',
+          videoUrl: VIDEO,
+          language: 'fr',
+          tags: [clinical],
+        }),
+      ],
+    },
   ],
 })
 
@@ -166,12 +233,25 @@ await project({
   description: richText('How biomedical technicians check, clean and repair phototherapy units. Includes a monthly maintenance checklist.'),
   tag: technology,
   layout: 'list',
-  files: [
-    { label: 'Phototherapy maintenance guide', kind: 'file', file: await pdf('Phototherapy Maintenance Guide'), language: 'en', tags: [biomedical] },
+  resourceGroups: [
+    {
+      resources: [
+        await resource({
+          title: 'Phototherapy maintenance guide',
+          slug: 'mock-phototherapy-maintenance-guide',
+          resourceType: 'document',
+          summary: 'Maintenance guide for phototherapy units.',
+          document: await pdf('Phototherapy Maintenance Guide'),
+          language: 'en',
+          tags: [biomedical],
+          publicationDate: '2024-11-20T12:00:00.000Z',
+        }),
+      ],
+    },
   ],
 })
 
-// 4. Grouped layout, outside links, a different section (innovators)
+// 4. Grouped layout, a publication and an outside link, a different section (innovators)
 await project({
   title: 'Newborn Technology Market Report',
   slug: 'mock-newborn-technology-market-report',
@@ -180,19 +260,40 @@ await project({
   description: richText('An overview of the market for newborn care technologies in sub-Saharan Africa. Covers pricing, suppliers and gaps in supply.'),
   tag: research,
   layout: 'groups',
-  fileGroups: [
+  resourceGroups: [
     {
       title: 'Report',
-      files: [{ label: 'Full market report', kind: 'file', file: await pdf('Newborn Technology Market Report'), language: 'en', tags: [biomedical] }],
+      resources: [
+        await resource({
+          title: 'Full market report',
+          slug: 'mock-market-report',
+          resourceType: 'publication',
+          summary: 'Market report on newborn care technologies.',
+          document: await pdf('Newborn Technology Market Report'),
+          language: 'en',
+          tags: [biomedical],
+          authors: 'NEST360 Mock Team',
+          publicationDate: '2026-06-01T12:00:00.000Z',
+        }),
+      ],
     },
     {
       title: 'Related links',
-      files: [{ label: 'Technology landscape', kind: 'link', url: 'https://www.nest360.org', language: 'en' }],
+      resources: [
+        await resource({
+          title: 'Technology landscape',
+          slug: 'mock-technology-landscape',
+          resourceType: 'link',
+          summary: 'NEST360 technology landscape.',
+          externalUrl: 'https://www.nest360.org',
+          language: 'en',
+        }),
+      ],
     },
   ],
 })
 
-// 5. Implementors section, Portuguese and Swahili files, "New" badge, country tag
+// 5. Implementors section, Portuguese and Swahili documents, "New" badge, country tag
 await project({
   title: 'Facility Readiness Checklist',
   slug: 'mock-facility-readiness-checklist',
@@ -201,12 +302,41 @@ await project({
   description: richText('A checklist hospitals use to see whether a newborn unit is ready for small and sick newborn care. Available in four languages.'),
   tag: kenya,
   layout: 'list',
-  files: [
-    { label: 'Facility readiness checklist', kind: 'file', file: await pdf('Facility Readiness Checklist'), language: 'en', tags: [jobAid] },
-    { label: 'Lista de verificação', kind: 'file', file: await pdf('Lista de Verificacao'), language: 'pt', tags: [jobAid], isNew: true },
-    { label: 'Orodha ya utayari', kind: 'file', file: await pdf('Orodha ya Utayari'), language: 'sw', tags: [jobAid] },
+  resourceGroups: [
+    {
+      resources: [
+        await resource({
+          title: 'Facility readiness checklist',
+          slug: 'mock-readiness-checklist-en',
+          resourceType: 'document',
+          summary: 'Facility readiness checklist.',
+          document: await pdf('Facility Readiness Checklist'),
+          language: 'en',
+          tags: [jobAid],
+          publicationDate: '2025-08-12T12:00:00.000Z',
+        }),
+        await resource({
+          title: 'Lista de verificação',
+          slug: 'mock-readiness-checklist-pt',
+          resourceType: 'document',
+          summary: 'Lista de verificação de prontidão.',
+          document: await pdf('Lista de Verificacao'),
+          language: 'pt',
+          tags: [jobAid],
+          isNew: true,
+        }),
+        await resource({
+          title: 'Orodha ya utayari',
+          slug: 'mock-readiness-checklist-sw',
+          resourceType: 'document',
+          summary: 'Orodha ya utayari wa kituo.',
+          document: await pdf('Orodha ya Utayari'),
+          language: 'sw',
+          tags: [jobAid],
+        }),
+      ],
+    },
   ],
-  relatedProjects: [],
 })
 
 // 6. Plain card: one outside link, a page tag only
@@ -217,7 +347,20 @@ await project({
   description: richText('An online toolkit, codesigned with UNICEF, that helps implementors plan and scale up newborn care.'),
   tag: newbornHealth,
   layout: 'list',
-  files: [{ label: 'Open the toolkit', kind: 'link', url: 'https://www.newborntoolkit.org', language: 'en' }],
+  resourceGroups: [
+    {
+      resources: [
+        await resource({
+          title: 'Open the toolkit',
+          slug: 'mock-implementation-toolkit-link',
+          resourceType: 'link',
+          summary: 'The online implementation toolkit.',
+          externalUrl: 'https://www.newborntoolkit.org',
+          language: 'en',
+        }),
+      ],
+    },
+  ],
 })
 
 payload.logger.info('Done. Open /resources to see the cards, or /admin/collections/projects to edit them.')

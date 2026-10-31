@@ -1725,44 +1725,44 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.projects_files": {
-      "name": "projects_files",
+    "public.resources": {
+      "name": "resources",
       "schema": "",
       "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
         "id": {
           "name": "id",
-          "type": "varchar",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
-        "label": {
-          "name": "label",
+        "title": {
+          "name": "title",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "kind": {
-          "name": "kind",
-          "type": "enum_projects_files_kind",
+        "slug": {
+          "name": "slug",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "summary": {
+          "name": "summary",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resource_type": {
+          "name": "resource_type",
+          "type": "enum_resources_resource_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "'file'"
+          "default": "'document'"
         },
-        "file_id": {
-          "name": "file_id",
+        "document_id": {
+          "name": "document_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -1773,15 +1773,21 @@
           "primaryKey": false,
           "notNull": false
         },
-        "url": {
-          "name": "url",
+        "external_url": {
+          "name": "external_url",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thumbnail_id": {
+          "name": "thumbnail_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
         "language": {
           "name": "language",
-          "type": "enum_projects_files_language",
+          "type": "enum_resources_language",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
@@ -1793,14 +1799,66 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
+        },
+        "authors": {
+          "name": "authors",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "journal_or_publisher": {
+          "name": "journal_or_publisher",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "publication_date": {
+          "name": "publication_date",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "doi": {
+          "name": "doi",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "citation": {
+          "name": "citation",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "_status": {
+          "name": "_status",
+          "type": "enum_resources_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
         }
       },
       "indexes": {
-        "projects_files_order_idx": {
-          "name": "projects_files_order_idx",
+        "resources_title_idx": {
+          "name": "resources_title_idx",
           "columns": [
             {
-              "expression": "_order",
+              "expression": "title",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1811,11 +1869,26 @@
           "method": "btree",
           "with": {}
         },
-        "projects_files_parent_id_idx": {
-          "name": "projects_files_parent_id_idx",
+        "resources_slug_idx": {
+          "name": "resources_slug_idx",
           "columns": [
             {
-              "expression": "_parent_id",
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources_resource_type_idx": {
+          "name": "resources_resource_type_idx",
+          "columns": [
+            {
+              "expression": "resource_type",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1826,11 +1899,86 @@
           "method": "btree",
           "with": {}
         },
-        "projects_files_file_idx": {
-          "name": "projects_files_file_idx",
+        "resources_document_idx": {
+          "name": "resources_document_idx",
           "columns": [
             {
-              "expression": "file_id",
+              "expression": "document_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources_thumbnail_idx": {
+          "name": "resources_thumbnail_idx",
+          "columns": [
+            {
+              "expression": "thumbnail_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources_language_idx": {
+          "name": "resources_language_idx",
+          "columns": [
+            {
+              "expression": "language",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources_updated_at_idx": {
+          "name": "resources_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources_created_at_idx": {
+          "name": "resources_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources__status_idx": {
+          "name": "resources__status_idx",
+          "columns": [
+            {
+              "expression": "_status",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1843,12 +1991,12 @@
         }
       },
       "foreignKeys": {
-        "projects_files_file_id_documents_id_fk": {
-          "name": "projects_files_file_id_documents_id_fk",
-          "tableFrom": "projects_files",
+        "resources_document_id_documents_id_fk": {
+          "name": "resources_document_id_documents_id_fk",
+          "tableFrom": "resources",
           "tableTo": "documents",
           "columnsFrom": [
-            "file_id"
+            "document_id"
           ],
           "columnsTo": [
             "id"
@@ -1856,12 +2004,143 @@
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "projects_files_parent_id_fk": {
-          "name": "projects_files_parent_id_fk",
-          "tableFrom": "projects_files",
-          "tableTo": "projects",
+        "resources_thumbnail_id_media_id_fk": {
+          "name": "resources_thumbnail_id_media_id_fk",
+          "tableFrom": "resources",
+          "tableTo": "media",
           "columnsFrom": [
-            "_parent_id"
+            "thumbnail_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.resources_rels": {
+      "name": "resources_rels",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "path": {
+          "name": "path",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tags_id": {
+          "name": "tags_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "resources_rels_order_idx": {
+          "name": "resources_rels_order_idx",
+          "columns": [
+            {
+              "expression": "order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources_rels_parent_idx": {
+          "name": "resources_rels_parent_idx",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources_rels_path_idx": {
+          "name": "resources_rels_path_idx",
+          "columns": [
+            {
+              "expression": "path",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resources_rels_tags_id_idx": {
+          "name": "resources_rels_tags_id_idx",
+          "columns": [
+            {
+              "expression": "tags_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "resources_rels_parent_fk": {
+          "name": "resources_rels_parent_fk",
+          "tableFrom": "resources_rels",
+          "tableTo": "resources",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "resources_rels_tags_fk": {
+          "name": "resources_rels_tags_fk",
+          "tableFrom": "resources_rels",
+          "tableTo": "tags",
+          "columnsFrom": [
+            "tags_id"
           ],
           "columnsTo": [
             "id"
@@ -1876,82 +2155,164 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.projects_file_groups_files": {
-      "name": "projects_file_groups_files",
+    "public._resources_v": {
+      "name": "_resources_v",
       "schema": "",
       "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
         "id": {
           "name": "id",
-          "type": "varchar",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
-        "label": {
-          "name": "label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "kind": {
-          "name": "kind",
-          "type": "enum_projects_file_groups_files_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'file'"
-        },
-        "file_id": {
-          "name": "file_id",
+        "parent_id": {
+          "name": "parent_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "video_url": {
-          "name": "video_url",
+        "version_title": {
+          "name": "version_title",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "url": {
-          "name": "url",
+        "version_slug": {
+          "name": "version_slug",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },
-        "language": {
-          "name": "language",
-          "type": "enum_projects_file_groups_files_language",
+        "version_summary": {
+          "name": "version_summary",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_resource_type": {
+          "name": "version_resource_type",
+          "type": "enum__resources_v_version_resource_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'document'"
+        },
+        "version_document_id": {
+          "name": "version_document_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_video_url": {
+          "name": "version_video_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_external_url": {
+          "name": "version_external_url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_thumbnail_id": {
+          "name": "version_thumbnail_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_language": {
+          "name": "version_language",
+          "type": "enum__resources_v_version_language",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
           "default": "'en'"
         },
-        "is_new": {
-          "name": "is_new",
+        "version_is_new": {
+          "name": "version_is_new",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
           "default": false
+        },
+        "version_authors": {
+          "name": "version_authors",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_journal_or_publisher": {
+          "name": "version_journal_or_publisher",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_publication_date": {
+          "name": "version_publication_date",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_doi": {
+          "name": "version_doi",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_citation": {
+          "name": "version_citation",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_updated_at": {
+          "name": "version_updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version_created_at": {
+          "name": "version_created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version__status": {
+          "name": "version__status",
+          "type": "enum__resources_v_version_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'draft'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "latest": {
+          "name": "latest",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
-        "projects_file_groups_files_order_idx": {
-          "name": "projects_file_groups_files_order_idx",
+        "_resources_v_parent_idx": {
+          "name": "_resources_v_parent_idx",
           "columns": [
             {
-              "expression": "_order",
+              "expression": "parent_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1962,11 +2323,11 @@
           "method": "btree",
           "with": {}
         },
-        "projects_file_groups_files_parent_id_idx": {
-          "name": "projects_file_groups_files_parent_id_idx",
+        "_resources_v_version_version_title_idx": {
+          "name": "_resources_v_version_version_title_idx",
           "columns": [
             {
-              "expression": "_parent_id",
+              "expression": "version_title",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1977,11 +2338,161 @@
           "method": "btree",
           "with": {}
         },
-        "projects_file_groups_files_file_idx": {
-          "name": "projects_file_groups_files_file_idx",
+        "_resources_v_version_version_slug_idx": {
+          "name": "_resources_v_version_version_slug_idx",
           "columns": [
             {
-              "expression": "file_id",
+              "expression": "version_slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_version_version_resource_type_idx": {
+          "name": "_resources_v_version_version_resource_type_idx",
+          "columns": [
+            {
+              "expression": "version_resource_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_version_version_document_idx": {
+          "name": "_resources_v_version_version_document_idx",
+          "columns": [
+            {
+              "expression": "version_document_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_version_version_thumbnail_idx": {
+          "name": "_resources_v_version_version_thumbnail_idx",
+          "columns": [
+            {
+              "expression": "version_thumbnail_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_version_version_language_idx": {
+          "name": "_resources_v_version_version_language_idx",
+          "columns": [
+            {
+              "expression": "version_language",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_version_version_updated_at_idx": {
+          "name": "_resources_v_version_version_updated_at_idx",
+          "columns": [
+            {
+              "expression": "version_updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_version_version_created_at_idx": {
+          "name": "_resources_v_version_version_created_at_idx",
+          "columns": [
+            {
+              "expression": "version_created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_version_version__status_idx": {
+          "name": "_resources_v_version_version__status_idx",
+          "columns": [
+            {
+              "expression": "version__status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_created_at_idx": {
+          "name": "_resources_v_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_updated_at_idx": {
+          "name": "_resources_v_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_latest_idx": {
+          "name": "_resources_v_latest_idx",
+          "columns": [
+            {
+              "expression": "latest",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1994,12 +2505,12 @@
         }
       },
       "foreignKeys": {
-        "projects_file_groups_files_file_id_documents_id_fk": {
-          "name": "projects_file_groups_files_file_id_documents_id_fk",
-          "tableFrom": "projects_file_groups_files",
-          "tableTo": "documents",
+        "_resources_v_parent_id_resources_id_fk": {
+          "name": "_resources_v_parent_id_resources_id_fk",
+          "tableFrom": "_resources_v",
+          "tableTo": "resources",
           "columnsFrom": [
-            "file_id"
+            "parent_id"
           ],
           "columnsTo": [
             "id"
@@ -2007,12 +2518,156 @@
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "projects_file_groups_files_parent_id_fk": {
-          "name": "projects_file_groups_files_parent_id_fk",
-          "tableFrom": "projects_file_groups_files",
-          "tableTo": "projects_file_groups",
+        "_resources_v_version_document_id_documents_id_fk": {
+          "name": "_resources_v_version_document_id_documents_id_fk",
+          "tableFrom": "_resources_v",
+          "tableTo": "documents",
           "columnsFrom": [
-            "_parent_id"
+            "version_document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "_resources_v_version_thumbnail_id_media_id_fk": {
+          "name": "_resources_v_version_thumbnail_id_media_id_fk",
+          "tableFrom": "_resources_v",
+          "tableTo": "media",
+          "columnsFrom": [
+            "version_thumbnail_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._resources_v_rels": {
+      "name": "_resources_v_rels",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "order": {
+          "name": "order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "path": {
+          "name": "path",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tags_id": {
+          "name": "tags_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "_resources_v_rels_order_idx": {
+          "name": "_resources_v_rels_order_idx",
+          "columns": [
+            {
+              "expression": "order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_rels_parent_idx": {
+          "name": "_resources_v_rels_parent_idx",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_rels_path_idx": {
+          "name": "_resources_v_rels_path_idx",
+          "columns": [
+            {
+              "expression": "path",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "_resources_v_rels_tags_id_idx": {
+          "name": "_resources_v_rels_tags_id_idx",
+          "columns": [
+            {
+              "expression": "tags_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_resources_v_rels_parent_fk": {
+          "name": "_resources_v_rels_parent_fk",
+          "tableFrom": "_resources_v_rels",
+          "tableTo": "_resources_v",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "_resources_v_rels_tags_fk": {
+          "name": "_resources_v_rels_tags_fk",
+          "tableFrom": "_resources_v_rels",
+          "tableTo": "tags",
+          "columnsFrom": [
+            "tags_id"
           ],
           "columnsTo": [
             "id"
@@ -2027,8 +2682,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.projects_file_groups": {
-      "name": "projects_file_groups",
+    "public.projects_resource_groups": {
+      "name": "projects_resource_groups",
       "schema": "",
       "columns": {
         "_order": {
@@ -2054,11 +2709,17 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
-        "projects_file_groups_order_idx": {
-          "name": "projects_file_groups_order_idx",
+        "projects_resource_groups_order_idx": {
+          "name": "projects_resource_groups_order_idx",
           "columns": [
             {
               "expression": "_order",
@@ -2072,8 +2733,8 @@
           "method": "btree",
           "with": {}
         },
-        "projects_file_groups_parent_id_idx": {
-          "name": "projects_file_groups_parent_id_idx",
+        "projects_resource_groups_parent_id_idx": {
+          "name": "projects_resource_groups_parent_id_idx",
           "columns": [
             {
               "expression": "_parent_id",
@@ -2089,9 +2750,9 @@
         }
       },
       "foreignKeys": {
-        "projects_file_groups_parent_id_fk": {
-          "name": "projects_file_groups_parent_id_fk",
-          "tableFrom": "projects_file_groups",
+        "projects_resource_groups_parent_id_fk": {
+          "name": "projects_resource_groups_parent_id_fk",
+          "tableFrom": "projects_resource_groups",
           "tableTo": "projects",
           "columnsFrom": [
             "_parent_id"
@@ -2359,8 +3020,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "tags_id": {
-          "name": "tags_id",
+        "resources_id": {
+          "name": "resources_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -2418,11 +3079,11 @@
           "method": "btree",
           "with": {}
         },
-        "projects_rels_tags_id_idx": {
-          "name": "projects_rels_tags_id_idx",
+        "projects_rels_resources_id_idx": {
+          "name": "projects_rels_resources_id_idx",
           "columns": [
             {
-              "expression": "tags_id",
+              "expression": "resources_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2463,12 +3124,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "projects_rels_tags_fk": {
-          "name": "projects_rels_tags_fk",
+        "projects_rels_resources_fk": {
+          "name": "projects_rels_resources_fk",
           "tableFrom": "projects_rels",
-          "tableTo": "tags",
+          "tableTo": "resources",
           "columnsFrom": [
-            "tags_id"
+            "resources_id"
           ],
           "columnsTo": [
             "id"
@@ -2686,6 +3347,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "resources_id": {
+          "name": "resources_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "projects_id": {
           "name": "projects_id",
           "type": "integer",
@@ -2814,6 +3481,21 @@
           "method": "btree",
           "with": {}
         },
+        "payload_locked_documents_rels_resources_id_idx": {
+          "name": "payload_locked_documents_rels_resources_id_idx",
+          "columns": [
+            {
+              "expression": "resources_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "payload_locked_documents_rels_projects_id_idx": {
           "name": "payload_locked_documents_rels_projects_id_idx",
           "columns": [
@@ -2902,6 +3584,19 @@
           "tableTo": "articles",
           "columnsFrom": [
             "articles_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_resources_fk": {
+          "name": "payload_locked_documents_rels_resources_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "resources",
+          "columnsFrom": [
+            "resources_id"
           ],
           "columnsTo": [
             "id"
@@ -3254,17 +3949,18 @@
         "published"
       ]
     },
-    "public.enum_projects_files_kind": {
-      "name": "enum_projects_files_kind",
+    "public.enum_resources_resource_type": {
+      "name": "enum_resources_resource_type",
       "schema": "public",
       "values": [
-        "file",
+        "document",
         "video",
-        "link"
+        "link",
+        "publication"
       ]
     },
-    "public.enum_projects_files_language": {
-      "name": "enum_projects_files_language",
+    "public.enum_resources_language": {
+      "name": "enum_resources_language",
       "schema": "public",
       "values": [
         "en",
@@ -3273,23 +3969,40 @@
         "sw"
       ]
     },
-    "public.enum_projects_file_groups_files_kind": {
-      "name": "enum_projects_file_groups_files_kind",
+    "public.enum_resources_status": {
+      "name": "enum_resources_status",
       "schema": "public",
       "values": [
-        "file",
-        "video",
-        "link"
+        "draft",
+        "published"
       ]
     },
-    "public.enum_projects_file_groups_files_language": {
-      "name": "enum_projects_file_groups_files_language",
+    "public.enum__resources_v_version_resource_type": {
+      "name": "enum__resources_v_version_resource_type",
+      "schema": "public",
+      "values": [
+        "document",
+        "video",
+        "link",
+        "publication"
+      ]
+    },
+    "public.enum__resources_v_version_language": {
+      "name": "enum__resources_v_version_language",
       "schema": "public",
       "values": [
         "en",
         "fr",
         "pt",
         "sw"
+      ]
+    },
+    "public.enum__resources_v_version_status": {
+      "name": "enum__resources_v_version_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published"
       ]
     },
     "public.enum_projects_category": {
@@ -3322,6 +4035,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "b533dc59-7405-4ab6-a454-bde005bd1dd5",
+  "id": "95af0c25-dfee-4c0e-8dad-93bd1dd3f8df",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

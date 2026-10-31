@@ -1,91 +1,9 @@
-import type { CollectionConfig, Field } from 'payload'
-
-// One file, video or outside link on a page. Used in the plain list and inside each group.
-const fileFields: Field[] = [
-  {
-    name: 'label',
-    type: 'text',
-    required: true,
-    admin: {
-      description: 'The link text visitors see, e.g. "Canta V8-WN-NS".',
-    },
-  },
-  {
-    name: 'kind',
-    type: 'select',
-    required: true,
-    defaultValue: 'file',
-    options: [
-      { label: 'File', value: 'file' },
-      { label: 'Video', value: 'video' },
-      { label: 'Outside link', value: 'link' },
-    ],
-  },
-  // Only the field matching `kind` is shown, and hidden fields are not validated
-  {
-    name: 'file',
-    type: 'upload',
-    relationTo: 'documents',
-    required: true,
-    admin: {
-      condition: (_, siblingData) => siblingData?.kind === 'file',
-    },
-  },
-  {
-    name: 'videoUrl',
-    type: 'text',
-    required: true,
-    admin: {
-      condition: (_, siblingData) => siblingData?.kind === 'video',
-      description: 'Vimeo or YouTube link.',
-    },
-  },
-  {
-    name: 'url',
-    type: 'text',
-    required: true,
-    admin: {
-      condition: (_, siblingData) => siblingData?.kind === 'link',
-      description: 'Full web address, starting with https://',
-    },
-  },
-  {
-    name: 'language',
-    type: 'select',
-    required: true,
-    defaultValue: 'en',
-    options: [
-      { label: 'English', value: 'en' },
-      { label: 'French', value: 'fr' },
-      { label: 'Portuguese', value: 'pt' },
-      { label: 'Swahili', value: 'sw' },
-    ],
-  },
-  {
-    name: 'tags',
-    type: 'relationship',
-    relationTo: 'tags',
-    hasMany: true,
-    admin: {
-      description: 'Only tags set to be used for files are offered.',
-    },
-    // Offers only file tags, and rejects others on save
-    filterOptions: { usedFor: { in: ['files', 'both'] } },
-  },
-  {
-    name: 'isNew',
-    type: 'checkbox',
-    label: 'Mark as new',
-    defaultValue: false,
-    admin: {
-      description: 'Shows a NEW badge next to the file.',
-    },
-  },
-]
+import type { CollectionConfig } from 'payload'
 
 // One resources/project page, e.g. nest360.org/project/clinical-job-aids.
-// Files are either one plain list (each shown with its preview) or sorted into titled groups.
-// File previews live on the Documents collection, made automatically from each PDF's first page.
+// The page doesn't hold files: its resourceGroups link to entries in the Resources collection, so the
+// same resource can be on several pages. `layout` picks how they're shown: one plain list (each with its
+// preview) or titled groups. File previews live on Documents, made automatically from each PDF's first page.
 export const Projects: CollectionConfig = {
   slug: 'projects',
   admin: {
@@ -170,60 +88,54 @@ export const Projects: CollectionConfig = {
     {
       name: 'layout',
       type: 'radio',
-      label: 'How should the files be shown?',
+      label: 'How should the resources be shown?',
       required: true,
       defaultValue: 'list',
       options: [
-        { label: 'One list, each file with its preview', value: 'list' },
+        { label: 'One list, each resource with its preview', value: 'list' },
         { label: 'Titled groups of plain links (like Clinical Job Aids)', value: 'groups' },
       ],
     },
-    // Only the section matching `layout` is shown, and the hidden one is not validated
     {
-      name: 'files',
+      name: 'resourceGroups',
       type: 'array',
+      label: 'Resource Groups',
       required: true,
       minRows: 1,
       labels: {
-        singular: 'File',
-        plural: 'Files',
+        singular: 'Resource Group',
+        plural: 'Resource Groups',
       },
       admin: {
-        condition: (data) => data?.layout === 'list',
-      },
-      fields: fileFields,
-    },
-    {
-      name: 'fileGroups',
-      type: 'array',
-      required: true,
-      minRows: 1,
-      labels: {
-        singular: 'File group',
-        plural: 'File groups',
-      },
-      admin: {
-        condition: (data) => data?.layout === 'groups',
+        description:
+          'With the "one list" layout, add one group: its title and description are not shown, and every group\'s resources form the list.',
       },
       fields: [
         {
           name: 'title',
           type: 'text',
-          required: true,
           admin: {
-            description: 'For example "Bubble CPAP".',
+            description: 'For example "Bubble CPAP". Required for the titled-groups layout.',
           },
+          // Only titled groups show their title
+          validate: (value: unknown, { data }: { data: { layout?: string } }) =>
+            data?.layout === 'groups' && !value ? 'Each group needs a title in the titled-groups layout.' : true,
         },
         {
-          name: 'files',
-          type: 'array',
+          name: 'description',
+          type: 'textarea',
+        },
+        {
+          name: 'resources',
+          type: 'relationship',
+          relationTo: 'resources',
+          hasMany: true,
           required: true,
-          minRows: 1,
-          labels: {
-            singular: 'File',
-            plural: 'Files',
+          admin: {
+            description: 'Choose resources for this group and arrange them in display order.',
+            isSortable: true,
+            allowCreate: false,
           },
-          fields: fileFields,
         },
       ],
     },

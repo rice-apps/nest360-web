@@ -11,6 +11,7 @@
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "seed": "payload run scripts/seed.ts",
+    "seed:sample": "payload run scripts/seed-sample.ts",
     "seed:resources": "payload run scripts/seed-resources.ts"
   },
   "dependencies": {

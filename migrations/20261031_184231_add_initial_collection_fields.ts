@@ -7,7 +7,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum_projects_files_language" AS ENUM('en', 'fr', 'pt', 'sw');
   CREATE TYPE "public"."enum_projects_file_groups_files_kind" AS ENUM('file', 'video', 'link');
   CREATE TYPE "public"."enum_projects_file_groups_files_language" AS ENUM('en', 'fr', 'pt', 'sw');
-  CREATE TYPE "public"."enum_projects_category" AS ENUM('healthcare', 'innovators', 'implementors', 'families', 'dashboards');
   CREATE TYPE "public"."enum_projects_layout" AS ENUM('list', 'groups');
   CREATE TABLE "articles_authors" (
   	"_order" integer NOT NULL,
@@ -81,7 +80,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"id" serial PRIMARY KEY NOT NULL,
   	"title" varchar NOT NULL,
   	"slug" varchar NOT NULL,
-  	"category" "enum_projects_category" DEFAULT 'healthcare' NOT NULL,
   	"featured_image_id" integer,
   	"description" jsonb NOT NULL,
   	"tag_id" integer NOT NULL,
@@ -246,6 +244,5 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_projects_files_language";
   DROP TYPE "public"."enum_projects_file_groups_files_kind";
   DROP TYPE "public"."enum_projects_file_groups_files_language";
-  DROP TYPE "public"."enum_projects_category";
   DROP TYPE "public"."enum_projects_layout";`)
 }

@@ -6,9 +6,9 @@ import React from 'react';
 
 import { ResourceGrid } from '@/components/ResourceGrid';
 import { getProjectBySlug, projectToResource } from '@/lib/data/projects';
-import type { Document, Media, Project, Tag } from '@/payload-types';
+import type { Document, Media, Project, Resource, Tag } from '@/payload-types';
 
-type Item = NonNullable<Project['files']>[number];
+type Item = Resource;
 
 const LANGUAGES: Record<Item['language'], string> = {
   en: 'English',
@@ -22,19 +22,29 @@ function populated<T extends object>(value: number | T | null | undefined): T | 
   return value && typeof value === 'object' ? value : null;
 }
 
-function itemLink(item: Item): { href: string; details?: string } | null {
-  if (item.kind === 'file') {
-    const file = populated<Document>(item.file);
-    return file?.url ? { href: file.url } : null;
-  }
-  if (item.kind === 'video') return item.videoUrl ? { href: item.videoUrl, details: 'Video' } : null;
-  return item.url ? { href: item.url, details: 'Outside link' } : null;
+// The uploaded file, if the resource has one (documents always; publications sometimes)
+function fileOf(item: Item) {
+  return item.resourceType === 'document' || item.resourceType === 'publication'
+    ? populated<Document>(item.document)
+    : null;
 }
 
-// The picture made from a file's first page. Uses the full image: the Media thumbnail size crops pages.
+function itemLink(item: Item): { href: string; details?: string; external: boolean } | null {
+  const file = fileOf(item);
+  if (file?.url) return { href: file.url, external: false };
+  if (item.resourceType === 'video') {
+    return item.videoUrl ? { href: item.videoUrl, details: 'Video', external: true } : null;
+  }
+  const details = item.resourceType === 'publication' ? 'Publication' : 'Outside link';
+  return item.externalUrl ? { href: item.externalUrl, details, external: true } : null;
+}
+
+// The resource's own thumbnail, else the picture made from its file's first page.
+// Uses the full image: the Media thumbnail size crops pages.
 function filePreview(item: Item) {
-  if (item.kind !== 'file') return null;
-  const preview = populated<Media>(populated<Document>(item.file)?.preview);
+  const file = fileOf(item);
+  if (!file) return null;
+  const preview = populated<Media>(item.thumbnail) ?? populated<Media>(file.preview);
   return preview?.url ? preview : null;
 }
 
@@ -44,7 +54,6 @@ function ItemRow({ item, previewSize }: { item: Item; previewSize: PreviewSize }
   const link = itemLink(item);
   if (!link) return null;
   const preview = previewSize ? filePreview(item) : null;
-  const external = item.kind !== 'file';
   const details = [link.details, item.language !== 'en' && LANGUAGES[item.language]].filter(Boolean).join(' · ');
 
   return (
@@ -62,10 +71,10 @@ function ItemRow({ item, previewSize }: { item: Item; previewSize: PreviewSize }
       <div className="min-w-0">
         <a
           href={link.href}
-          {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
           className="font-medium text-[#41B6C4] hover:underline"
         >
-          {item.label}
+          {item.title}
         </a>
         {item.isNew && (
           <span className="ml-2 rounded bg-[#0A4162] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
@@ -111,8 +120,9 @@ function FileSections({ items, previewSize, small }: { items: Item[]; previewSiz
             </h3>
           )}
           <ul className="divide-y divide-gray-100">
-            {section.items.map((item) => (
-              <ItemRow key={item.id} item={item} previewSize={previewSize} />
+            {section.items.map((item, index) => (
+              // A resource can be listed twice on one page, so its id alone isn't a unique key
+              <ItemRow key={`${item.id}-${index}`} item={item} previewSize={previewSize} />
             ))}
           </ul>
         </div>
@@ -131,19 +141,24 @@ export default async function ProjectPage({ params }: PageProps<'/resources/[slu
   const related = (project.relatedProjects ?? [])
     .map((other) => populated<Project>(other))
     .filter((other) => other !== null);
-  // Only the section matching the layout counts: the other may hold leftovers from before a switch
-  const groups = project.layout === 'groups' ? (project.fileGroups ?? []) : [];
-  const files = project.layout === 'list' ? (project.files ?? []) : [];
-  const allItems = [...files, ...groups.flatMap((group) => group.files)];
+  // Each group's resources, skipping any the visitor can't see (unpublished ones arrive as bare IDs)
+  const groups = (project.resourceGroups ?? []).map((group) => ({
+    ...group,
+    resources: group.resources.map((resource) => populated<Resource>(resource)).filter((item) => item !== null),
+  }));
+  // The "one list" layout shows every group's resources together, without group titles
+  const files = project.layout === 'list' ? groups.flatMap((group) => group.resources) : [];
+  const titledGroups = project.layout === 'groups' ? groups : [];
+  const allItems = groups.flatMap((group) => group.resources);
 
   // 1-2 files: a large preview for each. More, in one list: a small preview for each.
   // More, in groups: only the first PDF's preview, shown at the top.
-  const fileCount = allItems.filter((item) => item.kind === 'file').length;
+  const fileCount = allItems.filter((item) => fileOf(item)).length;
   const previewSize: PreviewSize = fileCount <= 2 ? 'large' : project.layout === 'list' ? 'small' : null;
   const topPreview = previewSize
     ? null
     : allItems
-        .filter((item) => populated<Document>(item.file)?.mimeType === 'application/pdf')
+        .filter((item) => fileOf(item)?.mimeType === 'application/pdf')
         .map(filePreview)
         .find((preview) => preview !== null);
 
@@ -193,10 +208,10 @@ export default async function ProjectPage({ params }: PageProps<'/resources/[slu
           </section>
         )}
 
-        {groups.map((group) => (
+        {titledGroups.map((group) => (
           <section key={group.id} className="rounded-lg border border-gray-100 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-xl font-bold text-[#0A4162]">{group.title}</h2>
-            <FileSections items={group.files} previewSize={previewSize} small />
+            <FileSections items={group.resources} previewSize={previewSize} small />
           </section>
         ))}
 

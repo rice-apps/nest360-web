@@ -78,9 +78,13 @@ const SECTIONS: { category: Resource['category']; title: string; label: string }
 ];
 
 export default async function ResourcesPage({ searchParams }: PageProps<'/resources'>) {
-  // Admin projects (dated by when they were added) plus the hard-coded cards, then the sidebar's choices
+  // Admin projects (dated by their newest publication, else when they were added) plus the hard-coded cards,
+  // then the sidebar's choices
   const listed = [
-    ...(await getProjects()).map((project) => ({ resource: projectToResource(project), date: project.createdAt })),
+    ...(await getProjects()).map((project) => {
+      const resource = projectToResource(project);
+      return { resource, date: resource.publishedDate ?? project.createdAt };
+    }),
     ...RESOURCES_DATA.map((resource) => ({ resource, date: resource.publishedDate })),
   ];
   const filters = parseFilters(await searchParams);
