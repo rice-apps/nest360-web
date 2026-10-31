@@ -124,6 +124,26 @@ export const Projects: CollectionConfig = {
         ],
       },
     },
+    // CLAUDE CHANGE: new. Which section of the resource library the page's card appears in. Same values as
+    // ResourceCategory in app/(frontend)/resources/types.ts.
+    {
+      name: 'category',
+      type: 'select',
+      label: 'Audience',
+      required: true,
+      defaultValue: 'healthcare',
+      options: [
+        { label: 'Healthcare professionals & BMETs', value: 'healthcare' },
+        { label: 'Innovators & manufacturers', value: 'innovators' },
+        { label: 'Implementors', value: 'implementors' },
+        { label: 'Families', value: 'families' },
+        { label: 'Dashboards', value: 'dashboards' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'The section of the resource library this page’s card appears in.',
+      },
+    },
     {
       name: 'featuredImage',
       type: 'upload',
