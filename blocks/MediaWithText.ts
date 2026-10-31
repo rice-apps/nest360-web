@@ -3,7 +3,7 @@ import type { Block } from "payload";
 //Image + a block of text
 export const MediaWithText: Block = {
     slug: 'mediaWithText', 
-    interfaceName: 'mediaWithTextBlock', 
+    interfaceName: 'MediaWithTextBlock', 
     labels: { singular: 'Image with text', plural: 'Images with text'},
     fields: [
         { name: 'image', type: 'upload', relationTo: 'media', required: true },

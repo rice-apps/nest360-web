@@ -13,7 +13,7 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title', // must match a field name below
-    defaultColumns: ['title', 'slug', '_status', 'updateAt'],
+    defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     preview: previewFor('pages', (slug) => `/${slug}`),
   },
 
@@ -35,7 +35,6 @@ export const Pages: CollectionConfig = {
       {
         name: 'slug',
         type: 'text',
-        required: true,
         unique: true,
         index: true,
         admin: {
@@ -56,9 +55,10 @@ export const Pages: CollectionConfig = {
       },
 
     //layout -> blocks field
-    {
+    { // Each layout requires at least one subsection
         name: 'layout',
         type: 'blocks', 
+        required: true,
         blocks: [RichText,MediaWithText,HeadingWithList]
     }
   ]

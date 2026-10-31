@@ -10,6 +10,8 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { Pages } from './collections/Pages'
+import { Footer } from './globals/Footer'
+import { Header } from './globals/Header'
 import { Articles } from './collections/Articles'
 import { Documents } from './collections/Documents'
 import { Media } from './collections/Media'
@@ -57,6 +59,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Documents, Tags, Articles, Projects, Pages],
+  globals: [Header, Footer],
   editor: lexicalEditor(),
   // Development falls back to a fixed secret so a fresh clone runs without a .env; production must set one
   secret: process.env.PAYLOAD_SECRET || (isProduction ? '' : 'nest360-local-development-only'),
