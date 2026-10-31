@@ -18,6 +18,7 @@
     "@payloadcms/db-postgres": "^3.92.0",
     "@payloadcms/db-sqlite": "^3.92.0",
     "@payloadcms/next": "^3.92.0",
+    "@payloadcms/plugin-search": "^3.92.0",
     "@payloadcms/richtext-lexical": "^3.92.0",
     "@payloadcms/storage-s3": "^3.92.0",
     "graphql": "^16.14.2",
