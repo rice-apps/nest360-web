@@ -17,8 +17,8 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   return docs[0] ?? null;
 }
 
-// CLAUDE CHANGE: new. Every project for the resource library, newest first. depth 2 fills in the featured
-// image, tags, and each file's document and preview, which the cards need.
+// Every project for the resource library, newest first. depth 2 fills in the featured image, tags, and each
+// file's document and preview, which the cards need.
 export async function getProjects(): Promise<Project[]> {
   const payload = await getPayload({ config });
   const { docs } = await payload.find({
@@ -35,14 +35,13 @@ function populated<T extends object>(value: number | T | null | undefined): T | 
   return value && typeof value === "object" ? value : null;
 }
 
-// CLAUDE CHANGE: moved here from resources/[slug]/page.tsx so the library cards can use it too.
 // Card text for a project: the first sentence of its description
 export function firstSentence(description: Project["description"]) {
   const text = convertLexicalToPlaintext({ data: description }).trim();
   return text.match(/^.*?[.!?](\s|$)/)?.[0].trim() ?? text;
 }
 
-// CLAUDE CHANGE: new. Turns a project from the admin into the card fields in resources/types.ts:
+// Turns a project from the admin into the card fields in resources/types.ts:
 // - image: the featured image, or else the preview of the project's first PDF
 // - badgeText: "New" when any file is marked new, otherwise "Video" when the project has a video
 // - tags: the page tag, then the file tags, without repeats

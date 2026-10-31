@@ -1,4 +1,4 @@
-// CLAUDE CHANGE: new file. Mock resource pages for trying out the resource library cards: a mix of featured
+// Mock resource pages for trying out the resource library cards: a mix of featured
 // images, PDF previews, videos, outside links, "New" badges, page and file tags, both layouts and a
 // "Download all" file. Every mock page's title starts with "[Mock]" and its slug with "mock-", so they're
 // easy to tell apart from real content and to find and delete in the admin. Safe to run more than once: anything that already exists is skipped.

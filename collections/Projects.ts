@@ -124,8 +124,7 @@ export const Projects: CollectionConfig = {
         ],
       },
     },
-    // CLAUDE CHANGE: new. Which section of the resource library the page's card appears in. Same values as
-    // ResourceCategory in app/(frontend)/resources/types.ts.
+    // Same values as ResourceCategory in app/(frontend)/resources/types.ts
     {
       name: 'category',
       type: 'select',

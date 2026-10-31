@@ -1,5 +1,3 @@
-// CLAUDE CHANGE: new file. The heading + grid wrapper that was repeated around each set of cards. The
-// grid is now a <ul> of <li> (was a <div>) so screen readers announce it as a list of N resources.
 import React from 'react';
 
 import { ResourceCard, type ResourceCardProps } from './ResourceCard';
@@ -12,8 +10,6 @@ const COLUMNS = {
 
 interface ResourceGridProps {
   title?: string;
-  // CLAUDE CHANGE: any card fields plus an id for the React key (string ids from the mock data, number ids
-  // from Payload)
   resources: (ResourceCardProps & { id: string | number })[];
   columns?: keyof typeof COLUMNS;
 }
@@ -24,8 +20,8 @@ export function ResourceGrid({ title, resources, columns = 4 }: ResourceGridProp
 
   return (
     <section>
-      {/* CLAUDE CHANGE: Figma "Heading 2 (24pt bold)" in Poppins; color #0A4162 -> Nest Blue #004167 */}
       {title && <h2 className="mb-6 font-heading text-xl font-bold text-nest-blue sm:text-2xl">{title}</h2>}
+      {/* A list, so screen readers announce how many resources there are */}
       <ul className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${COLUMNS[columns]}`}>
         {resources.map(({ id, ...card }) => (
           <li key={id}>

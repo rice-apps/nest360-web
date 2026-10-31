@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-// CLAUDE CHANGE: added DM_Sans and Poppins, the two typefaces in the Figma design system
 import { DM_Sans, Geist, Geist_Mono, Poppins } from "next/font/google";
 import { draftMode } from "next/headers";
 import "./globals.css";
@@ -14,8 +13,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// CLAUDE CHANGE: new. Figma design system: Poppins for headings, DM Sans for body text.
-// Only the weights the type scale uses (regular, semibold, bold), to keep downloads small.
+// Figma design system: Poppins for headings, DM Sans for body text. Poppins loads only the weights the type
+// scale uses (regular, semibold, bold), to keep downloads small.
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
@@ -38,7 +37,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      // CLAUDE CHANGE: added the poppins and dmSans variables
       className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

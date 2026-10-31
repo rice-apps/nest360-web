@@ -1,6 +1,5 @@
-// CLAUDE CHANGE: new file. Reads the /resources filter choices from the URL and applies them. Kept out of
-// components/ResourceFilters.tsx because that is a client component, and the server page can't read plain
-// values from one.
+// Reads the /resources filter choices from the URL and applies them. Not in components/ResourceFilters.tsx:
+// that's a client component, and the server page can't read plain values from one.
 import type { Resource } from '@/app/(frontend)/resources/types';
 
 export const SORTS = {

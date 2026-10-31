@@ -4,9 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
 
-// CLAUDE CHANGE: new import, used by the "Related resources" section at the bottom of the page
 import { ResourceGrid } from '@/components/ResourceGrid';
-// CLAUDE CHANGE: also imports projectToResource, which builds the card fields for a project
 import { getProjectBySlug, projectToResource } from '@/lib/data/projects';
 import type { Document, Media, Project, Tag } from '@/payload-types';
 
@@ -23,8 +21,6 @@ const LANGUAGES: Record<Item['language'], string> = {
 function populated<T extends object>(value: number | T | null | undefined): T | null {
   return value && typeof value === 'object' ? value : null;
 }
-
-// CLAUDE CHANGE: firstSentence() moved to lib/data/projects.ts, where projectToResource uses it
 
 function itemLink(item: Item): { href: string; details?: string } | null {
   if (item.kind === 'file') {
@@ -204,15 +200,9 @@ export default async function ProjectPage({ params }: PageProps<'/resources/[slu
           </section>
         ))}
 
-        {/* CLAUDE CHANGE: replaces the inline "Related resources" <section> (the related.length check,
-            the md:grid-cols-3 grid, and a <Link> card per project). ResourceGrid hides itself when the list
-            is empty, and ResourceCard renders the same image / navy fallback / title / first sentence.
-            The old whole-card <Link> is now a "View resource" button (linkUrl). */}
         <ResourceGrid
           title="Related resources"
           columns={3}
-          // CLAUDE CHANGE: same card fields as the resource library (projectToResource), so related cards also
-          // show tags and badges
           resources={related.map(projectToResource)}
         />
       </div>

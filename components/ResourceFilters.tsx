@@ -1,8 +1,8 @@
-// CLAUDE CHANGE: new file. The filter sidebar on /resources: sort order, audience and tags. It's a plain GET
-// form, so the choices live in the URL (/resources?sort=az&audience=healthcare&tag=Training), the page does
-// the filtering on the server, and a filtered view can be bookmarked or shared. The only JavaScript submits
-// the form as soon as a box is ticked; without it, the Apply button does the same.
 'use client';
+
+// The filter sidebar on /resources. A plain GET form, so the choices live in the URL
+// (/resources?sort=az&audience=healthcare&tag=Training), the page filters on the server, and a filtered view
+// can be shared. The only JavaScript submits the form as soon as a box is ticked; without it, Apply does.
 
 import Link from 'next/link';
 import React from 'react';
