@@ -1,11 +1,11 @@
-import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext';
 import { RichText } from '@payloadcms/richtext-lexical/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
 
-import { getProjectBySlug } from '@/lib/data/projects';
+import { ResourceGrid } from '@/components/ResourceGrid';
+import { getProjectBySlug, projectToResource } from '@/lib/data/projects';
 import type { Document, Media, Project, Resource, Tag } from '@/payload-types';
 
 type Item = Resource;
@@ -20,12 +20,6 @@ const LANGUAGES: Record<Item['language'], string> = {
 // Relationships are IDs until populated; the page queries with enough depth to populate them
 function populated<T extends object>(value: number | T | null | undefined): T | null {
   return value && typeof value === 'object' ? value : null;
-}
-
-// Card text for a project: the first sentence of its description
-function firstSentence(description: Project['description']) {
-  const text = convertLexicalToPlaintext({ data: description }).trim();
-  return text.match(/^.*?[.!?](\s|$)/)?.[0].trim() ?? text;
 }
 
 // The uploaded file, if the resource has one (documents always; publications sometimes)
@@ -221,43 +215,11 @@ export default async function ProjectPage({ params }: PageProps<'/resources/[slu
           </section>
         ))}
 
-        {related.length > 0 && (
-          <section>
-            <h2 className="mb-6 text-xl font-bold text-[#0A4162]">Related resources</h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-              {related.map((other) => {
-                const image = populated<Media>(other.featuredImage);
-                return (
-                  <Link
-                    key={other.id}
-                    href={`/resources/${other.slug}`}
-                    className="flex flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
-                  >
-                    {image?.url ? (
-                      <Image
-                        src={image.sizes?.thumbnail?.url ?? image.url}
-                        alt={image.alt}
-                        width={400}
-                        height={300}
-                        className="h-44 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-44 items-center justify-center bg-[#0A4162] p-4">
-                        <span className="text-center text-xs font-semibold uppercase tracking-wider text-white">
-                          {other.title}
-                        </span>
-                      </div>
-                    )}
-                    <div className="p-5">
-                      <h3 className="mb-2 text-sm font-semibold text-[#41B6C4]">{other.title}</h3>
-                      <p className="text-xs leading-relaxed text-gray-600">{firstSentence(other.description)}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        )}
+        <ResourceGrid
+          title="Related resources"
+          columns={3}
+          resources={related.map(projectToResource)}
+        />
       </div>
     </main>
   );

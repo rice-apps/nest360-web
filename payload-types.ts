@@ -381,6 +381,10 @@ export interface Project {
    */
   slug: string;
   /**
+   * The section of the resource library this page’s card appears in.
+   */
+  category: 'healthcare' | 'innovators' | 'implementors' | 'families' | 'dashboards';
+  /**
    * Shown on this page’s card in the resource library.
    */
   featuredImage?: (number | null) | Media;
@@ -676,6 +680,7 @@ export interface ResourcesSelect<T extends boolean = true> {
 export interface ProjectsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  category?: T;
   featuredImage?: T;
   description?: T;
   tag?: T;
