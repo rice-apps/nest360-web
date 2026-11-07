@@ -3,6 +3,10 @@ import type { CollectionConfig } from 'payload'
 import { pageBlocks } from '../blocks'
 import { previewFor, publishedOrLoggedIn } from '../lib/preview'
 
+// URLs that already belong to a fixed route, so a page with one of these slugs would never be shown.
+// Add to this list when adding a new folder under app/(frontend)/ or app/(payload)/.
+const RESERVED_SLUGS = ['admin', 'api', 'preview', 'exit-preview', 'resources', 'stories']
+
 // A simple page that staff build from blocks, such as What We Do or Jobs. Shown at /<slug>.
 // The header and footer come from the Header and Footer globals, so every page shares them.
 export const Pages: CollectionConfig = {
@@ -39,6 +43,10 @@ export const Pages: CollectionConfig = {
       },
       // Not required on purpose: the admin checks required fields before this hook runs,
       // so a required slug would block Publish whenever it was left blank
+      // Runs after the hook below fills in a blank slug
+      validate: (value: string | null | undefined) =>
+        !value || !RESERVED_SLUGS.includes(value) ||
+        `"${value}" is already used by another part of the site. Pick a different slug.`,
       hooks: {
         beforeValidate: [
           ({ value, data }) =>

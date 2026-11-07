@@ -1,4 +1,4 @@
-import { RichText } from "@payloadcms/richtext-lexical/react";
+import { RichText } from "@/components/RichText";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
