@@ -98,18 +98,19 @@ async function pdf(title: string) {
 const MOCK_LABEL = '[Mock] '
 
 type ResourceData = Pick<Resource, 'title' | 'slug' | 'summary' | 'resourceType' | 'language'> &
-  Partial<Pick<Resource, 'document' | 'videoUrl' | 'externalUrl' | 'tags' | 'isNew' | 'authors' | 'publicationDate'>>
+  Partial<Pick<Resource, 'document' | 'videoUrl' | 'externalUrl' | 'tags' | 'authors' | 'publicationDate'>>
 
-// A published resource, found by slug or created. Returns its id for a project's resourceGroups.
-async function resource(data: ResourceData) {
+// A published resource, found by slug or created. Returns a row for a project's resourceGroups; isNew
+// shows the "New" badge for it in that group only.
+async function resource(data: ResourceData, isNew = false) {
   const { docs } = await payload.find({ collection: 'resources', where: { slug: { equals: data.slug } }, limit: 1, draft: true })
-  if (docs[0]) return docs[0].id
+  if (docs[0]) return { resource: docs[0].id, isNew }
   const created = await payload.create({
     collection: 'resources',
     data: { ...data, title: MOCK_LABEL + data.title, _status: 'published' },
   })
   payload.logger.info(`Created resource: ${data.slug}`)
-  return created.id
+  return { resource: created.id, isNew }
 }
 
 // Creates the mock page, or brings an existing one up to date. Mock pages are disposable, so edits made to
@@ -164,9 +165,8 @@ await project({
           document: await pdf('Bubble CPAP Job Aid'),
           language: 'en',
           tags: [clinical, jobAid, bubbleCpap],
-          isNew: true,
           publicationDate: '2026-09-17T12:00:00.000Z',
-        }),
+        }, true),
         await resource({
           title: 'Bubble CPAP setup video',
           slug: 'mock-bubble-cpap-video',
@@ -323,8 +323,7 @@ await project({
           document: await pdf('Lista de Verificacao'),
           language: 'pt',
           tags: [jobAid],
-          isNew: true,
-        }),
+        }, true),
         await resource({
           title: 'Orodha ya utayari',
           slug: 'mock-readiness-checklist-sw',
