@@ -1,4 +1,5 @@
 import type { Block } from 'payload'
+import {backgroundColor} from '../fields/backgroundColor'
 
 // A section of formatted text: headings, paragraphs, links, lists
 export const RichText: Block = {
@@ -11,5 +12,7 @@ export const RichText: Block = {
       type: 'richText',
       required: true,
     },
+    backgroundColor, // The backgroundColor option
+    
   ],
 }

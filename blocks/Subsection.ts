@@ -1,4 +1,5 @@
 import type { Block } from 'payload'
+import { backgroundColor } from '../fields/backgroundColor'
 
 // A section with a required title and an optional subtitle, text and images (e.g. the Jobs page)
 export const Subsection: Block = {
@@ -25,5 +26,6 @@ export const Subsection: Block = {
       relationTo: 'media',
       hasMany: true,
     },
+    backgroundColor, // The backgroundColor option
   ],
 }

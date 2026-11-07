@@ -494,6 +494,10 @@ export interface SubsectionBlock {
     [k: string]: unknown;
   } | null;
   images?: (number | Media)[] | null;
+  /**
+   * Optional. Pick a brand color or any custom color. Text turns white on dark colors.
+   */
+  backgroundColor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'subsection';
@@ -518,6 +522,10 @@ export interface RichTextBlock {
     };
     [k: string]: unknown;
   };
+  /**
+   * Optional. Pick a brand color or any custom color. Text turns white on dark colors.
+   */
+  backgroundColor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'richText';
@@ -544,6 +552,10 @@ export interface MediaWithTextBlock {
     [k: string]: unknown;
   };
   imagePosition?: ('left' | 'right') | null;
+  /**
+   * Optional. Pick a brand color or any custom color. Text turns white on dark colors.
+   */
+  backgroundColor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaWithText';
@@ -562,6 +574,10 @@ export interface HeadingWithListBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Optional. Pick a brand color or any custom color. Text turns white on dark colors.
+   */
+  backgroundColor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'headingWithList';
@@ -905,6 +921,7 @@ export interface SubsectionBlockSelect<T extends boolean = true> {
   subtitle?: T;
   text?: T;
   images?: T;
+  backgroundColor?: T;
   id?: T;
   blockName?: T;
 }
@@ -914,6 +931,7 @@ export interface SubsectionBlockSelect<T extends boolean = true> {
  */
 export interface RichTextBlockSelect<T extends boolean = true> {
   content?: T;
+  backgroundColor?: T;
   id?: T;
   blockName?: T;
 }
@@ -925,6 +943,7 @@ export interface MediaWithTextBlockSelect<T extends boolean = true> {
   image?: T;
   content?: T;
   imagePosition?: T;
+  backgroundColor?: T;
   id?: T;
   blockName?: T;
 }
@@ -942,6 +961,7 @@ export interface HeadingWithListBlockSelect<T extends boolean = true> {
         description?: T;
         id?: T;
       };
+  backgroundColor?: T;
   id?: T;
   blockName?: T;
 }

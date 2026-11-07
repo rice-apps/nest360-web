@@ -1,4 +1,6 @@
 import type { Block } from 'payload'
+import {backgroundColor} from '../fields/backgroundColor'
+
 
 // An image beside a block of text
 export const MediaWithText: Block = {
@@ -26,5 +28,6 @@ export const MediaWithText: Block = {
         { label: 'Right', value: 'right' },
       ],
     },
+    backgroundColor,
   ],
 }

@@ -1,4 +1,6 @@
 import type { Block } from 'payload'
+import {backgroundColor} from '../fields/backgroundColor'
+
 
 // A heading, an optional intro, then a list of items (e.g. the pillars on What We Do)
 export const HeadingWithList: Block = {
@@ -31,5 +33,6 @@ export const HeadingWithList: Block = {
         },
       ],
     },
+    backgroundColor,
   ],
 }
