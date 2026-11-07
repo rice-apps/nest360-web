@@ -1,4 +1,5 @@
 import React from 'react';
+import { connection } from 'next/server';
 
 import { ResourceGrid } from '@/components/ResourceGrid';
 import { ResourceFilters } from '@/components/ResourceFilters';
@@ -78,6 +79,9 @@ const SECTIONS: { category: Resource['category']; title: string; label: string }
 ];
 
 export default async function ResourcesPage({ searchParams }: PageProps<'/resources'>) {
+  // Query CMS content at request time, after the deployment has a database available.
+  await connection();
+
   // Admin projects (dated by their newest publication, else when they were added) plus the hard-coded cards,
   // then the sidebar's choices
   const listed = [
