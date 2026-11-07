@@ -7,7 +7,7 @@ import { useState } from "react";
 import type { Header } from "@/payload-types";
 
 type Props = {
-    logo: { url: string; alt: string } | null;
+    logo: { url: string; alt: string; width?: number | null; height?: number | null } | null;
     navItems: NonNullable<Header["navItems"]>;
     donate: { label: string; url: string } | null;
 };
@@ -22,7 +22,19 @@ export function HeaderNav({ logo, navItems, donate }: Props) {
         <header className="relative border-b border-nest-neutral-200 bg-white text-nest-blue">
             <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4">
                 <Link href="/" onClick={close} className="shrink-0 font-heading text-xl font-bold">
-                    {logo ? <Image src={logo.url} alt={logo.alt} width={140} height={48} priority /> : "NEST360"}
+                    {logo ? (
+                        // Fixed height, width follows the image so a wide logo isn't squashed
+                        <Image
+                            src={logo.url}
+                            alt={logo.alt}
+                            width={logo.width ?? 200}
+                            height={logo.height ?? 48}
+                            priority
+                            className="h-10 w-auto md:h-12"
+                        />
+                    ) : (
+                        "NEST360"
+                    )}
                 </Link>
 
                 {/* Desktop menu */}

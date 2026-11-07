@@ -10,7 +10,7 @@ export async function SiteHeader() {
 
     return (
         <HeaderNav
-            logo={logo?.url ? { url: logo.url, alt: logo.alt } : null}
+            logo={logo?.url ? { url: logo.url, alt: logo.alt, width: logo.width, height: logo.height } : null}
             navItems={header.navItems ?? []}
             donate={header.donate?.url ? { label: header.donate.label || "Donate", url: header.donate.url } : null}
         />

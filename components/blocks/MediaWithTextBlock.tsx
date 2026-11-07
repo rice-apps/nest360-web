@@ -1,4 +1,4 @@
-import { RichText } from "@payloadcms/richtext-lexical/react";
+import { RichText } from "@/components/RichText";
 import Image from "next/image";
 
 import type { MediaWithTextBlock as MediaWithTextBlockType } from "@/payload-types";

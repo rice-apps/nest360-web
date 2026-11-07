@@ -1,4 +1,4 @@
-import { RichText } from "@payloadcms/richtext-lexical/react";
+import { RichText } from "@/components/RichText";
 
 import type { RichTextBlock as RichTextBlockType } from "@/payload-types";
 
