@@ -1,12 +1,6 @@
 'use client';
 
-// The filter sidebar on /resources, laid out as in the Figma mockup. components/ResourceBrowser.tsx holds the
-// choices and filters the cards in the browser as each box is ticked, with no page reload. It's still a GET
-// form, so without JavaScript the Search button loads /resources?audience=...&tag=...&topic=... and the server filters
-// instead. The whole sidebar and each group fold with <details>.
-
 import React from 'react';
-
 import { FILTER_FORM_ID } from '@/lib/resourceFilters';
 
 export type FilterGroup = 'audiences' | 'tags' | 'topics';
@@ -17,7 +11,6 @@ interface ResourceFiltersProps {
   topics: readonly string[];
   selected: Record<FilterGroup, string[]>;
   onToggle: (group: FilterGroup, value: string) => void;
-  // The form was submitted: the Search button, or Enter in the search box
   onSubmit: () => void;
   onReset: () => void;
 }
@@ -36,7 +29,6 @@ function Option({
   onChange: () => void;
 }) {
   return (
-    // items-start + mt-px keeps the box beside the first line when a label wraps
     <label className="flex cursor-pointer items-start gap-2 py-1.5 text-xs text-nest-neutral-900 hover:text-nest-blue">
       <input
         type="checkbox"
@@ -51,16 +43,33 @@ function Option({
   );
 }
 
-// One collapsible group of checkboxes, open to start with
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
+function Group({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <details open className="group border-b border-gray-200">
       <summary className="flex cursor-pointer list-none items-center justify-between border-b border-gray-200 px-4 py-3 text-sm font-semibold text-nest-neutral-900 group-[:not([open])]:border-b-0 [&::-webkit-details-marker]:hidden">
         {title}
-        <svg aria-hidden="true" viewBox="0 0 20 20" className="h-3.5 w-3.5 rotate-180 transition-transform group-open:rotate-0">
-          <path d="M5 12.5l5-5 5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          className="h-3.5 w-3.5 rotate-180 transition-transform group-open:rotate-0"
+        >
+          <path
+            d="M5 12.5l5-5 5 5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </summary>
+
       <fieldset className="px-4 py-2">
         <legend className="sr-only">{title}</legend>
         {children}
@@ -69,27 +78,47 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-export function ResourceFilters({ userTypes, contentTypes, topics, selected, onToggle, onSubmit, onReset }: ResourceFiltersProps) {
+export function ResourceFilters({
+  userTypes,
+  contentTypes,
+  topics,
+  selected,
+  onToggle,
+  onSubmit,
+  onReset,
+}: ResourceFiltersProps) {
   return (
     <form
       id={FILTER_FORM_ID}
       action="/resources"
       method="get"
-      // With JavaScript, submitting applies the search in the browser instead of reloading the page
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit();
       }}
     >
-      {/* Folding the whole sidebar keeps its choices applied */}
       <details open className="group/sidebar">
         <summary className="flex cursor-pointer list-none items-center justify-between border-b border-gray-200 px-4 py-3 [&::-webkit-details-marker]:hidden">
-          <h2 className="text-sm font-semibold text-nest-neutral-900">Filters</h2>
+          <h2 className="text-sm font-semibold text-nest-neutral-900">
+            Filters
+          </h2>
+
           <span className="flex items-center gap-1 text-sm font-medium text-nest-accent">
             <span className="group-open/sidebar:hidden">Expand</span>
             <span className="hidden group-open/sidebar:inline">Collapse</span>
-            <svg aria-hidden="true" viewBox="0 0 20 20" className="h-3.5 w-3.5 rotate-180 transition-transform group-open/sidebar:rotate-0">
-              <path d="M5 12.5l5-5 5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 20 20"
+              className="h-3.5 w-3.5 rotate-180 transition-transform group-open/sidebar:rotate-0"
+            >
+              <path
+                d="M5 12.5l5-5 5 5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </span>
         </summary>
@@ -134,7 +163,6 @@ export function ResourceFilters({ userTypes, contentTypes, topics, selected, onT
         </Group>
 
         <div className="px-4 py-5">
-          {/* A reset button, so without JavaScript it still clears the boxes */}
           <button
             type="reset"
             onClick={(event) => {

@@ -29,5 +29,7 @@ export interface Resource {
     authorOrOrganization?: string; 
     tags?: string[];
 
+    contentTypes?: string[];
+    topics?: string[];
 }
 
