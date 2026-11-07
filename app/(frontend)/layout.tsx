@@ -3,6 +3,9 @@ import { DM_Sans, Geist, Geist_Mono, Poppins } from "next/font/google";
 import { draftMode } from "next/headers";
 import "./globals.css";
 
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -46,7 +49,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <a href="/exit-preview" className="underline font-medium">Exit preview</a>
           </div>
         )}
+        <SiteHeader />
         {children}
+        <SiteFooter />
       </body>
     </html>
   );

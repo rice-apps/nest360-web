@@ -74,6 +74,7 @@ export interface Config {
     articles: Article;
     resources: Resource;
     projects: Project;
+    pages: Page;
     search: Search;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -93,6 +94,7 @@ export interface Config {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -103,8 +105,14 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    header: Header;
+    footer: Footer;
+  };
+  globalsSelect: {
+    header: HeaderSelect<false> | HeaderSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -444,6 +452,121 @@ export interface Project {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * Used in the URL, e.g. what-we-do. Filled in from the title if left blank.
+   */
+  slug?: string | null;
+  layout: (SubsectionBlock | RichTextBlock | MediaWithTextBlock | HeadingWithListBlock)[];
+  /**
+   * One or two sentences for search results. Keep under about 160 characters.
+   */
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SubsectionBlock".
+ */
+export interface SubsectionBlock {
+  title: string;
+  subtitle?: string | null;
+  text?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  images?: (number | Media)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'subsection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextBlock".
+ */
+export interface RichTextBlock {
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'richText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaWithTextBlock".
+ */
+export interface MediaWithTextBlock {
+  image: number | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  imagePosition?: ('left' | 'right') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaWithText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeadingWithListBlock".
+ */
+export interface HeadingWithListBlock {
+  heading: string;
+  intro?: string | null;
+  items?:
+    | {
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'headingWithList';
+}
+/**
  * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -530,6 +653,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'projects';
         value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'search';
@@ -751,6 +878,75 @@ export interface ProjectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  layout?:
+    | T
+    | {
+        subsection?: T | SubsectionBlockSelect<T>;
+        richText?: T | RichTextBlockSelect<T>;
+        mediaWithText?: T | MediaWithTextBlockSelect<T>;
+        headingWithList?: T | HeadingWithListBlockSelect<T>;
+      };
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SubsectionBlock_select".
+ */
+export interface SubsectionBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  text?: T;
+  images?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextBlock_select".
+ */
+export interface RichTextBlockSelect<T extends boolean = true> {
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaWithTextBlock_select".
+ */
+export interface MediaWithTextBlockSelect<T extends boolean = true> {
+  image?: T;
+  content?: T;
+  imagePosition?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeadingWithListBlock_select".
+ */
+export interface HeadingWithListBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "search_select".
  */
 export interface SearchSelect<T extends boolean = true> {
@@ -803,6 +999,138 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: number;
+  logo?: (number | null) | Media;
+  navItems?:
+    | {
+        label: string;
+        url?: string | null;
+        children?:
+          | {
+              label: string;
+              url: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  donate?: {
+    label?: string | null;
+    url?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  columns?:
+    | {
+        heading: string;
+        links?:
+          | {
+              label: string;
+              url: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  socials?:
+    | {
+        platform: 'Facebook' | 'X' | 'Instagram' | 'LinkedIn' | 'YouTube';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  contactEmail?: string | null;
+  legalLinks?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  logo?: T;
+  navItems?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        children?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  donate?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  columns?:
+    | T
+    | {
+        heading?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  socials?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  contactEmail?: T;
+  legalLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
