@@ -1,6 +1,6 @@
 # NEST360 Web — Design & Architecture Document
 
-RiceApps × Rice360 × NEST360 · Last updated Nov 6, 2026 · @Tigger
+RiceApps × Rice360 × NEST360 · Last updated Nov 6, 2026
 
 ## 1. Overview
 
@@ -50,8 +50,6 @@ Three personas drive the design. Clinicians are the primary user of the resource
 ## 3. System architecture
 
 The whole system is one Next.js application. The public site and the Payload admin run in the same process and share Payload's Local API, so pages query content directly, with no separate backend service to host.
-
-&#91;embedded content: system architecture · one app, two route groups, two data stores\]
 
 Visitors hit server-rendered pages; editors use `/admin`. Both go through Payload, which applies access rules and hooks before reading or writing Postgres and S3.
 
@@ -280,29 +278,6 @@ Implement as a `role` select on `users`, with access functions per collection an
 
 As of 6 Nov 2026, `main` has the CMS foundation, the content schema, draft preview and working project and article pages. The resource gallery, page blocks and globals are on open branches; search is not started.
 
-### Merged to `main` (newest first)
-
-| PR | What landed |
-| --- | --- |
-| #17 | Resources collection migration; migrations reset to one clean initial migration (20261031) |
-| #15 | Resources collection; projects link to resources through resource groups |
-| #14 | Base collection fields migrated |
-| #13 | Article page shows all article fields |
-| #10, #11 | Articles collection; Projects collection restored after a merge conflict; SQLite fallback |
-| #12 | Initial Payload migrations; `npm run dev` with no setup |
-| #9 | Projects collection, project page, draft preview routes and banner |
-| #7, #8 | Payload with Postgres and S3; Media, Documents and Tags collections |
-| #4 | Resources and stories page shells |
-| #1 | Next.js app for the first sprint |
-
-### Open branches
-
-| Branch | Contents | Note before merging |
-| --- | --- | --- |
-| `ahad-devi-Resource-Gallery-Frontend-Components-2.a` | `ResourceCard`, `ResourceGrid`, `ResourceFilters`, URL filter parsing, Figma tokens, `seed-resources.ts`, `category` field on projects | Cards are built from projects, not resources; filtering is in memory; the audience category conflicts with the gallery design (Section 8) |
-| `Page_blocks` | `pages` collection, three blocks, `RenderBlocks`, `/[slug]` route, `header` and `footer` globals | Branched before #15/#17: its diff deletes `collections/Resources.ts` and `seed-sample.ts` and adds old migrations. Rebase onto `main` and regenerate one migration |
-| `feature/homepage-content`, `ahad_laksh_task3` | First-sprint shells: homepage, nav dropdown, impact page, country pages, technology images | From before Payload; mine for layout, don't merge as is |
-
 ### Known gaps on `main`
 
 - Home page is still the Next.js starter; site title is "Create Next App".
@@ -313,8 +288,6 @@ As of 6 Nov 2026, `main` has the CMS foundation, the content schema, draft previ
 ## 13. Roadmap
 
 Four sprints remain before the 12/5 showcase, and the gate there is the client's must-have: a resource added in the admin shows up in the gallery and is found by search. Everything else in spring 2027 builds on that.
-
-&#91;embedded content: roadmap · four sprints to the 12/5 showcase, then spring 2027\]
 
 Darker items in each sprint are the priority. Analytics, translation and AI search are deliberately last: the client wants them, but they add cost and complexity without serving the core persona needs first.
 
@@ -345,27 +318,3 @@ Darker items in each sprint are the priority. Analytics, translation and AI sear
 | Which Google Analytics events matter most (download, resource open, module browse)? | Client |
 | Who on the NEST360 side approves content and design changes, and on what cadence? | Sara |
 | How do translations work: Payload localization per field, or per-language resource records (as today)? | Spring 2027 |
-
-## 15. Development process
-
-**Branching:** create `feature/<name>` from the integration branch, open a PR, and a TL (Teagan, Shriya or Femi) reviews it. The onboarding doc says to branch from `develop`, but the README and recent PRs merge to `main`. We should pick one and update both documents.
-
-**Before every PR**
-
-- [ ] `npm run dev` works from a fresh clone
-- [ ] `npm run generate:types` after any collection change, with `payload-types.ts` committed
-- [ ] `npm run payload migrate:create` for schema changes, rebased on the latest `main`
-- [ ] `npm run build` and `npm run lint` pass
-- [ ] Checked on a phone-sized viewport
-
-**Conventions**
-
-- Pages read data only through `lib/data/*`, with explicit `depth`, `overrideAccess` and `draft`.
-- Every field gets an `admin.description` written for NEST360 staff; the admin is a product too.
-- The slug hook is copied into four collections (five with Pages); extract a shared `slugField()` helper.
-- Don't commit copies of the client's image library; use a few sample images and the seed scripts.
-- AI use follows the team policy: use it to explain and debug early on, and review all generated code like a PR.
-
-**Testing plan** (11/14 sprint): unit tests (Vitest) for pure helpers such as filter parsing and slugs; integration tests against Payload's Local API on a temporary SQLite database for search, access rules and the PDF preview hook; one Playwright smoke test per key page on PR previews.
-
-**Pairing:** pairs rotate by sprint; TLs check in with each pair around 2:45–3 pm to hand out more work.
