@@ -58,6 +58,15 @@ export async function getProjects(): Promise<Project[]> {
     limit: 100,
     sort: "-createdAt",
     overrideAccess: false,
+    // Only what projectToResource reads from each linked document, so the page doesn't load every related
+    // project, and every resource's "used on" list, in full
+    populate: {
+      projects: { title: true },
+      resources: { resourceType: true, document: true, thumbnail: true, tags: true, publicationDate: true },
+      documents: { filename: true, url: true, preview: true },
+      media: { filename: true, url: true, alt: true, sizes: { thumbnail: { filename: true, url: true } } },
+      tags: { name: true },
+    },
   });
   return docs;
 }
@@ -79,6 +88,7 @@ export function firstSentence(description: Project["description"]) {
 // - publishedDate: the most recent publication date among its resources, if any have one
 // - tags: the page tag, then the resources' tags, without repeats
 // - downloadUrl: the "Download all" file
+// - lastModified: when the project was last saved
 export function projectToResource(project: Project): Resource {
   // Each group lists entries of { resource, isNew }. Unpublished resources stay as bare IDs and are skipped,
   // so their "new" flag doesn't count either.
@@ -123,6 +133,7 @@ export function projectToResource(project: Project): Resource {
     badgeText,
     image,
     publishedDate,
+    lastModified: project.updatedAt,
     linkUrl: `/resources/${project.slug}`,
     downloadUrl: populated<Document>(project.downloadAll)?.url ?? undefined,
     tags: [...new Set(tagNames)],

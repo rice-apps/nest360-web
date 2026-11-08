@@ -24,9 +24,12 @@ export interface Resource {
 
     linkUrl?: string; 
     downloadUrl?: string; 
-    publishedDate?: string; 
+    publishedDate?: string;
+    lastModified?: string; // ISO date of the last change in the admin, shown on the card as "Month Year"
     authorOrOrganization?: string; 
     tags?: string[];
 
+    contentTypes?: string[];
+    topics?: string[];
 }
 

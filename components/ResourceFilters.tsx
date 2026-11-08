@@ -1,90 +1,180 @@
 'use client';
 
-// The filter sidebar on /resources. A plain GET form, so the choices live in the URL
-// (/resources?sort=az&audience=healthcare&tag=Training), the page filters on the server, and a filtered view
-// can be shared. The only JavaScript submits the form as soon as a box is ticked; without it, Apply does.
-
-import Link from 'next/link';
 import React from 'react';
+import { FILTER_FORM_ID } from '@/lib/resourceFilters';
 
-import { SORTS, type Sort } from '@/lib/resourceFilters';
+export type FilterGroup = 'audiences' | 'tags' | 'topics';
 
 interface ResourceFiltersProps {
-  sort: Sort;
-  audiences: { value: string; label: string }[];
-  selectedAudiences: string[];
-  tags: string[];
-  selectedTags: string[];
+  userTypes: { value: string; label: string }[];
+  contentTypes: readonly string[];
+  topics: readonly string[];
+  selected: Record<FilterGroup, string[]>;
+  onToggle: (group: FilterGroup, value: string) => void;
+  onSubmit: () => void;
+  onReset: () => void;
 }
 
-// Figma "Subtitle 2" (bold uppercase), scaled down for a sidebar
-function GroupHeading({ children }: { children: React.ReactNode }) {
+function Option({
+  name,
+  value,
+  label,
+  checked,
+  onChange,
+}: {
+  name: string;
+  value: string;
+  label: string;
+  checked: boolean;
+  onChange: () => void;
+}) {
   return (
-    <legend className="mb-2 font-heading text-xs font-bold uppercase tracking-wider text-nest-neutral-900">
-      {children}
-    </legend>
-  );
-}
-
-function Option({ type, name, value, label, checked }: { type: 'radio' | 'checkbox'; name: string; value: string; label: string; checked: boolean }) {
-  return (
-    // items-start + mt-0.5 keeps the box beside the first line when a label wraps
-    <label className="flex cursor-pointer items-start gap-2 py-1 text-sm text-gray-700 hover:text-nest-blue">
-      <input type={type} name={name} value={value} defaultChecked={checked} className="mt-0.5 h-4 w-4 shrink-0 accent-nest-blue" />
+    <label className="flex cursor-pointer items-start gap-2 py-1.5 text-xs text-nest-neutral-900 hover:text-nest-blue">
+      <input
+        type="checkbox"
+        name={name}
+        value={value}
+        checked={checked}
+        onChange={onChange}
+        className="mt-px h-3.5 w-3.5 shrink-0 accent-nest-blue"
+      />
       {label}
     </label>
   );
 }
 
-export function ResourceFilters({ sort, audiences, selectedAudiences, tags, selectedTags }: ResourceFiltersProps) {
-  const filtered = selectedAudiences.length > 0 || selectedTags.length > 0 || sort !== 'newest';
+function Group({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <details open className="group border-b border-gray-200">
+      <summary className="flex cursor-pointer list-none items-center justify-between border-b border-gray-200 px-4 py-3 text-sm font-semibold text-nest-neutral-900 group-[:not([open])]:border-b-0 [&::-webkit-details-marker]:hidden">
+        {title}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          className="h-3.5 w-3.5 rotate-180 transition-transform group-open:rotate-0"
+        >
+          <path
+            d="M5 12.5l5-5 5 5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </summary>
 
+      <fieldset className="px-4 py-2">
+        <legend className="sr-only">{title}</legend>
+        {children}
+      </fieldset>
+    </details>
+  );
+}
+
+export function ResourceFilters({
+  userTypes,
+  contentTypes,
+  topics,
+  selected,
+  onToggle,
+  onSubmit,
+  onReset,
+}: ResourceFiltersProps) {
   return (
     <form
+      id={FILTER_FORM_ID}
       action="/resources"
       method="get"
-      onChange={(event) => event.currentTarget.requestSubmit()}
-      // rounded-[10px]: the Figma card corner
-      className="space-y-6 rounded-[10px] border border-gray-200 bg-white p-5"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
     >
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading text-base font-semibold text-nest-blue">Filter resources</h2>
-        {filtered && (
-          <Link href="/resources" className="text-sm text-nest-blue underline hover:no-underline">
-            Clear all
-          </Link>
-        )}
-      </div>
+      <details open className="group/sidebar">
+        <summary className="flex cursor-pointer list-none items-center justify-between border-b border-gray-200 px-4 py-3 [&::-webkit-details-marker]:hidden">
+          <h2 className="text-sm font-semibold text-nest-neutral-900">
+            Filters
+          </h2>
 
-      <fieldset>
-        <GroupHeading>Sort by</GroupHeading>
-        {Object.entries(SORTS).map(([value, label]) => (
-          <Option key={value} type="radio" name="sort" value={value} label={label} checked={sort === value} />
-        ))}
-      </fieldset>
+          <span className="flex items-center gap-1 text-sm font-medium text-nest-accent">
+            <span className="group-open/sidebar:hidden">Expand</span>
+            <span className="hidden group-open/sidebar:inline">Collapse</span>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 20 20"
+              className="h-3.5 w-3.5 rotate-180 transition-transform group-open/sidebar:rotate-0"
+            >
+              <path
+                d="M5 12.5l5-5 5 5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </summary>
 
-      <fieldset>
-        <GroupHeading>Audience</GroupHeading>
-        {audiences.map(({ value, label }) => (
-          <Option key={value} type="checkbox" name="audience" value={value} label={label} checked={selectedAudiences.includes(value)} />
-        ))}
-      </fieldset>
-
-      {tags.length > 0 && (
-        <fieldset>
-          <GroupHeading>Tags</GroupHeading>
-          {tags.map((tag) => (
-            <Option key={tag} type="checkbox" name="tag" value={tag} label={tag} checked={selectedTags.includes(tag)} />
+        <Group title="Filter by User Type">
+          {userTypes.map(({ value, label }) => (
+            <Option
+              key={value}
+              name="audience"
+              value={value}
+              label={label}
+              checked={selected.audiences.includes(value)}
+              onChange={() => onToggle('audiences', value)}
+            />
           ))}
-        </fieldset>
-      )}
+        </Group>
 
-      {/* Only needed when JavaScript is off; otherwise every change submits the form */}
-      <noscript>
-        <button className="w-full rounded-[30px] bg-nest-light-blue px-4 py-2 text-sm font-semibold text-nest-blue">
-          Apply
-        </button>
-      </noscript>
+        <Group title="Filter by Content Type">
+          {contentTypes.map((tag) => (
+            <Option
+              key={tag}
+              name="tag"
+              value={tag}
+              label={tag}
+              checked={selected.tags.includes(tag)}
+              onChange={() => onToggle('tags', tag)}
+            />
+          ))}
+        </Group>
+
+        <Group title="Filter by Topic / Focus">
+          {topics.map((topic) => (
+            <Option
+              key={topic}
+              name="topic"
+              value={topic}
+              label={topic}
+              checked={selected.topics.includes(topic)}
+              onChange={() => onToggle('topics', topic)}
+            />
+          ))}
+        </Group>
+
+        <div className="px-4 py-5">
+          <button
+            type="reset"
+            onClick={(event) => {
+              event.preventDefault();
+              onReset();
+            }}
+            className="w-full rounded-[30px] border border-nest-neutral-900 px-4 py-2 text-sm font-medium text-nest-neutral-900 transition-colors hover:bg-nest-neutral-100"
+          >
+            Reset
+          </button>
+        </div>
+      </details>
     </form>
   );
 }

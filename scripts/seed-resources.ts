@@ -171,9 +171,8 @@ await project({
           document: await pdf('Bubble CPAP Job Aid'),
           language: 'en',
           tags: [clinical, jobAid, bubbleCpap],
-          isNew: true,
           publicationDate: '2026-09-17T12:00:00.000Z',
-        }),
+        }, true),
         await resource({
           title: 'Bubble CPAP setup video',
           slug: 'mock-bubble-cpap-video',
@@ -330,8 +329,7 @@ await project({
           document: await pdf('Lista de Verificacao'),
           language: 'pt',
           tags: [jobAid],
-          isNew: true,
-        }),
+        }, true),
         await resource({
           title: 'Orodha ya utayari',
           slug: 'mock-readiness-checklist-sw',

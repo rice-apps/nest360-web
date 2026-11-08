@@ -1,111 +1,118 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import React from 'react';
 
 import type { Resource } from '@/app/(frontend)/resources/types';
+import { AUDIENCE_TAGS, tagColor } from '@/lib/tagColors';
+import { Button } from './Button';
 
-// id and category aren't shown: the grid uses id as the key, and category picks the card's section
-export type ResourceCardProps = Omit<Resource, 'id' | 'category'>;
+export type ResourceCardProps = Omit<Resource, 'id'>;
 
-// Resource.image can be a plain URL or a { url, alt, width, height } object
-function imageOf(image: Resource['image'], title: string) {
-  if (!image) return null;
-  return typeof image === 'string' ? { url: image, alt: title } : { ...image, alt: image.alt ?? title };
+function formatMonthYear(date: string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 }
 
-// e.g. "Sep 17, 2026", matching the rest of the site. UTC so the day doesn't shift by the reader's timezone.
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-}
-
-// One resource in a grid: a picture (or a Nest Blue panel with the title when there is none), then the
-// details, with the view and download links pinned to the bottom so they line up across a row.
 export function ResourceCard({
+  category,
   title,
   description,
-  badgeText,
   image,
   icon,
+  badgeText,
+  tags,
+  publishedDate,
+  lastModified,
   linkUrl,
   downloadUrl,
-  publishedDate,
-  authorOrOrganization,
-  tags,
 }: ResourceCardProps) {
-  const picture = imageOf(image, title);
-  const meta = [authorOrOrganization, publishedDate && formatDate(publishedDate)].filter(Boolean).join(' · ');
-  // Outside links open in a new tab; links within the site don't
-  const external = linkUrl?.startsWith('http');
+  const picture = image
+    ? typeof image === 'string'
+      ? { url: image, alt: title }
+      : { ...image, alt: image.alt ?? title }
+    : null;
+
+  const audience = AUDIENCE_TAGS[category];
+  const displayDate = lastModified ?? publishedDate;
 
   return (
-    // h-full keeps cards in a row the same height. Not one big link, because it can hold two (view and download).
-    <article className="flex h-full flex-col overflow-hidden rounded-[10px] border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-      <div className="relative">
-        {picture ? (
+    <article className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+      {/* Image area */}
+      {picture ? (
+        <div className="relative h-36 w-full">
           <Image
             src={picture.url}
-            alt={picture.alt}
-            width={picture.width ?? 400}
-            height={picture.height ?? 300}
-            // object-top, so a PDF first-page preview shows its heading rather than the blank middle of the page
-            className="h-44 w-full object-cover object-top"
+            alt={picture.alt ?? title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover"
           />
-        ) : (
-          <div className="flex h-44 flex-col items-center justify-center gap-3 bg-nest-blue p-4">
-            {/* Resource.icon is an image URL. 32px until the design system settles icon sizes. */}
-            {icon && <Image src={icon} alt="" width={32} height={32} className="h-8 w-8" />}
-            <span className="text-center font-heading text-xs font-semibold uppercase tracking-wider text-white">
-              {title}
+        </div>
+      ) : (
+        <div className="flex h-36 items-center justify-center bg-nest-neutral-100">
+          {icon && (
+            <span className="text-3xl" aria-hidden="true">
+              {icon}
             </span>
-          </div>
-        )}
-        {badgeText && (
-          <span className="absolute left-3 top-3 rounded-[30px] bg-nest-yellow px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-nest-neutral-900">
-            {badgeText}
-          </span>
-        )}
-      </div>
-
-      {/* justify-between pushes the links to the bottom, so they line up across a row */}
-      <div className="flex flex-1 flex-col justify-between gap-4 p-5">
-        <div>
-          {meta && <p className="mb-1 text-xs text-gray-500">{meta}</p>}
-          {/* Nest Blue, not light blue: light blue is too faint for text on white */}
-          <h3 className="mb-2 font-heading text-base font-semibold text-nest-blue">{title}</h3>
-          <p className="text-sm leading-relaxed text-gray-600">{description}</p>
-          {tags && tags.length > 0 && (
-            <ul className="mt-3 flex flex-wrap gap-1.5">
-              {tags.map((tag) => (
-                <li key={tag} className="rounded-[30px] bg-nest-neutral-200 px-2.5 py-0.5 text-[11px] text-gray-600">
-                  {tag}
-                </li>
-              ))}
-            </ul>
+          )}
+          {badgeText && (
+            <span className="text-sm font-medium text-nest-neutral-900">
+              {badgeText}
+            </span>
           )}
         </div>
+      )}
 
-        {(linkUrl || downloadUrl) && (
+      {/* Card content */}
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        {/* Audience and resource tags */}
+        <div className="flex flex-wrap gap-1.5">
+          {audience && (
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-medium ${audience.className}`}
+            >
+              {audience.label}
+            </span>
+          )}
+
+          {tags?.map((tag) => (
+            <span
+              key={tag}
+              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-medium ${tagColor(tag)}`}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <h3 className="text-base font-semibold text-nest-neutral-900">
+          {title}
+        </h3>
+
+        <p className="text-sm leading-relaxed text-nest-neutral-700">
+          {description}
+        </p>
+
+        {/* Date and actions */}
+        <div className="mt-auto flex flex-col gap-3 pt-3">
+          {displayDate && (
+            <span className="text-xs text-nest-neutral-500">
+              Updated: {formatMonthYear(displayDate)}
+            </span>
+          )}
+
           <div className="flex flex-wrap gap-2">
-            {linkUrl && (
-              <Link
-                href={linkUrl}
-                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className="rounded-[30px] bg-nest-light-blue px-4 py-2 text-sm font-semibold text-nest-blue transition-colors hover:bg-nest-accent"
-              >
-                View resource
-              </Link>
-            )}
+            {linkUrl && <Button href={linkUrl}>View</Button>}
+
             {downloadUrl && (
-              <a
-                href={downloadUrl}
-                download
-                className="rounded-[30px] border border-nest-blue px-4 py-2 text-sm font-semibold text-nest-blue transition-colors hover:bg-nest-neutral-100"
-              >
+              <Button href={downloadUrl} download>
                 Download
-              </a>
+              </Button>
             )}
           </div>
-        )}
+        </div>
       </div>
     </article>
   );
