@@ -90,12 +90,13 @@ export function firstSentence(description: Project["description"]) {
 // - downloadUrl: the "Download all" file
 // - lastModified: when the project was last saved
 export function projectToResource(project: Project): Resource {
-  // Each row holds a resource and that group's "new" setting. Unpublished resources arrive as bare IDs and
-  // are skipped.
-  const rows = (project.resourceGroups ?? []).flatMap((group) => group.resources ?? []);
-  const items = rows
-    .map((row) => populated<ResourceEntry>(row.resource))
-    .filter((item) => item !== null);
+  // Each group lists entries of { resource, isNew }. Unpublished resources stay as bare IDs and are skipped,
+  // so their "new" flag doesn't count either.
+  const entries = (project.resourceGroups ?? [])
+    .flatMap((group) => group.resources ?? [])
+    .map((entry) => ({ resource: populated<ResourceEntry>(entry.resource), isNew: Boolean(entry.isNew) }))
+    .filter((entry): entry is { resource: ResourceEntry; isNew: boolean } => entry.resource !== null);
+  const items = entries.map((entry) => entry.resource);
 
   const featured = populated<Media>(project.featuredImage);
   const fallback = items
@@ -107,7 +108,7 @@ export function projectToResource(project: Project): Resource {
       ? { url: fallback.url, alt: fallback.alt }
       : undefined;
 
-  const badgeText = rows.some((row) => row.isNew && populated<ResourceEntry>(row.resource))
+  const badgeText = entries.some((entry) => entry.isNew)
     ? "New"
     : items.some((item) => item.resourceType === "video")
       ? "Video"
