@@ -105,7 +105,7 @@ type ResourceData = Pick<Resource, 'title' | 'slug' | 'summary' | 'resourceType'
 
 // A published resource, found by slug or created. Returns an entry for a project's resourceGroups,
 // with the "New" flag for that project.
-async function resource({ isNew = false, ...data }: ResourceData) {
+async function resource(data: Omit<ResourceData, 'isNew'>, isNew = false) {
   const { docs } = await payload.find({ collection: 'resources', where: { slug: { equals: data.slug } }, limit: 1, draft: true })
   let id = docs[0]?.id
   if (!id) {
