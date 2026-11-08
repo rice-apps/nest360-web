@@ -97,19 +97,26 @@ async function pdf(title: string) {
 // Starts every mock title, so nobody mistakes a mock card or resource for real content
 const MOCK_LABEL = '[Mock] '
 
+// isNew isn't a field on the resource anymore. It's set per project, on the resourceGroups entry.
 type ResourceData = Pick<Resource, 'title' | 'slug' | 'summary' | 'resourceType' | 'language'> &
-  Partial<Pick<Resource, 'document' | 'videoUrl' | 'externalUrl' | 'tags' | 'isNew' | 'authors' | 'publicationDate'>>
+  Partial<Pick<Resource, 'document' | 'videoUrl' | 'externalUrl' | 'tags' | 'authors' | 'publicationDate'>> & {
+    isNew?: boolean
+  }
 
-// A published resource, found by slug or created. Returns its id for a project's resourceGroups.
-async function resource(data: ResourceData) {
+// A published resource, found by slug or created. Returns an entry for a project's resourceGroups,
+// with the "New" flag for that project.
+async function resource({ isNew = false, ...data }: ResourceData) {
   const { docs } = await payload.find({ collection: 'resources', where: { slug: { equals: data.slug } }, limit: 1, draft: true })
-  if (docs[0]) return docs[0].id
-  const created = await payload.create({
-    collection: 'resources',
-    data: { ...data, title: MOCK_LABEL + data.title, _status: 'published' },
-  })
-  payload.logger.info(`Created resource: ${data.slug}`)
-  return created.id
+  let id = docs[0]?.id
+  if (!id) {
+    const created = await payload.create({
+      collection: 'resources',
+      data: { ...data, title: MOCK_LABEL + data.title, _status: 'published' },
+    })
+    payload.logger.info(`Created resource: ${data.slug}`)
+    id = created.id
+  }
+  return { resource: id, isNew }
 }
 
 // Creates the mock page, or brings an existing one up to date. Mock pages are disposable, so edits made to
