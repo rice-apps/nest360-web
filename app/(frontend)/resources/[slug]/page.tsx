@@ -1,11 +1,13 @@
 import { RichText } from '@/components/RichText';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
 
 import { ResourceGrid } from '@/components/ResourceGrid';
-import { getProjectBySlug, projectToResource } from '@/lib/data/projects';
+import { firstSentence, getProjectBySlug, projectFiles, projectToResource } from '@/lib/data/projects';
+import { AUDIENCE_TAGS, tagColor } from '@/lib/tagColors';
 import type { Document, Media, Project, Resource, Tag } from '@/payload-types';
 
 // A resource as listed in one group, with that group's "new" setting
@@ -51,6 +53,9 @@ function filePreview(item: Item) {
 
 type PreviewSize = 'large' | 'small' | null;
 
+// The small View / Download / Open buttons under each resource
+const ACTION = 'rounded border border-[#41B6C4] px-3 py-1 text-[#41B6C4] hover:bg-[#41B6C4] hover:text-white';
+
 function ItemRow({ item, previewSize }: { item: Item; previewSize: PreviewSize }) {
   const link = itemLink(item);
   if (!link) return null;
@@ -83,6 +88,23 @@ function ItemRow({ item, previewSize }: { item: Item; previewSize: PreviewSize }
           </span>
         )}
         {details && <p className="text-xs text-gray-500">{details}</p>}
+        {/* One file at a time: View opens it in a new tab, Download saves just this file */}
+        <div className="mt-2 flex flex-wrap gap-2 text-xs font-medium">
+          {link.external ? (
+            <a href={link.href} target="_blank" rel="noopener noreferrer" className={ACTION}>
+              Open
+            </a>
+          ) : (
+            <>
+              <a href={link.href} target="_blank" rel="noopener noreferrer" className={ACTION}>
+                View
+              </a>
+              <a href={link.href} download className={ACTION}>
+                Download
+              </a>
+            </>
+          )}
+        </div>
       </div>
     </li>
   );
@@ -132,13 +154,24 @@ function FileSections({ items, previewSize, small }: { items: Item[]; previewSiz
   );
 }
 
+// Tab title and search-result text: the project's title and the first sentence of its description
+export async function generateMetadata({ params }: PageProps<'/resources/[slug]'>): Promise<Metadata> {
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
+  if (!project) return {};
+  return { title: project.title, description: firstSentence(project.description) };
+}
+
 export default async function ProjectPage({ params }: PageProps<'/resources/[slug]'>) {
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
   if (!project) notFound();
 
-  const pageTag = populated<Tag>(project.tag);
-  const downloadAll = populated<Document>(project.downloadAll);
+  // The card's fields, so the page's tags match the card that was clicked
+  const card = projectToResource(project);
+  const audience = AUDIENCE_TAGS[project.category];
+  // The files "Download all" zips up: the same ones listed below, once each
+  const fileTotal = projectFiles(project).length;
   const related = (project.relatedProjects ?? [])
     .map((other) => populated<Project>(other))
     .filter((other) => other !== null);
@@ -177,19 +210,31 @@ export default async function ProjectPage({ params }: PageProps<'/resources/[slu
               ← All resources
             </Link>
             <h1 className="text-4xl font-bold text-gray-800">{project.title}</h1>
-            {pageTag && (
-              <span className="inline-block rounded-full bg-slate-100 px-3 py-1 text-xs text-gray-600">{pageTag.name}</span>
-            )}
+            {/* The same pills as this project's card: audience, the page tag, then its resources' tags */}
+            <div className="flex flex-wrap gap-1.5">
+              {audience && (
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${audience.className}`}>
+                  {audience.label}
+                </span>
+              )}
+              {card.tags?.map((tag) => (
+                <span key={tag} className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tagColor(tag)}`}>
+                  {tag}
+                </span>
+              ))}
+            </div>
             <RichText
               data={project.description}
               className="space-y-3 text-sm leading-relaxed text-gray-600 [&_a]:text-[#41B6C4] [&_a]:underline"
             />
-            {downloadAll?.url && (
+            {/* One .zip of every file on this page, saved to the visitor's downloads (see download/route.ts) */}
+            {fileTotal > 0 && (
               <a
-                href={downloadAll.url}
+                href={`/resources/${project.slug}/download`}
+                download
                 className="inline-block rounded-md bg-[#41B6C4] px-6 py-3 text-sm font-medium text-white hover:bg-[#3298a4]"
               >
-                Download all
+                Download all ({fileTotal} {fileTotal === 1 ? 'file' : 'files'}, .zip)
               </a>
             )}
             {project.citation && <p className="text-xs italic text-gray-500">{project.citation}</p>}
@@ -208,6 +253,13 @@ export default async function ProjectPage({ params }: PageProps<'/resources/[slu
       </section>
 
       <div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
+        {/* Rows with no link (e.g. a video with no URL) aren't shown, so count only the ones that are */}
+        {!allItems.some((item) => itemLink(item)) && (
+          <p className="rounded-lg border border-gray-100 bg-white p-6 text-center text-gray-600 shadow-sm">
+            No resources have been published on this page yet.
+          </p>
+        )}
+
         {files.length > 0 && (
           <section className="rounded-lg border border-gray-100 bg-white p-6 shadow-sm">
             <FileSections items={files} previewSize={previewSize} />

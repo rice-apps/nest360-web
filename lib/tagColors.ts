@@ -23,9 +23,25 @@ export const AUDIENCE_TAGS: Record<string, { label: string; className: string }>
   innovators: { label: 'Innovators', className: 'bg-nest-lavender/35 text-nest-neutral-900' },
   implementors: { label: 'Implementers', className: 'bg-nest-light-blue/40 text-nest-blue' },
   families: { label: 'Families', className: 'bg-nest-coral/30 text-nest-neutral-900' },
+  dashboards: { label: 'Dashboards', className: 'bg-nest-yellow/30 text-nest-blue' },
 };
 
-// Any other tag (a topic, a country) gets the quiet neutral pill
+// Pastel pills for every other tag (countries, subjects, tags added later in the admin)
+const OTHER_TAG_COLORS = [
+  'bg-nest-coral/15 text-nest-neutral-900',
+  'bg-nest-accent/30 text-nest-blue',
+  'bg-nest-lavender/20 text-nest-blue',
+  'bg-nest-light-blue/15 text-nest-blue',
+  'bg-nest-yellow/40 text-nest-neutral-900',
+  'bg-nest-blue/15 text-nest-blue',
+];
+
+// A tag in TAG_COLORS gets its own color. Any other tag gets one of OTHER_TAG_COLORS picked from its name,
+// so the same tag is always the same color on every card and page, with nothing to set up in the admin.
 export function tagColor(tag: string) {
-  return TAG_COLORS[tag.toLocaleLowerCase('en-US')] ?? 'bg-nest-neutral-200 text-gray-700';
+  const name = tag.toLocaleLowerCase('en-US');
+  if (TAG_COLORS[name]) return TAG_COLORS[name];
+  let hash = 0;
+  for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return OTHER_TAG_COLORS[hash % OTHER_TAG_COLORS.length];
 }

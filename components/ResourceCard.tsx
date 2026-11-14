@@ -1,9 +1,9 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 
 import type { Resource } from '@/app/(frontend)/resources/types';
 import { AUDIENCE_TAGS, tagColor } from '@/lib/tagColors';
-import { Button } from './Button';
 
 export type ResourceCardProps = Omit<Resource, 'id'>;
 
@@ -26,7 +26,6 @@ export function ResourceCard({
   publishedDate,
   lastModified,
   linkUrl,
-  downloadUrl,
 }: ResourceCardProps) {
   const picture = image
     ? typeof image === 'string'
@@ -38,7 +37,7 @@ export function ResourceCard({
   const displayDate = lastModified ?? publishedDate;
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+    <article className="relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
       {/* Image area */}
       {picture ? (
         <div className="relative h-36 w-full">
@@ -88,7 +87,14 @@ export function ResourceCard({
         </div>
 
         <h3 className="text-base font-semibold text-nest-neutral-900">
-          {title}
+          {linkUrl ? (
+            // The link's ::after covers the whole card, so clicking anywhere on it opens the page
+            <Link href={linkUrl} className="after:absolute after:inset-0 hover:underline">
+              {title}
+            </Link>
+          ) : (
+            title
+          )}
         </h3>
 
         <p className="text-sm leading-relaxed text-nest-neutral-700">
@@ -103,15 +109,7 @@ export function ResourceCard({
             </span>
           )}
 
-          <div className="flex flex-wrap gap-2">
-            {linkUrl && <Button href={linkUrl}>View</Button>}
-
-            {downloadUrl && (
-              <Button href={downloadUrl} download>
-                Download
-              </Button>
-            )}
-          </div>
+          {/* No buttons: the whole card opens the project page, where each file can be viewed or downloaded */}
         </div>
       </div>
     </article>
