@@ -1,112 +1,200 @@
 # NEST360 Web
 
-A rebuild of [nest360.org](https://nest360.org) by RiceApps, in partnership with Rice360 and NEST360.
+A rebuild of [nest360.org](https://nest360.org) by RiceApps, in partnership with Rice360 and NEST360. Built with Next.js (App Router), TypeScript, Tailwind CSS, and Payload CMS.
 
-## Mission
+This README covers running the site on your own machine. For the design and architecture, see [`NEST360 Web — Design & Architecture Document.md`](./NEST360%20Web%20—%20Design%20%26%20Architecture%20Document.md).
 
-NEST360 works with governments in Africa to end preventable newborn deaths in hospitals through lifesaving technologies, clinician and biomedical technician training, and locally owned data.
+---
 
-## The problem
+## Prerequisites
 
-NEST360 hosts hundreds of clinical and biomedical resources (job aids, care modules, training videos) that healthcare teams and government partners depend on. The current website makes them hard to find. It is static, with flat images, static maps, and weak linking between pages, so visitors cannot search effectively or move from one resource to the next. Many of those visitors are in low-bandwidth settings, and the site's structure gets in the way of information that directly affects neonatal care.
+| Tool | Version | Notes |
+| --- | --- | --- |
+| [Git](https://git-scm.com/) | any recent | |
+| [Node.js](https://nodejs.org/) | `^22.23.4` or `>=24.22.1` | The exact version is pinned in `.nvmrc` |
+| npm | comes with Node | Use npm, not yarn or pnpm. The repo ships a `package-lock.json` |
+| [Docker](https://www.docker.com/) | optional | Only if you want to run Postgres locally |
 
-## What we are building
+The simplest way to get the right Node version is [nvm](https://github.com/nvm-sh/nvm) (macOS/Linux) or [nvm-windows](https://github.com/coreybutler/nvm-windows):
 
-A searchable, interconnected site that NEST360's own team can maintain without developers. The resource library comes first. After that come interactive maps and data visualizations, rebuilt navigation with country-specific pages, and tuning for low bandwidth. The site also links to NEST360's existing sites ([medicalrepairs.org](https://medicalrepairs.org/)).
+```bash
+nvm install   # reads .nvmrc
+nvm use
+node -v       # confirm it matches .nvmrc
+```
 
-## Tech stack
+You do **not** need a database, Docker, AWS credentials, or a `.env` file for the default setup.
 
-| Layer | Technology |
-| --- | --- |
-| Framework | [Next.js](https://nextjs.org) (App Router) with TypeScript |
-| Styling | [Tailwind CSS](https://tailwindcss.com) |
-| Admin and content management | [Payload CMS](https://payloadcms.com) |
-| Database | PostgreSQL ([AWS RDS](https://aws.amazon.com/rds/) in production) |
-| File storage | [AWS S3](https://aws.amazon.com/s3/), through Payload's S3 adapter |
-| Deployment | [Vercel](https://vercel.com) |
+---
 
-Until the backend is in place, the site runs on mock data in `lib/data/`.
-
-## Timeline
-
-| Milestone | Date |
-| --- | --- |
-| Resource library complete | End of 2026 |
-| Remaining features rolled out | Spring 2027 |
-| Final delivery | April 2027 |
-
-## Who uses the site
-
-- **Clinicians and biomedical engineers** need training resources: downloads, videos, and guides.
-- **Policymakers and hospital leaders** need data and technical information.
-- **Donors** need a quick narrative with impact over time.
-
-Most visitors are on phones and pay for data by the gigabyte. Every decision in this codebase should keep pages small and fast.
-
-## Getting started
-
-You need Git and the Node.js version listed in `.nvmrc`. Nothing else: no database, Docker, or `.env` file.
+## Quick start
 
 ```bash
 git clone https://github.com/rice-apps/nest360-web.git
 cd nest360-web
+nvm use
 npm install
 npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000) for the site and [http://localhost:3000/admin](http://localhost:3000/admin) for Payload. The first time you open the admin, it asks you to create a user. Run `npm run seed` if you want the starting tags.
+Then open:
 
-Without a `DATABASE_URL`, the site keeps its data in a SQLite file, `local.db`, in the project folder, and uploads in `media/` and `documents/`. All three are gitignored. Delete them to start over.
+- **Site:** http://localhost:3000
+- **Admin (Payload CMS):** http://localhost:3000/admin
 
-### Optional: use Postgres locally
+This runs against a private SQLite database on your machine. To work with the same content as the rest of the team, [connect to the shared dev database](#connect-to-the-shared-dev-database-neon).
 
-Production runs on Postgres. To match it locally, start a database and point the site at it:
+The first time you open `/admin` on a fresh local database, Payload asks you to create a user. This account only exists in your local database, so use any email and password you like.
+
+### Add starter content (optional)
+
+A fresh install has an empty database. To fill it in, run any of these while in the project folder:
 
 ```bash
-docker run --name nest360-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=nest360 -p 5432:5432 -d postgres:17
-cp .env.example .env
+npm run seed            # starting tags (safe to run more than once)
+npm run seed:sample     # sample content (see scripts/seed-sample.ts)
+npm run seed:resources  # resource library entries (see scripts/seed-resources.ts)
 ```
 
-Then uncomment `DATABASE_URL` in `.env`. The site uses Postgres whenever `DATABASE_URL` is set. In `.env` you can also set `PAYLOAD_AUTOLOGIN_EMAIL` to an existing user to skip the admin login page while developing.
+---
 
-Development uses a built-in `PAYLOAD_SECRET` when none is set. Production must set its own, generated with `openssl rand -hex 32`. Uploads go to S3 only when `S3_BUCKET` is set.
+## Connect to the shared dev database (Neon)
+
+The team shares one Postgres development database hosted on [Neon](https://neon.tech) and provisioned through Vercel. When you connect to it, you see the same pages, resources, and users as everyone else, and everything you add shows up for them too. (Production will run on a separate database.)
+
+### 1. Get the connection string
+
+The connection string looks like this:
+```
+postgresql://USER:PASSWORD@ep-example-123456.us-east-2.aws.neon.tech/neondb?sslmode=require
+```
+Ask a project lead to send it to you privately. Never post it in a public channel or commit it.
+
+### 2. Add it to `.env`
+
+```bash
+cp .env.example .env      # skip if you already have a .env
+```
+
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@ep-example-123456.us-east-2.aws.neon.tech/neondb?sslmode=require
+DATABASE_SSL=false
+```
+
+Keep `DATABASE_SSL=false`. That setting loads Amazon's RDS certificate and will break the Neon connection. Neon's SSL is handled by `?sslmode=require` in the connection string.
+
+### 3. Bring the schema up to date and start the server
+
+From an up-to-date `main`:
+
+```bash
+git pull
+npm run payload migrate
+npm run dev
+```
+
+Check the terminal. If you see `Nothing answers at DATABASE_URL ... using local.db (SQLite) instead`, you are **not** connected to Neon: the app falls back to SQLite when it can't reach the database. Check that the connection string is complete and correct, and that your network allows outbound connections on port 5432 (some campus or corporate networks block it), then restart the dev server.
+
+### 4. Sign in
+
+The shared database already has users, so `/admin` shows a login page instead of the create-user screen. Ask someone with an account to add you under **Users**. Once you have an account, you can set `PAYLOAD_AUTOLOGIN_EMAIL` to your email to skip the login page.
+
+The first request after the database has been idle can take a few seconds while Neon 
+
+### Switching back to local SQLite
+
+Comment out `DATABASE_URL` in `.env` and restart `npm run dev`.
+
+---
+
+## How local data works
+
+With no `DATABASE_URL` set, the app uses **SQLite** and keeps everything in the project folder:
+
+| Path | Contents |
+| --- | --- |
+| `local.db` | the database (users, pages, resources, tags, etc.) |
+| `media/` | uploaded images |
+| `documents/` | uploaded documents |
+
+All three are gitignored.
+
+**To start over:** stop the dev server, delete them, and run `npm run dev` again.
+
+```bash
+rm -rf local.db media documents
+```
+
+Uploads stay on local disk unless `S3_BUCKET` is set, and dev uses a built-in `PAYLOAD_SECRET` if you don't set one.
+
+---
+
+## Environment variables (optional)
+
+Only create a `.env` if you need to change a default:
+
+```bash
+cp .env.example .env      # Windows (cmd): copy .env.example .env
+```
+
+| Variable | Default when unset | What it does |
+| --- | --- | --- |
+| `DATABASE_URL` | SQLite in `local.db` | Postgres connection string (shared Neon database, Neon branch, or local Postgres). Setting it switches the app to Postgres. In development, if nothing answers at this address, the app falls back to SQLite and prints a warning. |
+| `DATABASE_SSL` | `false` | Set to `true` **only** for AWS RDS in production. It loads Amazon's CA bundle from `certs/`. Leave `false` for Neon and local Postgres. |
+| `PAYLOAD_SECRET` | built-in dev secret | **Required in production.** Generate with `openssl rand -hex 32`. |
+| `PAYLOAD_AUTOLOGIN_EMAIL` | none | Local dev only. Email of an existing admin user to sign in as automatically, skipping the login page. |
+| `S3_BUCKET` | uploads go to local disk | Set to send uploads to S3. Not used in development yet. Needs the three keys below. |
+| `S3_REGION` | `us-east-1` | |
+| `S3_ACCESS_KEY_ID` | none | |
+| `S3_SECRET_ACCESS_KEY` | none | |
+| `PREVIEW_SECRET` | none | Shared secret for draft previews. Generate with `openssl rand -hex 32`. |
+
+Restart `npm run dev` after editing `.env`. Never commit `.env`.
+
+---
+
+## Optional: run Postgres locally
+
+If you want a Postgres database that's entirely your own (for example, to test migrations offline), run one in Docker.
+
+1. Start a database:
+
+   ```bash
+   docker run --name nest360-db \
+     -e POSTGRES_PASSWORD=postgres \
+     -e POSTGRES_DB=nest360 \
+     -p 5432:5432 -d postgres:17
+   ```
+
+   (A Homebrew Postgres works too. Just create a `nest360` database.)
+
+2. Set `DATABASE_URL` in `.env`:
+
+   ```env
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/nest360
+   DATABASE_SSL=false
+   ```
+
+3. Run `npm run payload migrate`, then `npm run dev`. The database starts empty, so create an admin user and re-run any seed scripts you want.
+
+Later, use `docker start nest360-db` / `docker stop nest360-db`. To wipe it: `docker rm -f nest360-db` and repeat step 1.
+
+---
 
 ## Scripts
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Starts the local development server |
-| `npm run build` | Builds the site for production |
-| `npm run generate:types` | Regenerates `payload-types.ts` after you change a collection |
-| `npm run generate:importmap` | Regenerates the admin import map after you add admin components or plugins |
-| `npm run seed` | Adds the starting tags (safe to run more than once) |
-| `npm run payload migrate:create` | Creates a database migration for production |
+| `npm run dev` | Start the dev server at http://localhost:3000 |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build locally (run `build` first) |
+| `npm run lint` | Run ESLint |
+| `npm run seed` | Add starting tags (idempotent) |
+| `npm run seed:sample` | Add sample content |
+| `npm run seed:resources` | Add resource library entries |
+| `npm run generate:types` | Regenerate `payload-types.ts` after changing a collection, global, or field |
+| `npm run generate:importmap` | Regenerate the admin import map after adding admin components or plugins |
+| `npm run payload migrate:create` | Create a database migration for production |
+| `npm run payload migrate` | Apply any pending migrations in `migrations/` to your database |
 
-Test with `dev`, and then run `build` before opening a pull request.
-
-## Project structure
-
-```text
-app/
-  (payload)/                 Payload admin and API routes (generated, do not edit)
-  (frontend)/
-    layout.tsx               site shell: header and footer
-    page.tsx                 home page
-    resources/
-      page.tsx               resource library
-      [slug]/page.tsx        one resource
-    search/page.tsx          search results
-    where-we-work/page.tsx   country map
-collections/                 Payload collections: users, media, documents, tags, projects
-components/                  shared interface components
-lib/
-  types.ts                   shared TypeScript types
-  data/                      the only place pages get data from
-payload.config.ts            Payload configuration
-```
-
-The public site lives in the `(frontend)` route group. The parentheses do not appear in URLs. The Payload admin sits beside it in the `(payload)` route group.
-
-## Deployment
-
-The site is deployed on Vercel. Every pull request gets a preview deployment, linked in the pull request itself. Merges to `main` deploy automatically.
+> **Rerun migrations on schema changes.** Whenever you pull changes that add files to `migrations/`, or you create a migration yourself, run `npm run payload migrate` before starting the dev server. Otherwise your database won't match the schema the code expects. For the shared database, the PR author does this once after merging.
