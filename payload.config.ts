@@ -11,13 +11,16 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { Articles } from './collections/Articles'
+import { Authors } from './collections/Authors'
 import { Documents } from './collections/Documents'
+import { Icons } from './collections/Icons'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Projects } from './collections/Projects'
 import { Resources } from './collections/Resources'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
+import { Videos } from './collections/Videos'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { searchPluginConfig } from './lib/searchIndex'
@@ -61,7 +64,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Documents, Tags, Articles, Resources, Projects, Pages],
+  collections: [Users, Media, Icons, Documents, Videos, Tags, Articles, Authors, Resources, Projects, Pages],
   globals: [Header, Footer],
   editor: lexicalEditor(),
   // Development falls back to a fixed secret so a fresh clone runs without a .env; production must set one
@@ -97,6 +100,8 @@ export default buildConfig({
       collections: {
         media: { prefix: 'media' },
         documents: { prefix: 'documents' },
+        icons: { prefix: 'icons' },
+        videos: { prefix: 'videos' },
       },
       bucket: process.env.S3_BUCKET || '',
       // Browser uploads straight to S3, avoiding Vercel's 4.5 MB request limit

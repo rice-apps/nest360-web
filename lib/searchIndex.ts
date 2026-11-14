@@ -53,7 +53,7 @@ export const searchPluginConfig: SearchPluginConfig = {
     ],
   },
   // Copies the searchable text and tags from each document into its search entry
-  beforeSync: ({ originalDoc: doc, searchDoc, collectionSlug }) => {
+  beforeSync: async ({ originalDoc: doc, searchDoc, collectionSlug, payload, req }) => {
     const base = { ...searchDoc, slug: doc.slug }
 
     if (collectionSlug === 'resources') {
@@ -81,12 +81,27 @@ export const searchPluginConfig: SearchPluginConfig = {
       }
     }
 
-    // articles
-    const authors = (doc.authors ?? []) as { name?: string }[]
+    // articles: authors come from the Authors collection (the byline field holds their IDs or objects),
+    // so look up their names to make articles searchable by author
+    const authorIds = ids(doc.byline)
+    const authors = authorIds.length
+      ? (
+          await payload.find({
+            collection: 'authors',
+            where: { id: { in: authorIds } },
+            select: { name: true },
+            depth: 0,
+            limit: authorIds.length,
+            req, // same database transaction as the article being saved
+          })
+        ).docs
+      : []
+    // Keep the order the editor arranged the authors in (the lookup returns them sorted by ID)
+    const authorNames = authorIds.map((id) => authors.find((author) => author.id === id)?.name)
     return {
       ...base,
       summary: doc.excerpt,
-      content: joinText(doc.title, doc.excerpt, plainText(doc.content), ...authors.map((author) => author.name)),
+      content: joinText(doc.title, doc.excerpt, plainText(doc.content), ...authorNames),
       tags: ids(doc.tags),
     }
   },
