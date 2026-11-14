@@ -1,20 +1,23 @@
 import type { CollectionConfig } from 'payload'
 
 import { pageBlocks } from '../blocks'
-import { previewFor, publishedOrLoggedIn } from '../lib/preview'
+import { livePreviewFor, previewFor, publishedOrLoggedIn } from '../lib/preview'
 
 // URLs that already belong to a fixed route, so a page with one of these slugs would never be shown.
 // Add to this list when adding a new folder under app/(frontend)/ or app/(payload)/.
 const RESERVED_SLUGS = ['admin', 'api', 'preview', 'exit-preview', 'resources', 'stories']
+
+const toPath = (slug: string) => `/${slug}`
 
 // A simple page that staff build from blocks, such as What We Do or Jobs. Shown at /<slug>.
 // The header and footer come from the Header and Footer globals, so every page shares them.
 export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
-    useAsTitle: 'title', // must match a field name below
+    useAsTitle: 'title',
     defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
-    preview: previewFor('pages', (slug) => `/${slug}`),
+    preview: previewFor('pages', toPath),
+    livePreview: livePreviewFor('pages', toPath),
   },
 
   // Staff see drafts and published pages; the public only sees published ones
@@ -23,7 +26,8 @@ export const Pages: CollectionConfig = {
   },
 
   versions: {
-    drafts: true, // adds _status plus the Save Draft and Publish buttons
+    drafts: { autosave: { interval: 800 } },
+    maxPerDoc: 50,
   },
 
   fields: [

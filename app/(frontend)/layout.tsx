@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { RefreshRouteOnSave } from "@/components/RefreshRouteOnSave";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,10 +46,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         {isDraftMode && (
-          <div className="bg-amber-100 text-amber-900 text-sm text-center py-2">
-            You&apos;re viewing a draft preview.{" "}
-            <a href="/exit-preview" className="underline font-medium">Exit preview</a>
-          </div>
+          <>
+            <RefreshRouteOnSave />
+            <div className="bg-amber-100 text-amber-900 text-sm text-center py-2">
+              You&apos;re viewing a draft preview.{" "}
+              <a href="/exit-preview" target="_top" className="underline font-medium">Exit preview</a>
+            </div>
+          </>
         )}
         <SiteHeader />
         {children}
