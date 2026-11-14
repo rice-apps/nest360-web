@@ -66,7 +66,8 @@ export default async function StoriesPage({ searchParams }: PageProps<"/stories"
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 flex flex-col items-center justify-center pr-200 text-center text-white">
+                {/* px-4 keeps the text inside the banner on phones; the wide right padding only applies on large screens */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-4 xl:pr-200 text-center text-white">
                     <h1 className="text-4xl font-bold">Stories and News</h1>
                     <p className="mt-2 text-lg">Add stuff to here as needed</p>
                 </div>
