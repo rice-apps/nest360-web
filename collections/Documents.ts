@@ -49,19 +49,32 @@ export const Documents: CollectionConfig = {
     read: () => true,
   },
   upload: {
-    // Every file type linked from nest360.org project pages
+    // Every downloadable file type linked from nest360.org project pages. Videos go in Videos.
     mimeTypes: [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
       'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
-      'video/mp4',
     ],
   },
   hooks: {
     beforeChange: [generatePdfPreview],
   },
   fields: [
+    {
+      // Lets staff filter the Documents list by kind of file
+      name: 'documentType',
+      label: 'Type',
+      type: 'select',
+      index: true,
+      defaultValue: 'other', // not required, so scripts that upload files don't have to set it
+      options: [
+        { label: 'Clinical aid', value: 'clinical-aid' },
+        { label: 'Report', value: 'report' },
+        { label: 'Template', value: 'template' },
+        { label: 'Other', value: 'other' },
+      ],
+    },
     {
       name: 'preview',
       type: 'upload',

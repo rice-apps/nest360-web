@@ -45,6 +45,8 @@ next-env.d.ts
 # payload
 /media
 /documents
+/icons
+/videos
 /local.db*
 
 # local sample content and test files
