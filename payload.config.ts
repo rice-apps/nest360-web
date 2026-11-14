@@ -75,6 +75,7 @@ export default buildConfig({
   // Otherwise a SQLite file in the project, so `npm run dev` works with no database to install
   db: usePostgres
     ? postgresAdapter({
+        push: false,
         pool: {
           connectionString: databaseUrl,
           // RDS requires SSL with Amazon's CA; local Postgres doesn't
