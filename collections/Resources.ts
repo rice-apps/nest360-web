@@ -1,3 +1,4 @@
+import { staffWrites } from '../lib/staffAccess'
 import type { CollectionConfig } from 'payload'
 
 import { publishedOrLoggedIn } from '../lib/preview'
@@ -22,6 +23,7 @@ export const Resources: CollectionConfig = {
   },
   // Staff see drafts and published resources; the public only sees published ones
   access: {
+    ...staffWrites,
     read: publishedOrLoggedIn,
   },
   versions: {

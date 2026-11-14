@@ -172,6 +172,8 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+  name?: string | null;
+  role: 'pending' | 'editor' | 'admin';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -797,6 +799,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

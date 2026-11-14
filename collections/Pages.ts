@@ -1,3 +1,4 @@
+import { staffWrites } from '../lib/staffAccess'
 import type { CollectionConfig } from 'payload'
 
 import { pageBlocks } from '../blocks'
@@ -22,6 +23,7 @@ export const Pages: CollectionConfig = {
 
   // Staff see drafts and published pages; the public only sees published ones
   access: {
+    ...staffWrites,
     read: publishedOrLoggedIn,
   },
 
