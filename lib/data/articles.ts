@@ -1,13 +1,13 @@
 import config from '@payload-config'
-import { draftMode } from 'next/headers'
+import { canPreviewDrafts } from '../draftAccess'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
 //fetch helpers that respect draft mode
 // cache: the page and its metadata both ask for the same article, so look it up once per request
 export const getArticleBySlug = cache(async (slug: string) => {
-    const { isEnabled: draft } = await draftMode()
     const payload = await getPayload({ config })
+    const draft = await canPreviewDrafts(payload)
 
     const { docs } = await payload.find({
         collection: 'articles',
