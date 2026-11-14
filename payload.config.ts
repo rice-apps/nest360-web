@@ -11,6 +11,7 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { Articles } from './collections/Articles'
+import { Authors } from './collections/Authors'
 import { Documents } from './collections/Documents'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
@@ -61,7 +62,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Documents, Tags, Articles, Resources, Projects, Pages],
+  collections: [Users, Media, Documents, Tags, Articles, Authors, Resources, Projects, Pages],
   globals: [Header, Footer],
   editor: lexicalEditor(),
   // Development falls back to a fixed secret so a fresh clone runs without a .env; production must set one

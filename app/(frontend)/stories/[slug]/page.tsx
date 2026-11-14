@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getArticleBySlug } from "@/lib/data/articles";
-import type { Document, Media, Tag } from "@/payload-types";
+import type { Author, Document, Media, Tag } from "@/payload-types";
 
 // Relationships are IDs until populated; the article is fetched with enough depth to populate them
 function populated<T extends object>(value: number | T | null | undefined): T | null {
@@ -48,7 +48,8 @@ export default async function ArticlePage({ params }: PageProps<"/stories/[slug]
 
     const image = populated<Media>(article.featuredImage);
     const tags = article.tags.map((tag) => populated<Tag>(tag)).filter((tag) => tag !== null);
-    const authors = article.authors ?? [];
+    // Authors from the Authors collection; each is a full object (with its photo) because of depth 2
+    const authors = (article.byline ?? []).map((author) => populated<Author>(author)).filter((author) => author !== null);
     const attachments = (article.attachments ?? [])
         .map((file) => populated<Document>(file))
         .filter((file): file is Document => Boolean(file?.url));
@@ -77,12 +78,26 @@ export default async function ArticlePage({ params }: PageProps<"/stories/[slug]
 
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-500">
                         <time dateTime={article.publishedDate}>{formatDate(article.publishedDate)}</time>
-                        {authors.map((author) => (
-                            <div key={author.id ?? author.name}>
-                                <p className="font-medium text-gray-800">{author.name}</p>
-                                {author.role && <p className="text-xs">{author.role}</p>}
-                            </div>
-                        ))}
+                        {authors.map((author) => {
+                            const photo = populated<Media>(author.photo);
+                            return (
+                                <div key={author.id} className="flex items-center gap-2">
+                                    {photo?.url && (
+                                        <Image
+                                            src={photo.url}
+                                            alt={photo.alt}
+                                            width={36}
+                                            height={36}
+                                            className="h-9 w-9 rounded-full object-cover"
+                                        />
+                                    )}
+                                    <div>
+                                        <p className="font-medium text-gray-800">{author.name}</p>
+                                        {author.bio && <p className="text-xs">{author.bio}</p>}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </header>
 

@@ -72,6 +72,7 @@ export interface Config {
     documents: Document;
     tags: Tag;
     articles: Article;
+    authors: Author;
     resources: Resource;
     projects: Project;
     pages: Page;
@@ -92,6 +93,7 @@ export interface Config {
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    authors: AuthorsSelect<false> | AuthorsSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -249,14 +251,12 @@ export interface Article {
   slug: string;
   publishedDate: string;
   /**
-   * People or organizations credited on the article.
+   * Pick existing authors, or create a new one with the + button. Drag to reorder.
    */
+  byline?: (number | Author)[] | null;
   authors?:
     | {
         name: string;
-        /**
-         * Job title or organization, e.g. "Neonatal Nurse, Lagos University Teaching Hospital".
-         */
         role?: string | null;
         id?: string | null;
       }[]
@@ -306,6 +306,21 @@ export interface Article {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors".
+ */
+export interface Author {
+  id: number;
+  name: string;
+  photo?: (number | null) | Media;
+  /**
+   * One or two sentences, e.g. "Neonatal Nurse, Lagos University Teaching Hospital".
+   */
+  bio?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Individual searchable documents, videos, links, and publications.
@@ -663,6 +678,10 @@ export interface PayloadLockedDocument {
         value: number | Article;
       } | null)
     | ({
+        relationTo: 'authors';
+        value: number | Author;
+      } | null)
+    | ({
         relationTo: 'resources';
         value: number | Resource;
       } | null)
@@ -812,6 +831,7 @@ export interface ArticlesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   publishedDate?: T;
+  byline?: T;
   authors?:
     | T
     | {
@@ -834,6 +854,17 @@ export interface ArticlesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors_select".
+ */
+export interface AuthorsSelect<T extends boolean = true> {
+  name?: T;
+  photo?: T;
+  bio?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

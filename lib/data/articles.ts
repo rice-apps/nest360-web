@@ -12,7 +12,7 @@ export const getArticleBySlug = cache(async (slug: string) => {
     const { docs } = await payload.find({
         collection: 'articles',
         where: { slug: { equals: slug } },
-        depth: 1, // fills in tags, images and attachments
+        depth: 2, // fills in tags, images, attachments and authors, plus each author's photo
         limit: 1,
         draft, // latest draft instead of the published version
         overrideAccess: draft, // the preview route already checked login

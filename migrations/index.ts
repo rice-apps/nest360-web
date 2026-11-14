@@ -4,6 +4,7 @@ import * as migration_20261107_000000_add_project_category from './20261107_0000
 import * as migration_20261108_205048 from './20261108_205048';
 import * as migration_20261108_212241_add_header from './20261108_212241_add_header';
 import * as migration_20261114_182046 from './20261114_182046';
+import * as migration_20261114_193036_add_authors from './20261114_193036_add_authors';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261114_182046.up,
     down: migration_20261114_182046.down,
-    name: '20261114_182046'
+    name: '20261114_182046',
+  },
+  {
+    up: migration_20261114_193036_add_authors.up,
+    down: migration_20261114_193036_add_authors.down,
+    name: '20261114_193036_add_authors'
   },
 ];
