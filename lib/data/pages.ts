@@ -11,10 +11,10 @@ export const getPageBySlug = cache(async (slug: string) => {
     const { docs } = await payload.find({
         collection: 'pages',
         where: { slug: { equals: slug } },
-        depth: 1, // fills in the images inside blocks
+        depth: 2, // keep your current depth; blocks with images or links need it
         limit: 1,
-        draft, // latest draft instead of the published version
-        overrideAccess: draft, // the preview route already checked login
+        draft,                 // latest draft in preview
+        overrideAccess: draft, // drafts only after the preview route checked login; otherwise publishedOrLoggedIn applies
     })
     return docs[0] ?? null
 })
