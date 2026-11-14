@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { staffWrites } from '../lib/staffAccess'
+
 // A person or organization credited on articles. Entered once here and picked on each article
 // (the article's "Authors" field), instead of retyping the same name in every article.
 export const Authors: CollectionConfig = {
@@ -12,6 +14,7 @@ export const Authors: CollectionConfig = {
   // Public can read (article pages and the stories gallery show authors); creating, editing and
   // deleting require login (Payload's default)
   access: {
+    ...staffWrites,
     read: () => true,
   },
   fields: [
