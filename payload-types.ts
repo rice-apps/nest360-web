@@ -1173,6 +1173,10 @@ export interface Header {
   donate?: {
     label?: string | null;
     url?: string | null;
+    /**
+     * Optional button color. Blank keeps the default yellow. Text turns white on dark colors.
+     */
+    color?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1239,6 +1243,7 @@ export interface HeaderSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        color?: T;
       };
   updatedAt?: T;
   createdAt?: T;
