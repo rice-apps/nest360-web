@@ -1,3 +1,4 @@
+import { staffWrites } from '../lib/staffAccess'
 import type { CollectionConfig } from 'payload'
 
 // One resources/project page, shown at /resources/<slug> (app/(frontend)/resources/[slug]/page.tsx),
@@ -13,6 +14,7 @@ export const Projects: CollectionConfig = {
   },
   // Public can read; creating, editing and deleting require login (Payload's default)
   access: {
+    ...staffWrites,
     read: () => true,
   },
   fields: [

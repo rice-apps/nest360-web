@@ -69,9 +69,12 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    icons: Icon;
     documents: Document;
+    videos: Video;
     tags: Tag;
     articles: Article;
+    authors: Author;
     resources: Resource;
     projects: Project;
     pages: Page;
@@ -89,9 +92,12 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    icons: IconsSelect<false> | IconsSelect<true>;
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
+    videos: VideosSelect<false> | VideosSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    authors: AuthorsSelect<false> | AuthorsSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -142,11 +148,18 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Administrators create approved staff accounts. Public registration is disabled.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  name?: string | null;
+  /**
+   * Editors manage content. Administrators also manage staff accounts. Pending accounts have no staff access.
+   */
+  role: 'pending' | 'editor' | 'admin';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -201,14 +214,55 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "icons".
+ */
+export interface Icon {
+  id: number;
+  /**
+   * Describe the icon for screen readers.
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "documents".
  */
 export interface Document {
   id: number;
+  documentType?: ('clinical-aid' | 'report' | 'template' | 'other') | null;
   /**
    * Made automatically from the first page when a PDF is uploaded. Replace it to use a different picture.
    */
   preview?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos".
+ */
+export interface Video {
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -249,14 +303,12 @@ export interface Article {
   slug: string;
   publishedDate: string;
   /**
-   * People or organizations credited on the article.
+   * Pick existing authors, or create a new one with the + button. Drag to reorder.
    */
+  byline?: (number | Author)[] | null;
   authors?:
     | {
         name: string;
-        /**
-         * Job title or organization, e.g. "Neonatal Nurse, Lagos University Teaching Hospital".
-         */
         role?: string | null;
         id?: string | null;
       }[]
@@ -306,6 +358,21 @@ export interface Article {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors".
+ */
+export interface Author {
+  id: number;
+  name: string;
+  photo?: (number | null) | Media;
+  /**
+   * One or two sentences, e.g. "Neonatal Nurse, Lagos University Teaching Hospital".
+   */
+  bio?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Individual searchable documents, videos, links, and publications.
@@ -436,10 +503,6 @@ export interface Project {
     }[];
     id?: string | null;
   }[];
-  /**
-   * Optional single file that combines everything on the page.
-   */
-  downloadAll?: (number | null) | Document;
   /**
    * How to cite these materials, if the page needs it.
    */
@@ -651,8 +714,16 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'icons';
+        value: number | Icon;
+      } | null)
+    | ({
         relationTo: 'documents';
         value: number | Document;
+      } | null)
+    | ({
+        relationTo: 'videos';
+        value: number | Video;
       } | null)
     | ({
         relationTo: 'tags';
@@ -661,6 +732,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'articles';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'authors';
+        value: number | Author;
       } | null)
     | ({
         relationTo: 'resources';
@@ -725,6 +800,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -777,10 +854,46 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "icons_select".
+ */
+export interface IconsSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "documents_select".
  */
 export interface DocumentsSelect<T extends boolean = true> {
+  documentType?: T;
   preview?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos_select".
+ */
+export interface VideosSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -812,6 +925,7 @@ export interface ArticlesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   publishedDate?: T;
+  byline?: T;
   authors?:
     | T
     | {
@@ -834,6 +948,17 @@ export interface ArticlesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors_select".
+ */
+export interface AuthorsSelect<T extends boolean = true> {
+  name?: T;
+  photo?: T;
+  bio?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -886,7 +1011,6 @@ export interface ProjectsSelect<T extends boolean = true> {
             };
         id?: T;
       };
-  downloadAll?: T;
   citation?: T;
   relatedProjects?: T;
   updatedAt?: T;

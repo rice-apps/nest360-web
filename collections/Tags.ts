@@ -1,3 +1,4 @@
+import { staffWrites } from '../lib/staffAccess'
 import type { CollectionConfig } from 'payload'
 
 export const Tags: CollectionConfig = {
@@ -8,6 +9,7 @@ export const Tags: CollectionConfig = {
   },
   // Public can read; creating, editing and deleting require login (Payload's default)
   access: {
+    ...staffWrites,
     read: () => true,
   },
   fields: [

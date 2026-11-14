@@ -1,9 +1,11 @@
+import { approvedStaff } from '../lib/staffAccess'
 import type { GlobalConfig } from 'payload'
 
 // Site-wide header shown on every public page. Edited once under Globals → Header in the admin.
 export const Header: GlobalConfig = {
   slug: 'header',
   access: {
+    update: approvedStaff,
     read: () => true, // the public site needs to read it
   },
   fields: [

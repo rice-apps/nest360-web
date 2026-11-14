@@ -1,4 +1,5 @@
 import config from '@payload-config'
+import { isApprovedStaff } from '@/lib/staffAccess'
 import { cookies, draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
@@ -12,7 +13,7 @@ export async function GET(req: Request): Promise<Response> {
     }
     const payload = await getPayload({ config })
     const { user } = await payload.auth({ headers: req.headers })
-    if (!user) return new Response('You are not allowed to preview this page', { status: 403 })
+    if (!isApprovedStaff(user)) return new Response('You are not allowed to preview this page', { status: 403 })
 
     ;(await draftMode()).enable()
 
