@@ -3424,8 +3424,7 @@
           "type": "enum_projects_category",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'healthcare'"
+          "notNull": true
         },
         "featured_image_id": {
           "name": "featured_image_id",
@@ -7661,6 +7660,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "5482c0ce-2337-4d04-a0bd-142bbaa2e958",
+  "id": "6bf84994-c743-4868-958b-f6c0b31b6fee",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

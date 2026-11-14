@@ -37,7 +37,16 @@ export function ResourceCard({
   const displayDate = lastModified ?? publishedDate;
 
   return (
-    <article className="relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+      {/* Makes the entire card clickable, with an outline when reached by keyboard */}
+      {linkUrl && (
+        <Link
+          href={linkUrl}
+          aria-label={`View ${title}`}
+          className="absolute inset-0 z-10 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        />
+      )}
+
       {/* Image area */}
       {picture ? (
         <div className="relative h-36 w-full">
@@ -86,15 +95,9 @@ export function ResourceCard({
           ))}
         </div>
 
-        <h3 className="text-base font-semibold text-nest-neutral-900">
-          {linkUrl ? (
-            // The link's ::after covers the whole card, so clicking anywhere on it opens the page
-            <Link href={linkUrl} className="after:absolute after:inset-0 hover:underline">
-              {title}
-            </Link>
-          ) : (
-            title
-          )}
+        {/* Underlined while the card is hovered, since the whole card is the link */}
+        <h3 className={`text-base font-semibold text-nest-neutral-900 ${linkUrl ? 'group-hover:underline' : ''}`}>
+          {title}
         </h3>
 
         <p className="text-sm leading-relaxed text-nest-neutral-700">
