@@ -48,7 +48,6 @@ export const Projects: CollectionConfig = {
       type: 'select',
       label: 'Audience',
       required: true,
-      defaultValue: 'healthcare',
       options: [
         { label: 'Healthcare professionals & BMETs', value: 'healthcare' },
         { label: 'Innovators & manufacturers', value: 'innovators' },

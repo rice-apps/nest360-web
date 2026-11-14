@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 
 import type { Resource } from '@/app/(frontend)/resources/types';
@@ -38,7 +39,16 @@ export function ResourceCard({
   const displayDate = lastModified ?? publishedDate;
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+    <article className="relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+      {/* Makes the entire card clickable */}
+      {linkUrl && (
+        <Link
+          href={linkUrl}
+          aria-label={`View ${title}`}
+          className="absolute inset-0 z-10 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        />
+      )}
+
       {/* Image area */}
       {picture ? (
         <div className="relative h-36 w-full">
@@ -66,7 +76,7 @@ export function ResourceCard({
       )}
 
       {/* Card content */}
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="pointer-events-none relative flex flex-1 flex-col gap-3 p-4">
         {/* Audience and resource tags */}
         <div className="flex flex-wrap gap-1.5">
           {audience && (
@@ -103,7 +113,7 @@ export function ResourceCard({
             </span>
           )}
 
-          <div className="flex flex-wrap gap-2">
+          <div className="pointer-events-auto relative z-20 flex flex-wrap gap-2">
             {linkUrl && <Button href={linkUrl}>View</Button>}
 
             {downloadUrl && (
