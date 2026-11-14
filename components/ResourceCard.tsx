@@ -1,9 +1,9 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 
 import type { Resource } from '@/app/(frontend)/resources/types';
 import { AUDIENCE_TAGS, tagColor } from '@/lib/tagColors';
-import { Button } from './Button';
 
 export type ResourceCardProps = Omit<Resource, 'id'>;
 
@@ -26,7 +26,6 @@ export function ResourceCard({
   publishedDate,
   lastModified,
   linkUrl,
-  downloadUrl,
 }: ResourceCardProps) {
   const picture = image
     ? typeof image === 'string'
@@ -38,7 +37,16 @@ export function ResourceCard({
   const displayDate = lastModified ?? publishedDate;
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+      {/* Makes the entire card clickable, with an outline when reached by keyboard */}
+      {linkUrl && (
+        <Link
+          href={linkUrl}
+          aria-label={`View ${title}`}
+          className="absolute inset-0 z-10 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        />
+      )}
+
       {/* Image area */}
       {picture ? (
         <div className="relative h-36 w-full">
@@ -87,7 +95,8 @@ export function ResourceCard({
           ))}
         </div>
 
-        <h3 className="text-base font-semibold text-nest-neutral-900">
+        {/* Underlined while the card is hovered, since the whole card is the link */}
+        <h3 className={`text-base font-semibold text-nest-neutral-900 ${linkUrl ? 'group-hover:underline' : ''}`}>
           {title}
         </h3>
 
@@ -103,15 +112,7 @@ export function ResourceCard({
             </span>
           )}
 
-          <div className="flex flex-wrap gap-2">
-            {linkUrl && <Button href={linkUrl}>View</Button>}
-
-            {downloadUrl && (
-              <Button href={downloadUrl} download>
-                Download
-              </Button>
-            )}
-          </div>
+          {/* No buttons: the whole card opens the project page, where each file can be viewed or downloaded */}
         </div>
       </div>
     </article>

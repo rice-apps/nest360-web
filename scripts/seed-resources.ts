@@ -193,7 +193,6 @@ await project({
       ],
     },
   ],
-  downloadAll: await pdf('Bubble CPAP Job Aids Complete Set'),
 })
 
 // 2. No images at all: the Nest Blue fallback panel, with a "Video" badge

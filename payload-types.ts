@@ -504,10 +504,6 @@ export interface Project {
     id?: string | null;
   }[];
   /**
-   * Optional single file that combines everything on the page.
-   */
-  downloadAll?: (number | null) | Document;
-  /**
    * How to cite these materials, if the page needs it.
    */
   citation?: string | null;
@@ -1015,7 +1011,6 @@ export interface ProjectsSelect<T extends boolean = true> {
             };
         id?: T;
       };
-  downloadAll?: T;
   citation?: T;
   relatedProjects?: T;
   updatedAt?: T;

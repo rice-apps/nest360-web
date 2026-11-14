@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { convertLexicalToPlaintext } from "@payloadcms/richtext-lexical/plaintext";
 import { getPayload } from "payload";
+import { cache } from "react";
 
 import type { Resource } from "@/app/(frontend)/resources/types";
 import type { Document, Media, Project, Resource as ResourceEntry, Tag } from "@/payload-types";
@@ -9,7 +10,8 @@ import type { Document, Media, Project, Resource as ResourceEntry, Tag } from "@
 // plus the featured images of related projects.
 // overrideAccess: false applies the public's read rules, so unpublished resources stay as bare IDs
 // (which the page skips).
-export async function getProjectBySlug(slug: string): Promise<Project | null> {
+// cache: the page and its metadata both ask for the same project, so look it up once per request
+export const getProjectBySlug = cache(async (slug: string): Promise<Project | null> => {
   const payload = await getPayload({ config });
   const { docs } = await payload.find({
     collection: "projects",
@@ -20,7 +22,17 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     // Only the fields the page reads from each linked document. Without this, related projects come
     // with all their groups and resources, and every resource with its "used on" list of projects.
     populate: {
-      projects: { title: true, slug: true, featuredImage: true, description: true },
+      // What projectToResource needs for each related project's card. Not its resourceGroups, so a card
+      // without a featured image shows no picture rather than loading every related resource.
+      projects: {
+        title: true,
+        slug: true,
+        category: true,
+        tag: true,
+        featuredImage: true,
+        description: true,
+        updatedAt: true,
+      },
       resources: {
         title: true,
         resourceType: true,
@@ -45,7 +57,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     },
   });
   return docs[0] ?? null;
-}
+});
 
 // Every project for the resource library, newest first. depth 3 fills in each group's resources, their tags
 // and thumbnails, and each file's preview, which the cards need. Like getProjectBySlug, it applies the
@@ -76,6 +88,21 @@ function populated<T extends object>(value: number | T | null | undefined): T | 
   return value && typeof value === "object" ? value : null;
 }
 
+// Every uploaded file the project page lists, once each, in page order: what "Download all" puts in its zip.
+// Only documents and publications have files; unpublished resources (bare IDs) are skipped like on the page.
+export function projectFiles(project: Project): { url: string; filename: string }[] {
+  const files = new Map<string, string>();
+  for (const group of project.resourceGroups ?? []) {
+    for (const entry of group.resources ?? []) {
+      const resource = populated<ResourceEntry>(entry.resource);
+      if (resource?.resourceType !== "document" && resource?.resourceType !== "publication") continue;
+      const file = populated<Document>(resource.document);
+      if (file?.url && file.filename && !files.has(file.url)) files.set(file.url, file.filename);
+    }
+  }
+  return [...files].map(([url, filename]) => ({ url, filename }));
+}
+
 // Card text for a project: the first sentence of its description
 export function firstSentence(description: Project["description"]) {
   const text = convertLexicalToPlaintext({ data: description }).trim();
@@ -87,7 +114,6 @@ export function firstSentence(description: Project["description"]) {
 // - badgeText: "New" when any resource is marked new, otherwise "Video" when one is a video
 // - publishedDate: the most recent publication date among its resources, if any have one
 // - tags: the page tag, then the resources' tags, without repeats
-// - downloadUrl: the "Download all" file
 // - lastModified: when the project was last saved
 export function projectToResource(project: Project): Resource {
   // Each group lists entries of { resource, isNew }. Unpublished resources stay as bare IDs and are skipped,
@@ -135,7 +161,6 @@ export function projectToResource(project: Project): Resource {
     publishedDate,
     lastModified: project.updatedAt,
     linkUrl: `/resources/${project.slug}`,
-    downloadUrl: populated<Document>(project.downloadAll)?.url ?? undefined,
     tags: [...new Set(tagNames)],
   };
 }
