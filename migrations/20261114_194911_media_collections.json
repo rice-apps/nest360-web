@@ -100,6 +100,20 @@
           "primaryKey": true,
           "notNull": true
         },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "enum_users_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp(3) with time zone",
@@ -7508,6 +7522,15 @@
     }
   },
   "enums": {
+    "public.enum_users_role": {
+      "name": "enum_users_role",
+      "schema": "public",
+      "values": [
+        "pending",
+        "editor",
+        "admin"
+      ]
+    },
     "public.enum_documents_document_type": {
       "name": "enum_documents_document_type",
       "schema": "public",
@@ -7672,6 +7695,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "828d10db-72c8-499b-ab50-669969398eb6",
+  "id": "191a6d39-dd29-4aab-a627-dee3a1246f43",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

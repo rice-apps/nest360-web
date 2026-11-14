@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { staffWrites } from '../lib/staffAccess'
+
 // Video files. Downloadable files go in Documents, images in Media.
 export const Videos: CollectionConfig = {
   slug: 'videos',
@@ -8,6 +10,7 @@ export const Videos: CollectionConfig = {
   },
   // Public can read; creating, editing and deleting require login (Payload's default)
   access: {
+    ...staffWrites,
     read: () => true,
   },
   upload: {

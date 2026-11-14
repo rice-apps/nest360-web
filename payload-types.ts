@@ -148,11 +148,18 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Administrators create approved staff accounts. Public registration is disabled.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  name?: string | null;
+  /**
+   * Editors manage content. Administrators also manage staff accounts. Pending accounts have no staff access.
+   */
+  role: 'pending' | 'editor' | 'admin';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -797,6 +804,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

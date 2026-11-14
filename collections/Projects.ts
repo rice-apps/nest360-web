@@ -1,3 +1,4 @@
+import { staffWrites } from '../lib/staffAccess'
 import type { CollectionConfig } from 'payload'
 
 // One resources/project page, e.g. nest360.org/project/clinical-job-aids.
@@ -12,6 +13,7 @@ export const Projects: CollectionConfig = {
   },
   // Public can read; creating, editing and deleting require login (Payload's default)
   access: {
+    ...staffWrites,
     read: () => true,
   },
   fields: [
