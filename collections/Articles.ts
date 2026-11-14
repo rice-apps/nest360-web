@@ -1,15 +1,17 @@
 
 import type { CollectionConfig } from 'payload'
 
-import { previewFor, publishedOrLoggedIn } from '../lib/preview'
+import { livePreviewFor, previewFor, publishedOrLoggedIn } from '../lib/preview'
 
-// A NEST360 article
+const toPath = (slug: string) => `/stories/${slug}`
+
 export const Articles: CollectionConfig = {
   slug: 'articles',
   admin: {
-    useAsTitle: 'title', // must match a field name below
+    useAsTitle: 'title',
     defaultColumns: ['title', 'publishedDate', '_status'],
-    preview: previewFor('articles', (slug) => `/stories/${slug}`),
+    preview: previewFor('articles', toPath),
+    livePreview: livePreviewFor('articles', toPath),
   },
 
   // Staff see drafts and published articles; the public only sees published ones
@@ -18,7 +20,11 @@ export const Articles: CollectionConfig = {
   },
   
   versions: {
-    drafts: true, // adds _status plus the Save Draft and Publish buttons
+    drafts: {
+      // Saves a draft shortly after each edit, which is what refreshes the Live Preview pane
+      autosave: { interval: 800 },
+    },
+    maxPerDoc: 50, // autosave creates many versions; keep the newest 50
   },
 
 fields: [
