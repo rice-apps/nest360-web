@@ -4,6 +4,7 @@
 // Each entry stores the text to search (`content`) and links to the document's tags, so a search can match
 // words in the text or a tag's name. lib/data/search.ts runs the searches.
 import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
+import { staffWrites } from './staffAccess'
 import type { SearchPluginConfig } from '@payloadcms/plugin-search/types'
 
 type Relation = number | { id: number } | null | undefined
@@ -22,6 +23,7 @@ export const searchPluginConfig: SearchPluginConfig = {
   syncDrafts: false,
   deleteDrafts: true,
   searchOverrides: {
+    access: { ...staffWrites, read: () => true },
     admin: { group: 'Content' },
     fields: ({ defaultFields }) => [
       ...defaultFields,

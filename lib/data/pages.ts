@@ -1,12 +1,12 @@
 import config from '@payload-config'
-import { draftMode } from 'next/headers'
+import { canPreviewDrafts } from '../draftAccess'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
 // cache: the page and its metadata both ask for the same page, so look it up once per request
 export const getPageBySlug = cache(async (slug: string) => {
-    const { isEnabled: draft } = await draftMode()
     const payload = await getPayload({ config })
+    const draft = await canPreviewDrafts(payload)
 
     const { docs } = await payload.find({
         collection: 'pages',

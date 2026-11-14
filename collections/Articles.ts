@@ -1,3 +1,4 @@
+import { staffWrites } from '../lib/staffAccess'
 
 import type { CollectionConfig } from 'payload'
 
@@ -14,6 +15,7 @@ export const Articles: CollectionConfig = {
 
   // Staff see drafts and published articles; the public only sees published ones
   access: {
+    ...staffWrites,
     read: publishedOrLoggedIn,
   },
   

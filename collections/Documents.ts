@@ -1,3 +1,4 @@
+import { staffWrites } from '../lib/staffAccess'
 import fs from 'fs/promises'
 import path from 'path'
 import { type CollectionBeforeChangeHook, type CollectionConfig, isolateObjectProperty } from 'payload'
@@ -46,6 +47,7 @@ export const Documents: CollectionConfig = {
   },
   // Public can read; creating, editing and deleting require login (Payload's default)
   access: {
+    ...staffWrites,
     read: () => true,
   },
   upload: {

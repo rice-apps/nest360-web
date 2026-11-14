@@ -1,3 +1,4 @@
+import { approvedStaff } from '../lib/staffAccess'
 import type { GlobalConfig } from 'payload'
 
 // Site-wide footer shown on every public page. Edited once under Globals → Footer in the admin.
@@ -5,6 +6,7 @@ import type { GlobalConfig } from 'payload'
 export const Footer: GlobalConfig = {
   slug: 'footer',
   access: {
+    update: approvedStaff,
     read: () => true, // the public site needs to read it
   },
   fields: [

@@ -1,5 +1,6 @@
 //Shared helper for collections 
 import type { Access, CollectionAdminOptions } from 'payload'
+import { isApprovedStaff } from './staffAccess'
 
 // Builds the admin "Preview" button URL. Hidden until the doc has a slug.
 export const previewFor = (
@@ -19,6 +20,6 @@ export const previewFor = (
 
 // Only logged-in admins can see drafts
 export const publishedOrLoggedIn: Access = ({ req }) =>
-    req.user ? true : { _status: { equals: 'published' } }
+    isApprovedStaff(req.user) ? true : { _status: { equals: 'published' } }
 
 

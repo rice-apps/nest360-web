@@ -1,3 +1,4 @@
+import * as migration_20261114_000000_staff_access from './20261114_000000_staff_access';
 import * as migration_20261031_201851_initial from './20261031_201851_initial';
 import * as migration_20261031_202836_add_resources_and_project_category from './20261031_202836_add_resources_and_project_category';
 import * as migration_20261107_000000_add_project_category from './20261107_000000_add_project_category';
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20261108_212241_add_header.up,
     down: migration_20261108_212241_add_header.down,
     name: '20261108_212241_add_header'
+  },
+  {
+    up: migration_20261114_000000_staff_access.up,
+    down: migration_20261114_000000_staff_access.down,
+    name: '20261114_000000_staff_access',
   },
 ];
