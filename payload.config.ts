@@ -18,6 +18,7 @@ import { Resources } from './collections/Resources'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 import { searchPluginConfig } from './lib/searchIndex'
+import { Pages } from './collections/Pages'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -58,7 +59,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Documents, Tags, Articles, Resources, Projects],
+  collections: [Users, Media, Documents, Tags, Articles, Resources, Projects, Pages],
   editor: lexicalEditor(),
   // Development falls back to a fixed secret so a fresh clone runs without a .env; production must set one
   secret: process.env.PAYLOAD_SECRET || (isProduction ? '' : 'nest360-local-development-only'),
