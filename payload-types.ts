@@ -77,6 +77,7 @@ export interface Config {
     authors: Author;
     resources: Resource;
     projects: Project;
+    technologies: Technology;
     pages: Page;
     search: Search;
     'payload-kv': PayloadKv;
@@ -87,6 +88,7 @@ export interface Config {
   collectionsJoins: {
     resources: {
       projects: 'projects';
+      technologies: 'technologies';
     };
   };
   collectionsSelect: {
@@ -100,6 +102,7 @@ export interface Config {
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    technologies: TechnologiesSelect<false> | TechnologiesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -438,6 +441,14 @@ export interface Resource {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  /**
+   * Technology pages that list this resource. Add it to a page from that technology.
+   */
+  technologies?: {
+    docs?: (number | Technology)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -511,6 +522,117 @@ export interface Project {
    * Other project pages to link to, e.g. a device page linking to Clinical Job Aids.
    */
   relatedProjects?: (number | Project)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * NEST360 Qualified Technologies, shown in the gallery at /technology.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies".
+ */
+export interface Technology {
+  id: number;
+  /**
+   * The kind of device, e.g. "Syringe Pump" or "CPAP".
+   */
+  title: string;
+  /**
+   * Used in URLs. Filled in from the title if left blank.
+   */
+  slug: string;
+  /**
+   * Groups the technology in the gallery and is shown on its page.
+   */
+  categoryOfCare: 'respiratory' | 'thermal' | 'hydration' | 'jaundice' | 'monitoring' | 'diagnostics';
+  /**
+   * Shown on the gallery card and at the top of the page. Falls back to the first product’s photo.
+   */
+  featuredImage?: (number | null) | Media;
+  /**
+   * What the device does and who it helps. The first sentence is also used in search results.
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Each manufacturer’s model that passed NEST360 qualification. Listed on the gallery card and the page.
+   */
+  qualifiedProducts?:
+    | {
+        /**
+         * Manufacturer and model, e.g. "Mindray BeneFusion SP3".
+         */
+        name: string;
+        /**
+         * e.g. "CE Mark, ISO 13485".
+         */
+        regulation?: string | null;
+        image?: (number | null) | Media;
+        /**
+         * e.g. "Price optimized for low-resource settings."
+         */
+        price?: string | null;
+        /**
+         * One per line, e.g. "Any brand syringe 5-60cc".
+         */
+        consumables?: string | null;
+        /**
+         * e.g. "Battery or Mains power".
+         */
+        powerSource?: string | null;
+        /**
+         * e.g. "230 V 50 Hz".
+         */
+        voltage?: string | null;
+        /**
+         * e.g. "2 years".
+         */
+        warranty?: string | null;
+        productUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Resources about this device, e.g. "Training materials", "Training videos" and "Qualification documents". Add the resources themselves under Resources first.
+   */
+  resourceGroups?:
+    | {
+        /**
+         * For example "Training materials", "Training videos" or "Qualification documents".
+         */
+        title?: string | null;
+        description?: string | null;
+        /**
+         * Choose resources for this group. Drag rows to set the display order.
+         */
+        resources: {
+          resource: number | Resource;
+          /**
+           * Shows a NEW badge next to this resource in this group only.
+           */
+          isNew?: boolean | null;
+          id?: string | null;
+        }[];
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Where the "Purchase NEST360 Qualified Products" button goes. Leave blank to hide it.
+   */
+  purchaseUrl?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -665,6 +787,10 @@ export interface Search {
         value: number | Project;
       }
     | {
+        relationTo: 'technologies';
+        value: number | Technology;
+      }
+    | {
         relationTo: 'articles';
         value: number | Article;
       };
@@ -744,6 +870,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'projects';
         value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'technologies';
+        value: number | Technology;
       } | null)
     | ({
         relationTo: 'pages';
@@ -981,6 +1111,7 @@ export interface ResourcesSelect<T extends boolean = true> {
   doi?: T;
   citation?: T;
   projects?: T;
+  technologies?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1013,6 +1144,48 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   citation?: T;
   relatedProjects?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies_select".
+ */
+export interface TechnologiesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  categoryOfCare?: T;
+  featuredImage?: T;
+  description?: T;
+  qualifiedProducts?:
+    | T
+    | {
+        name?: T;
+        regulation?: T;
+        image?: T;
+        price?: T;
+        consumables?: T;
+        powerSource?: T;
+        voltage?: T;
+        warranty?: T;
+        productUrl?: T;
+        id?: T;
+      };
+  resourceGroups?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        resources?:
+          | T
+          | {
+              resource?: T;
+              isNew?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  purchaseUrl?: T;
   updatedAt?: T;
   createdAt?: T;
 }

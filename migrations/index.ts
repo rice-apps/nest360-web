@@ -8,6 +8,7 @@ import * as migration_20261114_182046 from './20261114_182046';
 import * as migration_20261114_193036_add_authors from './20261114_193036_add_authors';
 import * as migration_20261114_194911_media_collections from './20261114_194911_media_collections';
 import * as migration_20261114_213631_project_page_cleanup from './20261114_213631_project_page_cleanup';
+import * as migration_20261121_201414_add_technologies from './20261121_201414_add_technologies';
 
 export const migrations = [
   {
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20261114_213631_project_page_cleanup.up,
     down: migration_20261114_213631_project_page_cleanup.down,
     name: '20261114_213631_project_page_cleanup',
+  },
+  {
+    up: migration_20261121_201414_add_technologies.up,
+    down: migration_20261121_201414_add_technologies.down,
+    name: '20261121_201414_add_technologies',
   },
 ];

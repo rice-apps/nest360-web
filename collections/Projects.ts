@@ -1,6 +1,8 @@
 import { staffWrites } from '../lib/staffAccess'
 import type { CollectionConfig } from 'payload'
 
+import { resourceGroupsField, slugField } from '../fields/resourceGroups'
+
 // One resources/project page, shown at /resources/<slug> (app/(frontend)/resources/[slug]/page.tsx),
 // e.g. /resources/clinical-job-aids.
 // The page doesn't hold files: its resourceGroups link to entries in the Resources collection, so the
@@ -23,28 +25,7 @@ export const Projects: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-      index: true,
-      admin: {
-        position: 'sidebar',
-        description: 'Used in URLs. Filled in from the title if left blank.',
-      },
-      hooks: {
-        beforeValidate: [
-          ({ value, data }) =>
-            value ||
-            data?.title
-              ?.toLowerCase()
-              .trim()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, ''),
-        ],
-      },
-    },
+    slugField,
     // Same values as ResourceCategory in app/(frontend)/resources/types.ts
     {
       name: 'category',
@@ -98,71 +79,12 @@ export const Projects: CollectionConfig = {
         { label: 'Titled groups of plain links (like Clinical Job Aids)', value: 'groups' },
       ],
     },
-    {
-      name: 'resourceGroups',
-      type: 'array',
-      label: 'Resource Groups',
+    resourceGroupsField({
+      titles: 'groupsLayout',
       required: true,
-      minRows: 1,
-      labels: {
-        singular: 'Resource Group',
-        plural: 'Resource Groups',
-      },
-      admin: {
-        description:
-          'With the "one list" layout, add one group: its title and description are not shown, and every group\'s resources form the list.',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          admin: {
-            description: 'For example "Bubble CPAP". Required for the titled-groups layout.',
-          },
-          // Only titled groups show their title
-          validate: (value: unknown, { data }: { data: { layout?: string } }) =>
-            data?.layout === 'groups' && !value ? 'Each group needs a title in the titled-groups layout.' : true,
-        },
-        {
-          name: 'description',
-          type: 'textarea',
-        },
-        {
-          // One row per resource, so "new" can differ between groups and pages
-          name: 'resources',
-          type: 'array',
-          required: true,
-          minRows: 1,
-          labels: {
-            singular: 'Resource',
-            plural: 'Resources',
-          },
-          admin: {
-            description: 'Choose resources for this group. Drag rows to set the display order.',
-          },
-          fields: [
-            {
-              name: 'resource',
-              type: 'relationship',
-              relationTo: 'resources',
-              required: true,
-              admin: {
-                allowCreate: false,
-              },
-            },
-            {
-              name: 'isNew',
-              type: 'checkbox',
-              label: 'Mark as new',
-              defaultValue: false,
-              admin: {
-                description: 'Shows a NEW badge next to this resource in this group only.',
-              },
-            },
-          ],
-        },
-      ],
-    },
+      description:
+        'With the "one list" layout, add one group: its title and description are not shown, and every group\'s resources form the list.',
+    }),
     // No "Download all" upload: the page's Download all button zips every file it lists
     // (app/(frontend)/resources/[slug]/download/route.ts)
     {
