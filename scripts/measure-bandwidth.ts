@@ -6,8 +6,9 @@
 //   npm run measure:bandwidth -- --help            every option
 //
 // It measures three pages: the resource gallery (/resources), one project page and one article page. The
-// project and article are found on the site each time (the first card on /resources and on /stories), so the
-// script keeps working as content is added or removed. --project and --article choose specific pages instead.
+// project and article are found on the site each time (the most recently updated project, from the site's
+// /api/projects, and the first card on /stories), so the script keeps working as content is added or removed.
+// --project and --article choose specific pages instead.
 //
 // Each page is loaded three times in a fresh headless Chrome:
 //   1. First visit: empty cache, full speed. Then the script scrolls to the bottom, so pictures that only
@@ -351,24 +352,44 @@ async function linksOn(page: Page, pattern: RegExp): Promise<string[]> {
   return [...new Set(paths.filter((p) => pattern.test(p)))];
 }
 
+// The most recently updated project and how many there are, from Payload's REST API. Projects are public
+// (collections/Projects.ts), and since #32 no page links to them, so they can't be found from the pages.
+async function projectsFromApi(base: string): Promise<{ path: string | null; count: number } | null> {
+  try {
+    const response = await fetch(new URL('/api/projects?limit=1&depth=0&sort=-updatedAt', base));
+    if (!response.ok) return null;
+    const data = (await response.json()) as { docs?: { slug?: string | null }[]; totalDocs?: number };
+    const slug = data.docs?.[0]?.slug;
+    return { path: slug ? `/resources/${encodeURIComponent(slug)}` : null, count: data.totalDocs ?? 0 };
+  } catch {
+    return null;
+  }
+}
+
 async function discover(browser: Browser, base: string): Promise<Discovered> {
   const context = await browser.newContext();
   const page = await context.newPage();
   try {
     const gallery = await page.goto(new URL('/resources', base).toString(), { waitUntil: 'load', timeout: 60_000 });
     if (!gallery?.ok()) throw new Error(`/resources answered with status ${gallery?.status() ?? 'none'}.`);
-    const projects = await linksOn(page, /^\/resources\/[^/]+$/);
-    const shownText = await page.locator('text=/\\d+ resources? found/').first().textContent({ timeout: 2000 }).catch(() => null);
+    const linkedProjects = await linksOn(page, /^\/resources\/[^/]+$/);
+    // The gallery's own count, e.g. "16 resources" (or "11 resources found" on older versions)
+    const shownText = await page
+      .locator('text=/^\\s*\\d+ resources?\\b/')
+      .first()
+      .textContent({ timeout: 2000 })
+      .catch(() => null);
+    const fromApi = await projectsFromApi(base);
 
     const stories = await page.goto(new URL('/stories', base).toString(), { waitUntil: 'load', timeout: 60_000 });
     if (!stories?.ok()) throw new Error(`/stories answered with status ${stories?.status() ?? 'none'}.`);
     const articles = await linksOn(page, /^\/stories\/[^/]+$/);
 
     return {
-      projectPath: projects[0] ?? null,
+      projectPath: fromApi?.path ?? linkedProjects[0] ?? null,
       articlePath: articles[0] ?? null,
-      resourcesShown: shownText?.trim() ?? null,
-      projectCount: projects.length,
+      resourcesShown: shownText?.replace(/\s+/g, ' ').trim() ?? null,
+      projectCount: fromApi?.count ?? linkedProjects.length,
       articleCount: articles.length,
     };
   } finally {
@@ -456,7 +477,12 @@ async function build(logFile: string, env: NodeJS.ProcessEnv) {
   const child = runNext(['build'], logFile, env);
   const code: number | null = await new Promise((resolve) => child.on('exit', resolve));
   if (code !== 0) {
-    throw new Error(`The build failed. Last lines of ${path.relative(ROOT, logFile)}:\n\n${lastLines(logFile, 25)}`);
+    const log = lastLines(logFile, 25);
+    const hint = /no such column|no such table/.test(log)
+      ? '\n\nThe local database (local.db) is older than the code. Run `npm run dev` once, open ' +
+        'http://localhost:3000 so it updates local.db, stop it, and run this again.'
+      : '';
+    throw new Error(`The build failed. Last lines of ${path.relative(ROOT, logFile)}:\n\n${log}${hint}`);
   }
 }
 
@@ -560,7 +586,7 @@ function markdownReport(info: ReportInfo) {
     `- **Code:** ${info.source.startsWith('local') ? gitDescription() : 'whatever that site is running'}`,
     `- **Browser:** headless Chromium ${info.browserVersion}, ${info.device}`,
     `- **Content at the time:** /resources said "${discovered.resourcesShown ?? 'no count shown'}" ` +
-      `(${discovered.projectCount} project pages); /stories listed ${discovered.articleCount} ` +
+      `; the site had ${discovered.projectCount} ${discovered.projectCount === 1 ? 'project' : 'projects'}; /stories listed ${discovered.articleCount} ` +
       `${discovered.articleCount === 1 ? 'article' : 'articles'}. More content changes these numbers.`,
     ...SLOW_CONNECTIONS.map(
       (c) =>

@@ -22,12 +22,15 @@ That's all. It takes about 2 minutes. It:
 While it runs, a progress bar shows how far along it is and which step it is on.
 
 It uses the same database as `npm run dev`: `local.db`, or the database in `DATABASE_URL` if one answers.
+If the build stops with "no such column", `local.db` is older than the code: run `npm run dev` once, open
+the site, stop it, and run the script again.
 The `bandwidth-reports` folder is not committed. Attach or paste a report where the team needs it.
 
 ## Which pages
 
 - The resource gallery, `/resources`
-- One project page: the first project card on `/resources`
+- One project page: the most recently updated project, which the script asks the site for at `/api/projects`
+  (no page links to projects since the `/resources` redesign)
 - One article page: the first story card on `/stories`
 
 The project and article are found on the site each time, so the script keeps working as content changes. The
