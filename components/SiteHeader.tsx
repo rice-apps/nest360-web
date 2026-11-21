@@ -12,7 +12,7 @@ export async function SiteHeader() {
         <HeaderNav
             logo={logo?.url ? { url: logo.url, alt: logo.alt, width: logo.width, height: logo.height } : null}
             navItems={header.navItems ?? []}
-            donate={header.donate?.url ? { label: header.donate.label || "Donate", url: header.donate.url } : null}
+            donate={header.donate?.url ? { label: header.donate.label || "Donate", url: header.donate.url, color: header.donate.color } : null}
         />
     );
 }

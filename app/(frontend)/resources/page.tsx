@@ -1,81 +1,16 @@
 import React from 'react';
+import Link from 'next/link';
 import { connection } from 'next/server';
-import { ResourceBrowser } from '@/components/ResourceBrowser';
-import { getProjects, projectToResource } from '@/lib/data/projects';
-import { parseFilters } from '@/lib/resourceFilters';
-import type { Resource } from './types';
 
-// Your existing RESOURCES_DATA array goes here.
-// Keep all 9 resource objects exactly as you shared them.
+import { ResourceGrid } from '@/components/ResourceGrid';
+import { ResourceFiltersPanel } from '@/components/ResourceFiltersPanel';
+import { ResourceSearchBox } from '@/components/ResourceSearchBox';
+import { getResources, resourceToCard } from '@/lib/data/resources';
+import { search } from '@/lib/data/search';
+import { TOPICS, applyFilters, parseFilters, type Listed } from '@/lib/resourceFilters';
 
-const RESOURCES_DATA: Resource[] = [
-  {
-    id: '1',
-    category: 'healthcare',
-    title: 'Training Videos',
-    description: 'Training videos demonstrate model-specific equipment setup, use, and maintenance and are used as training aids in clinical and technical training.',
-    tags: ['Training Module'],
-    publishedDate: '2026-03-01',
-    downloadUrl: '/resources/training-videos.pdf',
-  },
-  {
-    id: '2',
-    category: 'healthcare',
-    title: 'Orientation for Staff Video',
-    description: 'This orientation video introduces healthcare workers and students to the neonatal intensive care unit (NICU) and its importance in saving newborn lives.',
-    tags: ['Training Module'],
-    publishedDate: '2026-01-01',
-  },
-  {
-    id: '3',
-    category: 'healthcare',
-    title: 'Clinical Modules',
-    description: 'Clinical education modules prepare healthcare staff and students to understand when and how to safely and effectively use equipment essential to newborn care.',
-    tags: ['Training Module'],
-  },
-  {
-    id: '4',
-    category: 'healthcare',
-    title: 'BME/T Modules',
-    description: 'BME/T education modules prepare biomedical technicians on the technical use of technologies for newborn care in resource limited settings.',
-    tags: ['Training Module'],
-  },
-  {
-    id: '5',
-    category: 'innovators',
-    title: 'Target Product Profiles for Newborn Care',
-    description: 'In collaboration with UNICEF, NEST360 developed the target product profiles (TPPs) which list a proposed set of performance & operational characteristics for 16 newborn products.',
-    tags: ['Toolkit'],
-  },
-  {
-    id: '6',
-    category: 'innovators',
-    title: 'NEST360 Qualified Technologies for Small & Sick Newborn Care',
-    description: 'The NEST360 Qualified Technologies are a list of newborn care technologies best suited for use in low-resource setting hospitals, including being effective, affordable, rugged, and simple to use.',
-    tags: ['Report'],
-  },
-  {
-    id: '7',
-    category: 'innovators',
-    title: 'Newborn & Maternal Technology Landscape',
-    description: 'A compendium of newborn & maternal healthcare technologies, both commercially available and in development, suited for use in resource-limited settings.',
-    tags: ['Report'],
-  },
-  {
-    id: '8',
-    category: 'innovators',
-    title: 'Newborn & Maternal Technology Landscape Survey',
-    description: 'Do you have a technology that you would like to be considered for the next edition of the Newborn & Maternal Technology Landscape? If so, please fill out our survey form.',
-    tags: ['Survey'],
-  },
-  {
-    id: '9',
-    category: 'implementors',
-    title: 'Implementation Toolkit',
-    description: 'The Implementation Toolkit for small and sick newborn care, codesigned by UNICEF and NEST360, is an open-access, online toolkit enabling implementors to reach every newborn.',
-    tags: ['Toolkit'],
-  },
-];
+const sortedUnique = (values: string[]) =>
+  [...new Set(values)].sort((a, b) => a.localeCompare(b));
 
 export default async function ResourcesPage({
   searchParams,
@@ -84,22 +19,113 @@ export default async function ResourcesPage({
 }) {
   await connection();
 
-  const listed = [
-    ...(await getProjects()).map((project) => {
-      const resource = projectToResource(project);
-      return { resource, date: resource.lastModified };
-    }),
-    ...RESOURCES_DATA.map((resource) => ({
-      resource,
-      date: resource.lastModified,
-    })),
-  ];
+  const params = await searchParams;
+  const q = typeof params.q === 'string' ? params.q.trim() : '';
+  const sort = typeof params.sort === 'string' ? params.sort : undefined;
 
-  const filters = parseFilters(await searchParams);
+  let listed: Listed[] = [];
+  let failed = false;
+
+  try {
+    const [entries, matches] = await Promise.all([
+      // Published resources only (see getResources)
+      getResources(),
+      // The search index covers title, text and tag names. No search term means "don't filter".
+      q ? search({ query: q, collections: ['resources'], limit: 100 }) : null,
+    ]);
+
+    const matchedSlugs = matches ? new Set(matches.map((match) => match.slug)) : null;
+
+    listed = entries
+      .filter((entry) => !matchedSlugs || matchedSlugs.has(entry.slug))
+      .map((entry) => ({
+        resource: resourceToCard(entry),
+        date: entry.publicationDate ?? entry.createdAt,
+      }));
+  } catch (error) {
+    console.error('Failed to load /resources', error);
+    failed = true;
+  }
+    // Resources have no audience, so any stale ?audience= in the URL is ignored
+  const filters = { ...parseFilters(params), audiences: [] };
+  // The search index already narrowed by q (including body text), so don't search again here
+  const resources = applyFilters(listed, { ...filters, query: '' });
+    // Offer only tags that some matching resource has, A–Z. Tags named like a topic go under
+  // Topic / Focus; every other tag goes under Content Type, so no tag is left out.
+  const allTags = [...new Set(listed.flatMap(({ resource }) => resource.tags ?? []))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+  const isTopic = (tag: string) =>
+    TOPICS.some((topic) => topic.toLowerCase() === tag.toLowerCase());
+
+  const filteredView = Boolean(q) || filters.tags.length > 0 || filters.topics.length > 0;
 
   return (
-    <main>
-      <ResourceBrowser items={listed} initialFilters={filters} />
+    <main className="min-h-screen bg-nest-neutral-100 pb-16">
+      {/* search header section */}
+      <section className="bg-white py-10 px-4 border-b border-gray-200 text-center">
+        <div className="max-w-4xl mx-auto space-y-4">
+          <h1 className="font-heading text-4xl font-bold text-nest-neutral-900 sm:text-5xl">Resources</h1>
+          <p className="text-gray-600 max-w-2xl mx-auto text-base leading-relaxed">
+            Our resources support clinicians, engineers, and administrators to implement an evidence-based model for sustainable, high-quality hospital-based newborn care in limited-resource settings.
+          </p>
+
+          {/* Not keyed on q, so it keeps focus and the cursor while you type */}
+          <ResourceSearchBox initialQuery={q} />
+        </div>
+      </section>
+
+      {/* results section */}
+      {/* 1080px: the width left by the Figma 180px side margins on a 1440px frame */}
+      <div className="max-w-[1080px] mx-auto px-4 py-10 md:flex md:items-start md:gap-8">
+        {/* Rendered once: the sidebar folds itself with its own Expand/Collapse toggle,
+            and FILTER_FORM_ID must only appear once on the page */}
+        <aside className="mb-8 rounded-[10px] border border-gray-200 bg-white md:sticky md:top-6 md:mb-0 md:w-60 md:shrink-0">
+          <ResourceFiltersPanel
+            key={JSON.stringify(filters)}
+            initial={filters}
+            contentTypes={allTags.filter((tag) => !isTopic(tag))}
+            topics={allTags.filter(isTopic)}
+          />
+        </aside>
+
+        <div className="min-w-0 flex-1 space-y-6">
+          {/* Error state: the data couldn't be loaded, which is different from "nothing matched" */}
+          {failed && (
+            <div role="alert" className="rounded-[10px] border border-red-200 bg-white p-8 text-center">
+              <p className="font-semibold text-red-700">We couldn&apos;t load resources right now.</p>
+              <p className="mt-1 text-sm text-gray-600">Please try again in a moment.</p>
+              <Link
+                href="/resources"
+                className="mt-4 inline-block rounded-[30px] bg-nest-light-blue px-6 py-2 text-sm font-semibold text-nest-blue hover:bg-nest-accent"
+              >
+                Try again
+              </Link>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!failed && resources.length === 0 && (
+            <p className="rounded-[10px] border border-gray-200 bg-white p-8 text-center text-gray-600">
+              {q
+                ? `No resources match "${q}".`
+                : filteredView
+                  ? 'No resources match these filters.'
+                  : 'No resources have been published yet.'}
+            </p>
+          )}
+
+          {!failed && resources.length > 0 && (
+            <>
+              <p className="text-sm text-gray-600" aria-live="polite">
+                {resources.length} resource{resources.length === 1 ? '' : 's'}
+                {q ? ` matching "${q}"` : ''}
+              </p>
+              <ResourceGrid columns={3} resources={resources} />
+            </>
+          )}
+        </div>
+      </div>
     </main>
   );
 }

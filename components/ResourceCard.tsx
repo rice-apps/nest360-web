@@ -42,7 +42,7 @@ export function ResourceCard({
     // With a link, clicking anywhere on the card opens it but the text can still be highlighted and copied
     // (see ClickableCard). The title is the real link, for keyboard and screen-reader users.
     <ClickableCard
-      href={linkUrl}
+      linked={Boolean(linkUrl)}
       className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md focus-within:shadow-md"
     >
 
@@ -99,6 +99,7 @@ export function ResourceCard({
           {linkUrl ? (
             <Link
               href={linkUrl}
+              data-card-link
               className="rounded group-hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
               {title}

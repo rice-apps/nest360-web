@@ -18,7 +18,7 @@ export function TechnologyCard({ title, slug, categoryOfCare, image, products }:
   return (
     // On hover the card lifts with a shadow, the photo zooms a little and the title changes colour
     <ClickableCard
-      href={href}
+      linked
       className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition duration-300 hover:border-[#41B6C4] hover:shadow-xl focus-within:border-[#41B6C4] focus-within:shadow-xl motion-safe:hover:-translate-y-1"
     >
       {/* Device photos are product shots, so show the whole device on white rather than cropping it */}
@@ -53,6 +53,7 @@ export function TechnologyCard({ title, slug, categoryOfCare, image, products }:
         <h3 className="font-heading text-lg font-semibold">
           <Link
             href={href}
+            data-card-link
             className="rounded text-nest-blue transition-colors duration-300 group-hover:text-[#2a8f9b] group-hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           >
             {title}

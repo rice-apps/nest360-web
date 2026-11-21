@@ -1,9 +1,9 @@
 'use client';
 
 // The search bar, filter sidebar, sort menu and cards on /resources. The server page loads every resource
-// once; after that, pressing Search, ticking a box or changing the sort filters them right here in the browser,
-// with no page reload. Each change also updates the URL (without a reload), so a filtered view can be shared
-// and reopens filtered.
+// once; after that, typing (after a short pause), ticking a box or changing the sort filters them right here
+// in the browser, with no page reload. Each change also updates the URL (without a reload), so a filtered view
+// can be shared and reopens filtered.
 
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -23,6 +23,9 @@ import { ResourceFilters, type FilterGroup } from './ResourceFilters';
 import { ResourceGrid } from './ResourceGrid';
 import { SortSelect } from './SortSelect';
 
+// How long typing must pause before the search is applied
+const SEARCH_DELAY_MS = 300;
+
 interface ResourceBrowserProps {
   items: Listed[];
   // The choices in the URL the page was opened with
@@ -31,9 +34,19 @@ interface ResourceBrowserProps {
 
 export function ResourceBrowser({ items, initialFilters }: ResourceBrowserProps) {
   const [filters, setFilters] = useState(initialFilters);
-  // What's typed in the search box; it only becomes the search (filters.query) on Search or Enter
+  // What's typed in the search box. It becomes the search (filters.query) once typing pauses for
+  // SEARCH_DELAY_MS, or straight away on Search or Enter. Only the query changes, so the ticked filters
+  // and the sort stay as they are.
   const [draftQuery, setDraftQuery] = useState(initialFilters.query);
   const resources = useMemo(() => applyFilters(items, filters), [items, filters]);
+
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setFilters((current) => (current.query === draftQuery ? current : { ...current, query: draftQuery })),
+      SEARCH_DELAY_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [draftQuery]);
 
   // replaceState rather than router.replace: the router would ask the server to render the page again
   useEffect(() => {

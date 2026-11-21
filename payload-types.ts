@@ -647,7 +647,33 @@ export interface Page {
    * Used in the URL, e.g. what-we-do. Filled in from the title if left blank.
    */
   slug?: string | null;
+  intro?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   layout: (SubsectionBlock | RichTextBlock | MediaWithTextBlock | HeadingWithListBlock)[];
+  countries?:
+    | {
+        name: string;
+        image: number | Media;
+        /**
+         * Optional. Internal path (e.g. /countries/kenya) or full URL.
+         */
+        link?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * One or two sentences for search results. Keep under about 160 characters.
    */
@@ -1196,6 +1222,7 @@ export interface TechnologiesSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  intro?: T;
   layout?:
     | T
     | {
@@ -1203,6 +1230,14 @@ export interface PagesSelect<T extends boolean = true> {
         richText?: T | RichTextBlockSelect<T>;
         mediaWithText?: T | MediaWithTextBlockSelect<T>;
         headingWithList?: T | HeadingWithListBlockSelect<T>;
+      };
+  countries?:
+    | T
+    | {
+        name?: T;
+        image?: T;
+        link?: T;
+        id?: T;
       };
   description?: T;
   updatedAt?: T;
@@ -1341,6 +1376,10 @@ export interface Header {
   donate?: {
     label?: string | null;
     url?: string | null;
+    /**
+     * Optional button color. Blank keeps the default yellow. Text turns white on dark colors.
+     */
+    color?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1351,9 +1390,18 @@ export interface Header {
  */
 export interface Footer {
   id: number;
+  logo?: (number | null) | Media;
+  donate?: {
+    label?: string | null;
+    url?: string | null;
+    /**
+     * Optional button color. Blank keeps the default teal. Text turns white on dark colors.
+     */
+    color?: string | null;
+  };
   columns?:
     | {
-        heading: string;
+        heading?: string | null;
         links?:
           | {
               label: string;
@@ -1364,6 +1412,7 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  socialsHeading?: string | null;
   socials?:
     | {
         platform: 'Facebook' | 'X' | 'Instagram' | 'LinkedIn' | 'YouTube';
@@ -1371,7 +1420,9 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  contactLabel?: string | null;
   contactEmail?: string | null;
+  copyright?: string | null;
   legalLinks?:
     | {
         label: string;
@@ -1407,6 +1458,7 @@ export interface HeaderSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        color?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1417,6 +1469,14 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
+  logo?: T;
+  donate?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        color?: T;
+      };
   columns?:
     | T
     | {
@@ -1430,6 +1490,7 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  socialsHeading?: T;
   socials?:
     | T
     | {
@@ -1437,7 +1498,9 @@ export interface FooterSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  contactLabel?: T;
   contactEmail?: T;
+  copyright?: T;
   legalLinks?:
     | T
     | {

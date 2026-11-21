@@ -65,12 +65,28 @@ export const Pages: CollectionConfig = {
         ],
       },
     },
+    { name: 'intro', type: 'richText' }, // from resources-search
     {
       name: 'layout', // The page body: sections stacked in any order
       type: 'blocks',
       required: true,
       minRows: 1,
       blocks: pageBlocks,
+    },
+    {
+      name: 'countries', // from resources-search
+      type: 'array',
+      labels: { singular: 'Country', plural: 'Countries' },
+      admin: { initCollapsed: true },
+      fields: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'image', type: 'upload', relationTo: 'media', required: true },
+        {
+          name: 'link',
+          type: 'text',
+          admin: { description: 'Optional. Internal path (e.g. /countries/kenya) or full URL.' },
+        },
+      ],
     },
     {
       name: 'description', // Shown in Google results and link previews
