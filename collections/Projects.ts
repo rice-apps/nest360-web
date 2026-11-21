@@ -1,7 +1,8 @@
 import { staffWrites } from '../lib/staffAccess'
 import type { CollectionConfig } from 'payload'
 
-// One resources/project page, e.g. nest360.org/project/clinical-job-aids.
+// One resources/project page, shown at /resources/<slug> (app/(frontend)/resources/[slug]/page.tsx),
+// e.g. /resources/clinical-job-aids.
 // The page doesn't hold files: its resourceGroups link to entries in the Resources collection, so the
 // same resource can be on several pages. `layout` picks how they're shown: one plain list (each with its
 // preview) or titled groups. File previews live on Documents, made automatically from each PDF's first page.
@@ -50,7 +51,6 @@ export const Projects: CollectionConfig = {
       type: 'select',
       label: 'Audience',
       required: true,
-      defaultValue: 'healthcare',
       options: [
         { label: 'Healthcare professionals & BMETs', value: 'healthcare' },
         { label: 'Innovators & manufacturers', value: 'innovators' },
@@ -163,14 +163,8 @@ export const Projects: CollectionConfig = {
         },
       ],
     },
-    {
-      name: 'downloadAll',
-      type: 'upload',
-      relationTo: 'documents',
-      admin: {
-        description: 'Optional single file that combines everything on the page.',
-      },
-    },
+    // No "Download all" upload: the page's Download all button zips every file it lists
+    // (app/(frontend)/resources/[slug]/download/route.ts)
     {
       name: 'citation',
       type: 'textarea',
