@@ -39,15 +39,13 @@ The header and footer appear on all three.
 **Where:** `components/ResourceCard.tsx`, the card link on `/resources`.
 
 **Why it costs data:**
-- Each card's link points straight at the file: the PDF, Word or PowerPoint upload (`linkUrl` in `lib/data/resources.ts`).
-- The link is a Next.js `<Link>`. In the built site, Next.js prefetches every `<Link>` that scrolls into view: it downloads the target in the background so a click feels instant. For a page that is a small data request. For a file it is the **whole file**.
-- Measured with `npm run measure:bandwidth` on the local database (15 resources): `/resources` downloads 787 kB on first load and **11.8 MB** after scrolling to the bottom. The largest requests are the PDFs themselves (2.8 MB, 2.8 MB, 2.3 MB, 1.7 MB, ...), requested with `?_rsc=`, which is how Next.js prefetches.
-- On 3G (400 kbit/s) that is about 4 minutes of downloading for files the visitor never opened. On a prepaid phone plan it is also real money.
+- Each card links straight to its file (`linkUrl` in `lib/data/resources.ts`) with a Next.js `<Link>`.
+- In the built site, Next.js prefetches every `<Link>` that scrolls into view. For a file, that means the whole file.
+- Measured locally with 15 resources: `/resources` downloads 787 kB on load and about 11.8 MB after scrolling, mostly PDFs.
 
 **How to make it smaller:**
-- Use a plain `<a href>` for links to files and to other sites. Files and external links aren't pages of this site, so `<Link>` gives them nothing. Keep `<Link>` for pages on the site.
-- Or, the smallest change: add `prefetch={false}` to that `<Link>`.
-- Measure again: "Whole page after scrolling" on `/resources` should drop from about 11.8 MB to under 1 MB.
+- Use a plain `<a href>` for files and external links, and keep `<Link>` for pages on the site.
+- Or add `prefetch={false}` to that `<Link>`.
 
 ## Images
 
@@ -200,4 +198,4 @@ Neither is shown on a page yet.
 
 ## Suggested order
 
-Fix #1 first: it is the largest saving by far, and it is a one-line change. Fixes #2, #3 and #4 are a few lines each and affect every page or the project pages. Do them next, and measure with Laksh's script before and after. Fixes #5–#7 come next, and #8–#11 as content grows.
+Fix #1 first: it is the largest saving and a one-line change. Fixes #2, #3 and #4 are a few lines each and affect every page or the project pages. Do them next, and measure with Laksh's script before and after. Fixes #5–#7 come next, and #8–#11 as content grows.
