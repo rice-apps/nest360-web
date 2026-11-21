@@ -525,7 +525,33 @@ export interface Page {
    * Used in the URL, e.g. what-we-do. Filled in from the title if left blank.
    */
   slug?: string | null;
+  intro?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   layout: (SubsectionBlock | RichTextBlock | MediaWithTextBlock | HeadingWithListBlock)[];
+  countries?:
+    | {
+        name: string;
+        image: number | Media;
+        /**
+         * Optional. Internal path (e.g. /countries/kenya) or full URL.
+         */
+        link?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * One or two sentences for search results. Keep under about 160 characters.
    */
@@ -1023,6 +1049,7 @@ export interface ProjectsSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  intro?: T;
   layout?:
     | T
     | {
@@ -1030,6 +1057,14 @@ export interface PagesSelect<T extends boolean = true> {
         richText?: T | RichTextBlockSelect<T>;
         mediaWithText?: T | MediaWithTextBlockSelect<T>;
         headingWithList?: T | HeadingWithListBlockSelect<T>;
+      };
+  countries?:
+    | T
+    | {
+        name?: T;
+        image?: T;
+        link?: T;
+        id?: T;
       };
   description?: T;
   updatedAt?: T;
