@@ -1,5 +1,5 @@
 // Site search, built on Payload's search plugin (https://payloadcms.com/docs/plugins/search).
-// The plugin keeps a `search` collection with one entry per published resource, project and article,
+// The plugin keeps a `search` collection with one entry per published resource, project, technology and article,
 // and updates it whenever one of those is saved. Drafts are never added, and unpublishing removes the entry.
 // Each entry stores the text to search (`content`) and links to the document's tags, so a search can match
 // words in the text or a tag's name. lib/data/search.ts runs the searches.
@@ -17,7 +17,7 @@ const joinText = (...parts: (string | null | undefined)[]) => parts.filter(Boole
 const shorten = (text: string, length = 200) => (text.length > length ? `${text.slice(0, length).trimEnd()}…` : text)
 
 export const searchPluginConfig: SearchPluginConfig = {
-  collections: ['resources', 'projects', 'articles'],
+  collections: ['resources', 'projects', 'technologies', 'articles'],
   // Drafts are left out, and a document that is unpublished is removed (both are the plugin's defaults,
   // stated here because the task depends on them)
   syncDrafts: false,
@@ -78,6 +78,23 @@ export const searchPluginConfig: SearchPluginConfig = {
           ...groups.flatMap((group) => [group.title, group.description]),
         ),
         tags: ids([doc.tag]),
+      }
+    }
+
+    if (collectionSlug === 'technologies') {
+      const description = plainText(doc.description)
+      const products = (doc.qualifiedProducts ?? []) as { name?: string; regulation?: string }[]
+      const groups = (doc.resourceGroups ?? []) as { title?: string; description?: string }[]
+      return {
+        ...base,
+        summary: shorten(description),
+        content: joinText(
+          doc.title,
+          description,
+          ...products.flatMap((product) => [product.name, product.regulation]),
+          ...groups.flatMap((group) => [group.title, group.description]),
+        ),
+        tags: [],
       }
     }
 

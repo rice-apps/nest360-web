@@ -19,6 +19,7 @@ import { Pages } from './collections/Pages'
 import { Projects } from './collections/Projects'
 import { Resources } from './collections/Resources'
 import { Tags } from './collections/Tags'
+import { Technologies } from './collections/Technologies'
 import { Users } from './collections/Users'
 import { Videos } from './collections/Videos'
 import { Footer } from './globals/Footer'
@@ -64,7 +65,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Icons, Documents, Videos, Tags, Articles, Authors, Resources, Projects, Pages],
+  collections: [Users, Media, Icons, Documents, Videos, Tags, Articles, Authors, Resources, Projects, Technologies, Pages],
   globals: [Header, Footer],
   editor: lexicalEditor(),
   // Development falls back to a fixed secret so a fresh clone runs without a .env; production must set one

@@ -2,23 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { StoryCard } from "@/components/StoryCard";
+import { StorySearchBox } from "@/components/StorySearchBox";
 import { getPublishedArticles } from "@/lib/data/articles";
 import { search } from "@/lib/data/search";
+import { storiesHref } from "@/lib/storiesHref";
 import type { Article, Tag } from "@/payload-types";
 
 // The /stories gallery. Shows every published article as a card. The search box and the tag buttons put
-// ?q=… and ?tag=… in the URL, and the page reads them on the server, so it works without client JavaScript.
+// ?q=… and ?tag=… in the URL, and the page reads them on the server. The search box applies the text after a
+// short pause in typing; without client JavaScript, pressing Search still works.
 // The page is rendered on every request (it reads searchParams), so a newly published story shows up on
 // the next page load.
-
-// Builds a /stories link that keeps the current search and/or tag
-function storiesHref(query: string, tag: string) {
-    const params = new URLSearchParams();
-    if (query) params.set("q", query);
-    if (tag) params.set("tag", tag);
-    const qs = params.toString();
-    return qs ? `/stories?${qs}` : "/stories";
-}
 
 // The tags used by at least one published article, for the filter buttons
 function tagsOf(articles: Article[]) {
@@ -73,28 +67,8 @@ export default async function StoriesPage({ searchParams }: PageProps<"/stories"
                 </div>
             </div>
 
-            {/* Search: a plain GET form, so pressing Search loads /stories?q=… (keeping the chosen tag) */}
-            <form
-                action="/stories"
-                role="search"
-                className="flex max-w-2xl mx-4 sm:mx-auto mt-6 shadow-sm rounded-md overflow-hidden border border-gray-200 mb-10"
-            >
-                <input
-                    type="search"
-                    name="q"
-                    defaultValue={query}
-                    placeholder="Search stories, topics or authors..."
-                    aria-label="Search stories"
-                    className="flex-1 min-w-0 px-4 py-3 outline-none text-gray-700 placeholder-gray-400 text-sm"
-                />
-                {tag && <input type="hidden" name="tag" value={tag} />}
-                <button
-                    type="submit"
-                    className="bg-[#41B6C4] text-white px-8 font-medium hover:bg-[#3298a4] transition-colors text-sm"
-                >
-                    Search
-                </button>
-            </form>
+            {/* Search: applies the typed text after a short pause, keeping the chosen tag (see StorySearchBox) */}
+            <StorySearchBox initialQuery={query} tag={tag} />
 
             {/* Tag filters: links, so the chosen one is in the URL and can be shared */}
             {tags.length > 0 && (

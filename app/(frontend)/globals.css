@@ -24,6 +24,37 @@
   --color-nest-neutral-500: #868e96;
   --color-nest-neutral-200: #f1f3f5;
   --color-nest-neutral-100: #f8f9fa;
+
+  /* A panel or section easing in, e.g. motion-safe:animate-fade-in-up when a tab opens */
+  --animate-fade-in-up: fade-in-up 0.35s ease-out both;
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Qualified product rows on technology pages (<details class="product-accordion">) slide open and closed.
+   Browsers without ::details-content (or with reduced motion) just open and close instantly. */
+@media (prefers-reduced-motion: no-preference) {
+  .product-accordion {
+    interpolate-size: allow-keywords;
+  }
+  .product-accordion::details-content {
+    height: 0;
+    overflow: clip;
+    transition:
+      height 0.35s ease,
+      content-visibility 0.35s allow-discrete;
+  }
+  .product-accordion[open]::details-content {
+    height: auto;
+  }
 }
 
 body {

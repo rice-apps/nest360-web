@@ -1,0 +1,82 @@
+'use client';
+
+// The search box on /resources. Once typing pauses for SEARCH_DELAY_MS, it updates ?q= in the URL with
+// router.replace, so the server page re-renders with new results and the browser never reloads.
+// Clicking Search (or pressing Enter) applies the text straight away. Every other URL param (the
+// sidebar's filters and the sort) is kept. Same live-search pattern as StorySearchBox on /stories.
+
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import React, { useCallback, useEffect, useState, useTransition } from 'react';
+
+// How long typing must pause before the search is applied
+const SEARCH_DELAY_MS = 300;
+
+export function ResourceSearchBox({ initialQuery = '' }: { initialQuery?: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [value, setValue] = useState(initialQuery);
+  const [isPending, startTransition] = useTransition();
+  // The search text this box and the URL last agreed on. When the page comes back with the text this box
+  // sent, nothing changes, so letters typed in the meantime are kept. When the URL changes some other way
+  // (Back button, a shared link), the box takes the new text.
+  const [synced, setSynced] = useState(initialQuery);
+  // The ?q= the page was last rendered with, to notice when it changes
+  const [seenQuery, setSeenQuery] = useState(initialQuery);
+  if (initialQuery !== seenQuery) {
+    setSeenQuery(initialQuery);
+    if (initialQuery !== synced) {
+      setSynced(initialQuery);
+      setValue(initialQuery);
+    }
+  }
+
+  const apply = useCallback(
+    (term: string) => {
+      setSynced(term); // this also stops the waiting timer below
+      const params = new URLSearchParams(searchParams.toString());
+      if (term) params.set('q', term);
+      else params.delete('q');
+      const query = params.toString();
+      startTransition(() => {
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      });
+    },
+    [pathname, router, searchParams],
+  );
+
+  // After a pause in typing, put the text in the URL
+  useEffect(() => {
+    const term = value.trim();
+    if (term === synced) return;
+    const timer = setTimeout(() => apply(term), SEARCH_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [value, synced, apply]);
+
+  function onSubmit(event: React.FormEvent) {
+    event.preventDefault(); // stops the browser's full page load
+    const term = value.trim();
+    if (term !== synced) apply(term);
+  }
+
+  return (
+    <form action="/resources" method="GET" onSubmit={onSubmit} className="flex max-w-2xl mx-auto mt-6 gap-2">
+      <input
+        type="search"
+        name="q"
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder="Search..."
+        aria-busy={isPending}
+        className="min-w-0 flex-1 rounded-[10px] border border-gray-200 bg-white px-4 py-3 text-base text-gray-700 placeholder-gray-400 outline-none focus:border-nest-light-blue"
+      />
+      <button
+        type="submit"
+        disabled={isPending}
+        className="rounded-[30px] bg-nest-light-blue px-8 text-base font-semibold text-nest-blue transition-colors hover:bg-nest-accent disabled:opacity-70"
+      >
+        {isPending ? 'Searching…' : 'Search'}
+      </button>
+    </form>
+  );
+}

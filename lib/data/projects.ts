@@ -88,11 +88,13 @@ function populated<T extends object>(value: number | T | null | undefined): T | 
   return value && typeof value === "object" ? value : null;
 }
 
-// Every uploaded file the project page lists, once each, in page order: what "Download all" puts in its zip.
-// Only documents and publications have files; unpublished resources (bare IDs) are skipped like on the page.
-export function projectFiles(project: Project): { url: string; filename: string }[] {
+// Every uploaded file a project or technology page lists, once each, in page order: what "Download all" puts in
+// its zip. Only documents and publications have files; unpublished resources (bare IDs) are skipped like on the page.
+export function projectFiles(page: {
+  resourceGroups?: { resources?: { resource: number | ResourceEntry }[] | null }[] | null;
+}): { url: string; filename: string }[] {
   const files = new Map<string, string>();
-  for (const group of project.resourceGroups ?? []) {
+  for (const group of page.resourceGroups ?? []) {
     for (const entry of group.resources ?? []) {
       const resource = populated<ResourceEntry>(entry.resource);
       if (resource?.resourceType !== "document" && resource?.resourceType !== "publication") continue;

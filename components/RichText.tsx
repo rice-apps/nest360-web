@@ -12,6 +12,7 @@ const pathFor: Record<string, (slug: string) => string> = {
     pages: (slug) => `/${slug}`,
     articles: (slug) => `/stories/${slug}`,
     projects: (slug) => `/resources/${slug}`,
+    technologies: (slug) => `/technology/${slug}`,
 };
 
 // Editors can link to another document ("link to the Jobs page") instead of pasting a URL.
