@@ -757,10 +757,15 @@ class Progress {
     const width = 30;
     const percent = this.percent();
     const filled = Math.round((percent / 100) * width);
-    const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
+    // Green for the done part, grey for the rest (plain when NO_COLOR is set: https://no-color.org)
+    const color = !process.env.NO_COLOR;
+    const done = '█'.repeat(filled);
+    const rest = '░'.repeat(width - filled);
+    const bar = color ? `\x1b[32m${done}\x1b[90m${rest}\x1b[0m` : done + rest;
     const columns = process.stdout.columns || 100;
-    const line = `[${bar}] ${String(percent).padStart(3)}%  ${this.step.label}`;
-    process.stdout.write(`\r\x1b[2K${line.slice(0, columns - 1)}`);
+    // Shorten the label, not the bar, so the color codes are never cut
+    const label = this.step.label.slice(0, Math.max(0, columns - width - 10));
+    process.stdout.write(`\r\x1b[2K[${bar}] ${String(percent).padStart(3)}%  ${label}`);
   }
 }
 
