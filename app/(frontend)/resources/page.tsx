@@ -3,18 +3,25 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 
 import { ResourceGrid } from '@/components/ResourceGrid';
-import { ResourceFilters } from '@/components/ResourceFilters';
+import { ResourceFiltersPanel } from '@/components/ResourceFiltersPanel';
 import { ResourceSearchBox } from '@/components/ResourceSearchBox';
 import { getResources, resourceToCard } from '@/lib/data/resources';
 import { search } from '@/lib/data/search';
 import { applyFilters, parseFilters, type Listed } from '@/lib/resourceFilters';
 
-export default async function ResourcesPage({ searchParams }: PageProps<'/resources'>) {
-  // Query CMS content at request time, after the deployment has a database available.
+const sortedUnique = (values: string[]) =>
+  [...new Set(values)].sort((a, b) => a.localeCompare(b));
+
+export default async function ResourcesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await connection();
 
   const params = await searchParams;
   const q = typeof params.q === 'string' ? params.q.trim() : '';
+  const sort = typeof params.sort === 'string' ? params.sort : undefined;
 
   let listed: Listed[] = [];
   let failed = false;
@@ -43,22 +50,11 @@ export default async function ResourcesPage({ searchParams }: PageProps<'/resour
   // Resources have no audience, so any stale ?audience= in the URL is ignored
   const filters = { ...parseFilters(params), audiences: [] };
   const resources = applyFilters(listed, filters);
-  // Every tag on any matching resource, A–Z, so the sidebar only offers tags that match something
-  const allTags = [...new Set(listed.flatMap(({ resource }) => resource.tags ?? []))].sort((a, b) => a.localeCompare(b));
+  // Only offer choices that match at least one resource, A–Z
+  const allTags = sortedUnique(listed.flatMap(({ resource }) => resource.tags ?? []));
+  const allTopics = sortedUnique(listed.flatMap(({ resource }) => resource.topics ?? []));
 
-  const sidebar = (
-    <ResourceFilters
-      // Remounts the form when the URL changes, so "Clear all" also clears the ticked boxes
-      key={JSON.stringify({ filters, q })}
-      sort={filters.sort}
-      audiences={[]}
-      selectedAudiences={[]}
-      tags={allTags}
-      selectedTags={filters.tags}
-    />
-  );
-
-  const filteredView = Boolean(q) || filters.tags.length > 0;
+  const filteredView = Boolean(q) || filters.tags.length > 0 || filters.topics.length > 0;
 
   return (
     <main className="min-h-screen bg-nest-neutral-100 pb-16">
@@ -78,14 +74,20 @@ export default async function ResourcesPage({ searchParams }: PageProps<'/resour
       {/* results section */}
       {/* 1080px: the width left by the Figma 180px side margins on a 1440px frame */}
       <div className="max-w-[1080px] mx-auto px-4 py-10 md:flex md:items-start md:gap-8">
-        {/* On phones the filters fold into a toggle, so the cards aren't pushed down a screen */}
-        <details className="mb-8 md:hidden">
-          <summary className="cursor-pointer rounded-[30px] border border-nest-blue px-4 py-2 text-center text-sm font-semibold text-nest-blue">
-            Filter and sort
-          </summary>
-          <div className="mt-3">{sidebar}</div>
-        </details>
-        <aside className="hidden w-60 shrink-0 md:sticky md:top-6 md:block">{sidebar}</aside>
+        {/* Rendered once: the sidebar folds itself with its own Expand/Collapse toggle,
+            and FILTER_FORM_ID must only appear once on the page */}
+        <aside className="mb-8 rounded-[10px] border border-gray-200 bg-white md:sticky md:top-6 md:mb-0 md:w-60 md:shrink-0">
+          <ResourceFiltersPanel
+            // Remounts when the URL changes (Back button, search), so the boxes match the URL
+            key={JSON.stringify({ filters, q })}
+            userTypes={[]}
+            contentTypes={allTags}
+            topics={allTopics}
+            initialSelected={{ audiences: [], tags: filters.tags, topics: filters.topics }}
+            q={q}
+            sort={sort}
+          />
+        </aside>
 
         <div className="min-w-0 flex-1 space-y-6">
           {/* Error state: the data couldn't be loaded, which is different from "nothing matched" */}

@@ -1,3 +1,4 @@
+import { staffWrites } from '../lib/staffAccess'
 import type { CollectionConfig } from 'payload'
 
 // Images only. Downloadable files go in Documents.
@@ -5,6 +6,7 @@ export const Media: CollectionConfig = {
   slug: 'media',
   // Public can read; creating, editing and deleting require login (Payload's default)
   access: {
+    ...staffWrites,
     read: () => true,
   },
   upload: {

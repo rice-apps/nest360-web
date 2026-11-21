@@ -1,24 +1,32 @@
+import { staffWrites } from '../lib/staffAccess'
 
 import type { CollectionConfig } from 'payload'
 
-import { previewFor, publishedOrLoggedIn } from '../lib/preview'
+import { livePreviewFor, previewFor, publishedOrLoggedIn } from '../lib/preview'
 
-// A NEST360 article
+const toPath = (slug: string) => `/stories/${slug}`
+
 export const Articles: CollectionConfig = {
   slug: 'articles',
   admin: {
-    useAsTitle: 'title', // must match a field name below
+    useAsTitle: 'title',
     defaultColumns: ['title', 'publishedDate', '_status'],
-    preview: previewFor('articles', (slug) => `/stories/${slug}`),
+    preview: previewFor('articles', toPath),
+    livePreview: livePreviewFor('articles', toPath),
   },
 
   // Staff see drafts and published articles; the public only sees published ones
   access: {
+    ...staffWrites,
     read: publishedOrLoggedIn,
   },
   
   versions: {
-    drafts: true, // adds _status plus the Save Draft and Publish buttons
+    drafts: {
+      // Saves a draft shortly after each edit, which is what refreshes the Live Preview pane
+      autosave: { interval: 800 },
+    },
+    maxPerDoc: 50, // autosave creates many versions; keep the newest 50
   },
 
 fields: [
@@ -64,23 +72,37 @@ fields: [
       },
     },
     {
-      name: 'authors', // The author/s related to the article card.
+      // Who wrote the article, picked from the Authors collection (labelled "Authors" in the admin).
+      // Named byline because `authors` is still taken by the old embedded list below.
+      name: 'byline',
+      label: 'Authors',
+      type: 'relationship',
+      relationTo: 'authors',
+      hasMany: true,
+      admin: {
+        description: 'Pick existing authors, or create a new one with the + button. Drag to reorder.',
+      },
+    },
+    {
+      // The old embedded author list (name and role typed into each article). Kept unchanged so its
+      // database tables and data stay as they are, but hidden from editors. The add_authors migration
+      // copies it into Authors and byline. Remove it in a later PR, once that migration has run everywhere.
+      name: 'authors',
+      label: 'Authors (old)',
       type: 'array',
       admin: {
-        description: 'People or organizations credited on the article.',
+        hidden: true,
+        readOnly: true,
       },
       fields: [
         {
-          name: 'name', // The name of the author or organization.
+          name: 'name',
           type: 'text',
           required: true,
         },
         {
-          name: 'role', // The role of the author or organization.
+          name: 'role',
           type: 'text',
-          admin: {
-            description: 'Job title or organization, e.g. "Neonatal Nurse, Lagos University Teaching Hospital".',
-          },
         },
       ],
     },
