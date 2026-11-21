@@ -20,20 +20,38 @@ The header and footer appear on all three.
 
 | # | Problem | Pages | Priority | Effort |
 |---|---|---|---|---|
-| 1 | The logo downloads at about 1,000–2,000 px wide but displays about 180 px wide | All (header and footer) | High | Small |
-| 2 | Two unused fonts are downloaded on every page | All | High | Small |
-| 3 | The PDF cover picture downloads at 640–1,200 px for a 240 px box | Project pages | Medium | Small |
-| 4 | Country pictures are sent as the original upload, at full size and all at once | Pages with countries (for example, Where We Work) | Medium | Small |
-| 5 | Images are sent as WebP only; AVIF would be about 20% smaller | All | Medium | Small |
-| 6 | Uploads have no size limit, so an editor can upload a 5 MB photo | All, as content grows | Medium | Small |
-| 7 | `/stories` lists every article, and `/resources` up to 100, on one page | Gallery pages | Low now, grows with content | Medium |
-| 8 | Download links don't show file sizes | Project pages | Low | Small |
-| 9 | Videos: plan for this before videos are shown on pages | Future | Low (plan ahead) | — |
-| 10 | Pages are rebuilt on every visit, so the browser never reuses a stored copy | `/resources`, Pages | Low | Medium |
+| 1 | Resource cards preload their whole PDF or file before anyone clicks: about 11 MB when scrolling `/resources` | `/resources` | High | Small |
+| 2 | The logo downloads at about 1,000–2,000 px wide but displays about 180 px wide | All (header and footer) | High | Small |
+| 3 | Two unused fonts are downloaded on every page | All | High | Small |
+| 4 | The PDF cover picture downloads at 640–1,200 px for a 240 px box | Project pages | Medium | Small |
+| 5 | Country pictures are sent as the original upload, at full size and all at once | Pages with countries (for example, Where We Work) | Medium | Small |
+| 6 | Images are sent as WebP only; AVIF would be about 20% smaller | All | Medium | Small |
+| 7 | Uploads have no size limit, so an editor can upload a 5 MB photo | All, as content grows | Medium | Small |
+| 8 | `/stories` lists every article, and `/resources` up to 100, on one page | Gallery pages | Low now, grows with content | Medium |
+| 9 | Download links don't show file sizes | Project pages | Low | Small |
+| 10 | Videos: plan for this before videos are shown on pages | Future | Low (plan ahead) | — |
+| 11 | Pages are rebuilt on every visit, so the browser never reuses a stored copy | `/resources`, Pages | Low | Medium |
+
+## Links to files
+
+### 1. Resource cards download their whole file in advance (High)
+
+**Where:** `components/ResourceCard.tsx`, the card link on `/resources`.
+
+**Why it costs data:**
+- Each card's link points straight at the file: the PDF, Word or PowerPoint upload (`linkUrl` in `lib/data/resources.ts`).
+- The link is a Next.js `<Link>`. In the built site, Next.js prefetches every `<Link>` that scrolls into view: it downloads the target in the background so a click feels instant. For a page that is a small data request. For a file it is the **whole file**.
+- Measured with `npm run measure:bandwidth` on the local database (15 resources): `/resources` downloads 787 kB on first load and **11.8 MB** after scrolling to the bottom. The largest requests are the PDFs themselves (2.8 MB, 2.8 MB, 2.3 MB, 1.7 MB, ...), requested with `?_rsc=`, which is how Next.js prefetches.
+- On 3G (400 kbit/s) that is about 4 minutes of downloading for files the visitor never opened. On a prepaid phone plan it is also real money.
+
+**How to make it smaller:**
+- Use a plain `<a href>` for links to files and to other sites. Files and external links aren't pages of this site, so `<Link>` gives them nothing. Keep `<Link>` for pages on the site.
+- Or, the smallest change: add `prefetch={false}` to that `<Link>`.
+- Measure again: "Whole page after scrolling" on `/resources` should drop from about 11.8 MB to under 1 MB.
 
 ## Images
 
-### 1. The logo is downloaded much larger than it's shown (High)
+### 2. The logo is downloaded much larger than it's shown (High)
 
 **Where:**
 - `components/HeaderNav.tsx`: the header logo, on every page.
@@ -49,7 +67,7 @@ The header and footer appear on all three.
 - Pass the size the logo is shown at, for example `width={184} height={48}`, keeping the shape of the image. Next.js then offers 256 px and 384 px versions instead.
 - Better still, upload the logo as an **SVG**. A simple logo is usually a few KB and stays sharp at any size. The Media collection already accepts `image/*`.
 
-### 2. Two fonts are loaded but not used (High)
+### 3. Two fonts are loaded but not used (High)
 
 **Where:** `app/(frontend)/layout.tsx`.
 
@@ -65,7 +83,7 @@ The header and footer appear on all three.
 - Point `--font-mono` in `globals.css` at a system font stack, such as `ui-monospace, monospace`, which downloads nothing.
 - Keep Poppins to the weights the design uses. It's already limited to 400, 600 and 700.
 
-### 3. The PDF cover picture on project pages is too large (Medium)
+### 4. The PDF cover picture on project pages is too large (Medium)
 
 **Where:** `app/(frontend)/resources/[slug]/page.tsx`, the `topPreview` image.
 
@@ -78,7 +96,7 @@ The header and footer appear on all three.
 - Pass the displayed size, `width={240}` with a height that keeps the shape, or add `sizes="240px"`.
 - Either way, visitors get the 256 px or 384–640 px version instead of 640–1,200 px.
 
-### 4. Country pictures use the original upload (Medium)
+### 5. Country pictures use the original upload (Medium)
 
 **Where:** `app/(frontend)/[slug]/page.tsx`, the country cards (`<img src={image.url}>`).
 
@@ -90,7 +108,7 @@ The header and footer appear on all three.
 - Use `next/image` with `sizes` matching the grid, like `StoryCard` does. Visitors then get a resized WebP or AVIF that loads only when scrolled into view.
 - If a plain `<img>` is kept, at least add `loading="lazy"` and use the Media `thumbnail` size (`image.sizes.thumbnail.url`).
 
-### 5. Turn on AVIF (Medium)
+### 6. Turn on AVIF (Medium)
 
 **Where:** `next.config.ts`. There is no `images` setting, so the default is WebP only.
 
@@ -100,13 +118,13 @@ The header and footer appear on all three.
 
 The trade-off: the first request for each image is a bit slower, because AVIF takes longer to encode. After that the result is cached.
 
-### 6. There's no size limit on uploads (Medium)
+### 7. There's no size limit on uploads (Medium)
 
 **Where:** `collections/Media.ts`. The only setting is a 400 × 300 `thumbnail`; originals are stored at whatever size is uploaded.
 
 **Why it costs data:**
 - An editor can upload a 6,000 px, 5 MB phone photo.
-- Anything that uses the original URL then sends the whole file: the country cards (#4), and any future plain `<img>`.
+- Anything that uses the original URL then sends the whole file: the country cards (#5), and any future plain `<img>`.
 - Next.js also has to fetch and shrink that original before it can send a small version.
 
 **How to make it smaller:**
@@ -115,7 +133,7 @@ The trade-off: the first request for each image is a bit slower, because AVIF ta
 
 ## Page content
 
-### 7. Gallery pages load every item at once (Low now, grows with content)
+### 8. Gallery pages load every item at once (Low now, grows with content)
 
 **Where:**
 - `lib/data/articles.ts`: `/stories` uses `pagination: false`, so all articles are loaded.
@@ -129,7 +147,7 @@ The trade-off: the first request for each image is a bit slower, because AVIF ta
 - Show the first 12–24 items, with a "Load more" button or page numbers.
 - Keep the search, filters and sort in the URL, as they are now, so paging works with them.
 
-### 8. Show file sizes next to downloads (Low)
+### 9. Show file sizes next to downloads (Low)
 
 **Where:** the View / Download buttons and "Download all (.zip)" in `app/(frontend)/resources/[slug]/page.tsx`.
 
@@ -142,7 +160,7 @@ The trade-off: the first request for each image is a bit slower, because AVIF ta
 - Show the total size on "Download all".
 - This doesn't reduce data by itself, but it lets people choose.
 
-### 9. Videos: decide how they load before they appear on pages (Low, plan ahead)
+### 10. Videos: decide how they load before they appear on pages (Low, plan ahead)
 
 **Where:**
 - `collections/Videos.ts`: MP4 uploads.
@@ -158,7 +176,7 @@ Neither is shown on a page yet.
 - For uploaded videos, use `preload="none"` and a `poster` image.
 - For YouTube or Vimeo, show a thumbnail with a play button and load the player only when clicked. This is known as a "facade" or "lite embed".
 
-### 10. Pages are rebuilt on every request (Low)
+### 11. Pages are rebuilt on every request (Low)
 
 **Where:**
 - `app/(frontend)/resources/page.tsx` calls `connection()`.
@@ -182,4 +200,4 @@ Neither is shown on a page yet.
 
 ## Suggested order
 
-Fixes #1, #2 and #3 are a few lines each and affect every page or the project pages. Do them first and measure with Laksh's script before and after. Fixes #4–#6 come next, and #7–#10 as content grows.
+Fix #1 first: it is the largest saving by far, and it is a one-line change. Fixes #2, #3 and #4 are a few lines each and affect every page or the project pages. Do them next, and measure with Laksh's script before and after. Fixes #5–#7 come next, and #8–#11 as content grows.
