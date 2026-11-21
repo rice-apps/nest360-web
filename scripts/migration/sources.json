@@ -1,0 +1,31 @@
+[
+  {
+    "url": "https://nest360.org/project/oxygen-cylinder-safety-guidelines/",
+    "title": "Oxygen Cylinder Safety Guidelines",
+    "category": "healthcare",
+    "layout": "list",
+    "resources": [
+      { "linkText": "Download (PDF)", "title": "Oxygen Cylinder Safety Guidelines", "group": "Guidelines", "language": "en", "documentType": "clinical-aid" }
+    ]
+  },
+  {
+    "url": "https://nest360.org/project/clinical-modules/",
+    "title": "Clinical Education Modules",
+    "category": "healthcare",
+    "layout": "groups",
+    "resources": [
+      { "linkText": "Syringe Pump", "title": "Syringe Pump — Clinical Module", "group": "Hydration, Nutrition, and Drug Delivery", "language": "en", "documentType": "other" },
+      { "linkText": "Bubble CPAP", "title": "Bubble CPAP — Clinical Module", "group": "Respiratory Support", "language": "en", "documentType": "other" }
+    ]
+  },
+  {
+    "url": "https://nest360.org/project/clinical-job-aids/",
+    "title": "Clinical Job Aids",
+    "category": "healthcare",
+    "layout": "groups",
+    "resources": [
+      { "linkText": "Canta V8-WN-NS", "title": "Canta V8-WN-NS — Clinical Job Aid (English)", "group": "Oxygen Concentrator", "language": "en", "documentType": "clinical-aid" },
+      { "linkText": "Canta V8-WN-NS", "title": "Canta V8-WN-NS — Clinical Job Aid (Portuguese)", "group": "Oxygen Concentrator", "language": "pt", "documentType": "clinical-aid" }
+    ]
+  }
+]

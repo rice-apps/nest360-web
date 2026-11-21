@@ -15,7 +15,10 @@
     "seed:sample": "payload run scripts/seed-sample.ts",
     "seed:resources": "payload run scripts/seed-resources.ts",
     "staff:setup-admin": "payload run scripts/setup-admin.ts",
-    "test:staff-access": "payload run tests/staff-access.integration.ts"
+    "test:staff-access": "payload run tests/staff-access.integration.ts",
+    "migration:prepare": "python3 scripts/migration/prepare.py",
+    "migration:import": "payload run scripts/migration/run.ts",
+    "test:migration": "python3 -m unittest discover -s tests/migration -p \"test_*.py\" && payload run tests/migration/import.integration.ts"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.10",
