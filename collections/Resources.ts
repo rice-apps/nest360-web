@@ -1,5 +1,5 @@
 import { staffWrites } from '../lib/staffAccess'
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, FieldHook } from 'payload'
 
 import { publishedOrLoggedIn } from '../lib/preview'
 
@@ -10,9 +10,25 @@ const showFor =
   (_: unknown, siblingData: Sibling) =>
     types.includes(siblingData?.resourceType ?? '')
 
+// Payload 3.92 returns a page once per array row it has (a join into an array repeats the parent per row),
+// so drop the repeats. The joins' higher limit keeps repeats from crowding real pages off the first page.
+const dropRepeatedJoins: FieldHook = ({ value }) => {
+  if (!value?.docs) return value
+  const seen = new Set()
+  const docs = value.docs.filter((doc: number | { id: number }) => {
+    const id = typeof doc === 'object' ? doc.id : doc
+    return seen.has(id) ? false : (seen.add(id), true)
+  })
+  // Payload's count includes the repeats too. With everything on one page the real count is just the
+  // list's length; otherwise take off the repeats removed here.
+  if (typeof value.totalDocs !== 'number') return { ...value, docs }
+  const totalDocs = value.hasNextPage ? value.totalDocs - (value.docs.length - docs.length) : docs.length
+  return { ...value, docs, totalDocs }
+}
+
 // One file, video, outside link or publication, saved once and searchable on its own.
-// Project pages don't hold resources: they list them in their resourceGroups, so one resource can
-// appear on several pages, and editing it here updates every page that shows it.
+// Project and technology pages don't hold resources: they list them in their resourceGroups, so one
+// resource can appear on several pages, and editing it here updates every page that shows it.
 export const Resources: CollectionConfig = {
   slug: 'resources',
   admin: {
@@ -200,36 +216,28 @@ export const Resources: CollectionConfig = {
       },
     },
 
-    // The other direction of each project's resourceGroups. Read-only: nothing is stored here,
-    // so adding a resource to a project is done on the project.
+    // The other direction of each project's and technology's resourceGroups. Read-only: nothing is stored
+    // here, so adding a resource to a page is done on that page.
     {
       name: 'projects',
       type: 'join',
       collection: 'projects',
       on: 'resourceGroups.resources.resource',
-      // Payload 3.92 returns a project once per array row it has (a join into an array repeats the
-      // parent per row), so drop the repeats. The higher limit keeps repeats from crowding real
-      // projects off the first page.
       defaultLimit: 100,
-      hooks: {
-        afterRead: [
-          ({ value }) => {
-            if (!value?.docs) return value
-            const seen = new Set()
-            const docs = value.docs.filter((doc: number | { id: number }) => {
-              const id = typeof doc === 'object' ? doc.id : doc
-              return seen.has(id) ? false : (seen.add(id), true)
-            })
-            // Payload's count includes the repeats too. With everything on one page the real count is
-            // just the list's length; otherwise take off the repeats removed here.
-            if (typeof value.totalDocs !== 'number') return { ...value, docs }
-            const totalDocs = value.hasNextPage ? value.totalDocs - (value.docs.length - docs.length) : docs.length
-            return { ...value, docs, totalDocs }
-          },
-        ],
-      },
+      hooks: { afterRead: [dropRepeatedJoins] },
       admin: {
         description: 'Project pages that list this resource. Add it to a page from that project.',
+      },
+    },
+    {
+      name: 'technologies',
+      type: 'join',
+      collection: 'technologies',
+      on: 'resourceGroups.resources.resource',
+      defaultLimit: 100,
+      hooks: { afterRead: [dropRepeatedJoins] },
+      admin: {
+        description: 'Technology pages that list this resource. Add it to a page from that technology.',
       },
     },
   ],

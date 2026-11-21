@@ -14,6 +14,7 @@
     "seed": "payload run scripts/seed.ts",
     "seed:sample": "payload run scripts/seed-sample.ts",
     "seed:resources": "payload run scripts/seed-resources.ts",
+    "seed:technologies": "payload run scripts/seed-technologies.ts",
     "staff:setup-admin": "payload run scripts/setup-admin.ts",
     "test:staff-access": "payload run tests/staff-access.integration.ts",
     "migration:prepare": "python3 scripts/migration/prepare.py",

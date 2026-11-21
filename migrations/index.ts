@@ -11,6 +11,7 @@ import * as migration_20261114_213631_project_page_cleanup from './20261114_2136
 import * as migration_20261114_213925_donate_color from './20261114_213925_donate_color';
 import * as migration_20261121_194459 from './20261121_194459';
 import * as migration_20261121_195605_footer_design from './20261121_195605_footer_design';
+import * as migration_20261121_205557_add_technologies from './20261121_205557_add_technologies';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20261121_195605_footer_design.up,
     down: migration_20261121_195605_footer_design.down,
-    name: '20261121_195605_footer_design'
+    name: '20261121_195605_footer_design',
+  },
+  {
+    up: migration_20261121_205557_add_technologies.up,
+    down: migration_20261121_205557_add_technologies.down,
+    name: '20261121_205557_add_technologies'
   },
 ];
