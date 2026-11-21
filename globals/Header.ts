@@ -1,6 +1,7 @@
 import { backgroundColor } from '../fields/backgroundColor'
 import { approvedStaff } from '../lib/staffAccess'
 import type { GlobalConfig } from 'payload'
+import { revalidateLayout } from './hooks/revalidateLayout'
 
 // Site-wide header shown on every public page. Edited once under Globals → Header in the admin.
 export const Header: GlobalConfig = {
@@ -73,4 +74,5 @@ export const Header: GlobalConfig = {
       ],
     },
   ],
+  hooks: { afterChange: [revalidateLayout] },
 }

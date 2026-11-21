@@ -1,6 +1,7 @@
 import { backgroundColor } from '../fields/backgroundColor'
 import { approvedStaff } from '../lib/staffAccess'
 import type { GlobalConfig } from 'payload'
+import { revalidateLayout } from './hooks/revalidateLayout'
 
 // Site-wide footer shown on every public page. Edited once under Globals → Footer in the admin.
 // Logo and Donate are optional and set separately from the Header's.
@@ -123,4 +124,5 @@ export const Footer: GlobalConfig = {
       ],
     },
   ],
+  hooks: { afterChange: [revalidateLayout] },
 }
