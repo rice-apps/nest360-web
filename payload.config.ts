@@ -24,7 +24,6 @@ import { Videos } from './collections/Videos'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { searchPluginConfig } from './lib/searchIndex'
-import { Pages } from './collections/Pages'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
