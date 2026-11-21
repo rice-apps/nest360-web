@@ -6,9 +6,9 @@
 //   npm run measure:bandwidth -- --help            every option
 //
 // It measures three pages: the resource gallery (/resources), one project page and one article page. The
-// project and article are found on the site each time (the most recently updated project, from the site's
-// /api/projects, and the first card on /stories), so the script keeps working as content is added or removed.
-// --project and --article choose specific pages instead.
+// project and article are found each time through the site's REST API (the most recently updated project and
+// the newest published article), so the script keeps working as content is added or removed, and doesn't
+// depend on how the gallery pages look. --project and --article choose specific pages instead.
 //
 // Each page is loaded three times in a fresh headless Chrome:
 //   1. First visit: empty cache, full speed. Then the script scrolls to the bottom, so pictures that only
@@ -352,15 +352,21 @@ async function linksOn(page: Page, pattern: RegExp): Promise<string[]> {
   return [...new Set(paths.filter((p) => pattern.test(p)))];
 }
 
-// The most recently updated project and how many there are, from Payload's REST API. Projects are public
-// (collections/Projects.ts), and since #32 no page links to them, so they can't be found from the pages.
-async function projectsFromApi(base: string): Promise<{ path: string | null; count: number } | null> {
+// The first document of a collection and how many there are, from Payload's REST API. Asking the data instead
+// of reading the gallery pages keeps this working when those pages are redesigned (since #32, no page links to
+// projects at all). Projects are public; for articles the API only returns published ones to visitors, and the
+// query asks for published ones explicitly too.
+async function firstFromApi(
+  base: string,
+  query: string,
+  pathFor: (slug: string) => string,
+): Promise<{ path: string | null; count: number } | null> {
   try {
-    const response = await fetch(new URL('/api/projects?limit=1&depth=0&sort=-updatedAt', base));
+    const response = await fetch(new URL(`${query}&limit=1&depth=0`, base));
     if (!response.ok) return null;
     const data = (await response.json()) as { docs?: { slug?: string | null }[]; totalDocs?: number };
     const slug = data.docs?.[0]?.slug;
-    return { path: slug ? `/resources/${encodeURIComponent(slug)}` : null, count: data.totalDocs ?? 0 };
+    return { path: slug ? pathFor(encodeURIComponent(slug)) : null, count: data.totalDocs ?? 0 };
   } catch {
     return null;
   }
@@ -379,18 +385,25 @@ async function discover(browser: Browser, base: string): Promise<Discovered> {
       .first()
       .textContent({ timeout: 2000 })
       .catch(() => null);
-    const fromApi = await projectsFromApi(base);
+    const projectsApi = await firstFromApi(base, '/api/projects?sort=-updatedAt', (slug) => `/resources/${slug}`);
 
     const stories = await page.goto(new URL('/stories', base).toString(), { waitUntil: 'load', timeout: 60_000 });
     if (!stories?.ok()) throw new Error(`/stories answered with status ${stories?.status() ?? 'none'}.`);
-    const articles = await linksOn(page, /^\/stories\/[^/]+$/);
+    const linkedArticles = await linksOn(page, /^\/stories\/[^/]+$/);
+    // Same order as /stories: newest publication date first
+    const articlesApi = await firstFromApi(
+      base,
+      '/api/articles?where[_status][equals]=published&sort=-publishedDate',
+      (slug) => `/stories/${slug}`,
+    );
 
     return {
-      projectPath: fromApi?.path ?? linkedProjects[0] ?? null,
-      articlePath: articles[0] ?? null,
+      // The API first; the links on the gallery pages only if the API didn't answer
+      projectPath: projectsApi ? projectsApi.path : (linkedProjects[0] ?? null),
+      articlePath: articlesApi ? articlesApi.path : (linkedArticles[0] ?? null),
       resourcesShown: shownText?.replace(/\s+/g, ' ').trim() ?? null,
-      projectCount: fromApi?.count ?? linkedProjects.length,
-      articleCount: articles.length,
+      projectCount: projectsApi?.count ?? linkedProjects.length,
+      articleCount: articlesApi?.count ?? linkedArticles.length,
     };
   } finally {
     await context.close();
@@ -585,9 +598,10 @@ function markdownReport(info: ReportInfo) {
     `- **Site:** ${base} (${info.source})`,
     `- **Code:** ${info.source.startsWith('local') ? gitDescription() : 'whatever that site is running'}`,
     `- **Browser:** headless Chromium ${info.browserVersion}, ${info.device}`,
-    `- **Content at the time:** /resources said "${discovered.resourcesShown ?? 'no count shown'}" ` +
-      `; the site had ${discovered.projectCount} ${discovered.projectCount === 1 ? 'project' : 'projects'}; /stories listed ${discovered.articleCount} ` +
-      `${discovered.articleCount === 1 ? 'article' : 'articles'}. More content changes these numbers.`,
+    `- **Content at the time:** /resources said "${discovered.resourcesShown ?? 'no count shown'}"` +
+      `; the site had ${discovered.projectCount} ${discovered.projectCount === 1 ? 'project' : 'projects'} ` +
+      `and ${discovered.articleCount} published ${discovered.articleCount === 1 ? 'article' : 'articles'}. ` +
+      'More content changes these numbers.',
     ...SLOW_CONNECTIONS.map(
       (c) =>
         `- **${c.label}:** ${c.downloadKbps} kbit/s down, ${c.uploadKbps} kbit/s up, ${c.latencyMs} ms added to each ` +

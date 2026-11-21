@@ -31,9 +31,11 @@ The `bandwidth-reports` folder is not committed. Attach or paste a report where 
 - The resource gallery, `/resources`
 - One project page: the most recently updated project, which the script asks the site for at `/api/projects`
   (no page links to projects since the `/resources` redesign)
-- One article page: the first story card on `/stories`
+- One article page: the newest published article, which the script asks the site for at `/api/articles`
 
-The project and article are found on the site each time, so the script keeps working as content changes. The
+The project and article are found through the site's data, not by reading its pages, so the script keeps
+working as content changes and when the gallery pages are redesigned. It still expects projects at
+`/resources/<slug>` and articles at `/stories/<slug>`; if those addresses change, update the script. The
 report names the pages it used and how much content the site had, because more content changes the numbers.
 To measure a specific page instead (for example, to compare one page before and after a change):
 
