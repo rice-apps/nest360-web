@@ -1,13 +1,15 @@
 import React from 'react';
-import Link from 'next/link';
 import { connection } from 'next/server';
 
 import { ResourceGrid } from '@/components/ResourceGrid';
 import { ResourceFiltersPanel } from '@/components/ResourceFiltersPanel';
-import { ResourceSearchBox } from '@/components/ResourceSearchBox';
+import { SearchBox } from '@/components/SearchBox';
+import { SearchError } from '@/components/SearchError';
 import { getResources, resourceToCard } from '@/lib/data/resources';
 import { search } from '@/lib/data/search';
 import { TOPICS, applyFilters, parseFilters, type Listed } from '@/lib/resourceFilters';
+import { loadResources, withSimulatedFailure } from '@/lib/searchLoaders';
+import { simulatedFailure } from '@/lib/simulatedFailure';
 
 const sortedUnique = (values: string[]) =>
   [...new Set(values)].sort((a, b) => a.localeCompare(b));
@@ -23,29 +25,25 @@ export default async function ResourcesPage({
   const q = typeof params.q === 'string' ? params.q.trim() : '';
   const sort = typeof params.sort === 'string' ? params.sort : undefined;
 
-  let listed: Listed[] = [];
-  let failed = false;
-
-  try {
-    const [entries, matches] = await Promise.all([
-      // Published resources only (see getResources)
-      getResources(),
-      // The search index covers title, text and tag names. No search term means "don't filter".
-      q ? search({ query: q, collections: ['resources'], limit: 100 }) : null,
-    ]);
-
-    const matchedSlugs = matches ? new Set(matches.map((match) => match.slug)) : null;
-
-    listed = entries
-      .filter((entry) => !matchedSlugs || matchedSlugs.has(entry.slug))
-      .map((entry) => ({
+  // Published resources (see getResources), narrowed by the search index when there's a search term. If the
+  // database or the search index fails or doesn't answer in time, `loaded` says so and the page shows an error
+  // with Try again instead of "no results" (lib/searchLoaders.ts). In development the failure can be simulated.
+  const loaded = await loadResources(
+    { query: q },
+    withSimulatedFailure({ getResources, search }, await simulatedFailure()),
+  );
+  const failed = !loaded.ok;
+  const listed: Listed[] = loaded.ok
+    ? loaded.data.map((entry) => ({
         resource: resourceToCard(entry),
         date: entry.publicationDate ?? entry.createdAt,
-      }));
-  } catch (error) {
-    console.error('Failed to load /resources', error);
-    failed = true;
-  }
+      }))
+    : [];
+  // Try again reloads exactly this address, so the search and filters are kept
+  const query = new URLSearchParams(
+    Object.entries(params).flatMap(([name, value]) => [value ?? []].flat().map((item) => [name, item])),
+  ).toString();
+  const retryHref = query ? `/resources?${query}` : '/resources';
     // Resources have no audience, so any stale ?audience= in the URL is ignored
   const filters = { ...parseFilters(params), audiences: [] };
   // The search index already narrowed by q (including body text), so don't search again here
@@ -71,7 +69,7 @@ export default async function ResourcesPage({
           </p>
 
           {/* Not keyed on q, so it keeps focus and the cursor while you type */}
-          <ResourceSearchBox initialQuery={q} />
+          <SearchBox initialQuery={q} placeholder="Search..." label="Search resources" />
         </div>
       </section>
 
@@ -91,18 +89,7 @@ export default async function ResourcesPage({
 
         <div className="min-w-0 flex-1 space-y-6">
           {/* Error state: the data couldn't be loaded, which is different from "nothing matched" */}
-          {failed && (
-            <div role="alert" className="rounded-[10px] border border-red-200 bg-white p-8 text-center">
-              <p className="font-semibold text-red-700">We couldn&apos;t load resources right now.</p>
-              <p className="mt-1 text-sm text-gray-600">Please try again in a moment.</p>
-              <Link
-                href="/resources"
-                className="mt-4 inline-block rounded-[30px] bg-nest-light-blue px-6 py-2 text-sm font-semibold text-nest-blue hover:bg-nest-accent"
-              >
-                Try again
-              </Link>
-            </div>
-          )}
+          {!loaded.ok && <SearchError noun="resources" failure={loaded.failure} retryHref={retryHref} />}
 
           {/* Empty state */}
           {!failed && resources.length === 0 && (
