@@ -1,11 +1,16 @@
 'use client';
 
+// The filter sidebar on /resources. The parent owns the selected filters and decides what
+// happens on change (e.g. updating the URL with router.replace). Without JavaScript the form
+// still works as a plain GET form to /resources.
+
 import React from 'react';
 import { FILTER_FORM_ID } from '@/lib/resourceFilters';
 
 export type FilterGroup = 'audiences' | 'tags' | 'topics';
 
 interface ResourceFiltersProps {
+  // Leave empty to hide the User Type group
   userTypes: { value: string; label: string }[];
   contentTypes: readonly string[];
   topics: readonly string[];
@@ -13,6 +18,10 @@ interface ResourceFiltersProps {
   onToggle: (group: FilterGroup, value: string) => void;
   onSubmit: () => void;
   onReset: () => void;
+  // Current search term, kept for the no-JavaScript fallback
+  q?: string;
+  // True while the results are reloading
+  isPending?: boolean;
 }
 
 function Option({
@@ -86,6 +95,8 @@ export function ResourceFilters({
   onToggle,
   onSubmit,
   onReset,
+  q,
+  isPending = false,
 }: ResourceFiltersProps) {
   return (
     <form
@@ -96,7 +107,11 @@ export function ResourceFilters({
         event.preventDefault();
         onSubmit();
       }}
+      className={isPending ? 'opacity-70 transition-opacity' : undefined}
     >
+      {/* Only used by the no-JavaScript fallback, so a plain GET keeps the search term */}
+      {q ? <input type="hidden" name="q" value={q} /> : null}
+
       <details open className="group/sidebar">
         <summary className="flex cursor-pointer list-none items-center justify-between border-b border-gray-200 px-4 py-3 [&::-webkit-details-marker]:hidden">
           <h2 className="text-sm font-semibold text-nest-neutral-900">
@@ -123,18 +138,20 @@ export function ResourceFilters({
           </span>
         </summary>
 
-        <Group title="Filter by User Type">
-          {userTypes.map(({ value, label }) => (
-            <Option
-              key={value}
-              name="audience"
-              value={value}
-              label={label}
-              checked={selected.audiences.includes(value)}
-              onChange={() => onToggle('audiences', value)}
-            />
-          ))}
-        </Group>
+        {userTypes.length > 0 && (
+          <Group title="Filter by User Type">
+            {userTypes.map(({ value, label }) => (
+              <Option
+                key={value}
+                name="audience"
+                value={value}
+                label={label}
+                checked={selected.audiences.includes(value)}
+                onChange={() => onToggle('audiences', value)}
+              />
+            ))}
+          </Group>
+        )}
 
         <Group title="Filter by Content Type">
           {contentTypes.map((tag) => (
