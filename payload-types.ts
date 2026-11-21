@@ -1203,6 +1203,10 @@ export interface Header {
   donate?: {
     label?: string | null;
     url?: string | null;
+    /**
+     * Optional button color. Blank keeps the default yellow. Text turns white on dark colors.
+     */
+    color?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1213,9 +1217,18 @@ export interface Header {
  */
 export interface Footer {
   id: number;
+  logo?: (number | null) | Media;
+  donate?: {
+    label?: string | null;
+    url?: string | null;
+    /**
+     * Optional button color. Blank keeps the default teal. Text turns white on dark colors.
+     */
+    color?: string | null;
+  };
   columns?:
     | {
-        heading: string;
+        heading?: string | null;
         links?:
           | {
               label: string;
@@ -1226,6 +1239,7 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  socialsHeading?: string | null;
   socials?:
     | {
         platform: 'Facebook' | 'X' | 'Instagram' | 'LinkedIn' | 'YouTube';
@@ -1233,7 +1247,9 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  contactLabel?: string | null;
   contactEmail?: string | null;
+  copyright?: string | null;
   legalLinks?:
     | {
         label: string;
@@ -1269,6 +1285,7 @@ export interface HeaderSelect<T extends boolean = true> {
     | {
         label?: T;
         url?: T;
+        color?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1279,6 +1296,14 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
+  logo?: T;
+  donate?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        color?: T;
+      };
   columns?:
     | T
     | {
@@ -1292,6 +1317,7 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  socialsHeading?: T;
   socials?:
     | T
     | {
@@ -1299,7 +1325,9 @@ export interface FooterSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  contactLabel?: T;
   contactEmail?: T;
+  copyright?: T;
   legalLinks?:
     | T
     | {

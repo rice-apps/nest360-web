@@ -1,11 +1,15 @@
 'use client';
 
-// The search box on /resources. Clicking Search (or pressing Enter) updates ?q= in the URL with
+// The search box on /resources. Once typing pauses for SEARCH_DELAY_MS, it updates ?q= in the URL with
 // router.replace, so the server page re-renders with new results and the browser never reloads.
-// Every other URL param (the sidebar's filters) is kept. Nothing runs while you type.
+// Clicking Search (or pressing Enter) applies the text straight away. Every other URL param (the
+// sidebar's filters and the sort) is kept. Same live-search pattern as StorySearchBox on /stories.
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect, useState, useTransition } from 'react';
+import React, { useCallback, useEffect, useState, useTransition } from 'react';
+
+// How long typing must pause before the search is applied
+const SEARCH_DELAY_MS = 300;
 
 export function ResourceSearchBox({ initialQuery = '' }: { initialQuery?: string }) {
   const router = useRouter();
@@ -13,22 +17,46 @@ export function ResourceSearchBox({ initialQuery = '' }: { initialQuery?: string
   const searchParams = useSearchParams();
   const [value, setValue] = useState(initialQuery);
   const [isPending, startTransition] = useTransition();
+  // The search text this box and the URL last agreed on. When the page comes back with the text this box
+  // sent, nothing changes, so letters typed in the meantime are kept. When the URL changes some other way
+  // (Back button, a shared link), the box takes the new text.
+  const [synced, setSynced] = useState(initialQuery);
+  // The ?q= the page was last rendered with, to notice when it changes
+  const [seenQuery, setSeenQuery] = useState(initialQuery);
+  if (initialQuery !== seenQuery) {
+    setSeenQuery(initialQuery);
+    if (initialQuery !== synced) {
+      setSynced(initialQuery);
+      setValue(initialQuery);
+    }
+  }
 
-  // Keeps the box in step with the URL when it changes elsewhere (Back button, a shared link)
-  useEffect(() => setValue(initialQuery), [initialQuery]);
+  const apply = useCallback(
+    (term: string) => {
+      setSynced(term); // this also stops the waiting timer below
+      const params = new URLSearchParams(searchParams.toString());
+      if (term) params.set('q', term);
+      else params.delete('q');
+      const query = params.toString();
+      startTransition(() => {
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      });
+    },
+    [pathname, router, searchParams],
+  );
+
+  // After a pause in typing, put the text in the URL
+  useEffect(() => {
+    const term = value.trim();
+    if (term === synced) return;
+    const timer = setTimeout(() => apply(term), SEARCH_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [value, synced, apply]);
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault(); // stops the browser's full page load
-
-    const params = new URLSearchParams(searchParams.toString());
     const term = value.trim();
-    if (term) params.set('q', term);
-    else params.delete('q');
-
-    const query = params.toString();
-    startTransition(() => {
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
-    });
+    if (term !== synced) apply(term);
   }
 
   return (

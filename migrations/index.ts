@@ -8,7 +8,9 @@ import * as migration_20261114_182046 from './20261114_182046';
 import * as migration_20261114_193036_add_authors from './20261114_193036_add_authors';
 import * as migration_20261114_194911_media_collections from './20261114_194911_media_collections';
 import * as migration_20261114_213631_project_page_cleanup from './20261114_213631_project_page_cleanup';
+import * as migration_20261114_213925_donate_color from './20261114_213925_donate_color';
 import * as migration_20261121_194459 from './20261121_194459';
+import * as migration_20261121_195605_footer_design from './20261121_195605_footer_design';
 
 export const migrations = [
   {
@@ -62,8 +64,18 @@ export const migrations = [
     name: '20261114_213631_project_page_cleanup',
   },
   {
+    up: migration_20261114_213925_donate_color.up,
+    down: migration_20261114_213925_donate_color.down,
+    name: '20261114_213925_donate_color',
+  },
+  {
     up: migration_20261121_194459.up,
     down: migration_20261121_194459.down,
-    name: '20261121_194459'
+    name: '20261121_194459',
+  },
+  {
+    up: migration_20261121_195605_footer_design.up,
+    down: migration_20261121_195605_footer_design.down,
+    name: '20261121_195605_footer_design'
   },
 ];

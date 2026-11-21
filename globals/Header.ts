@@ -1,3 +1,4 @@
+import { backgroundColor } from '../fields/backgroundColor'
 import { approvedStaff } from '../lib/staffAccess'
 import type { GlobalConfig } from 'payload'
 
@@ -59,6 +60,15 @@ export const Header: GlobalConfig = {
         {
           name: 'url',
           type: 'text',
+        },
+        {
+          // Same color picker and brand palette as the page blocks. Blank keeps the default yellow.
+          ...backgroundColor,
+          name: 'color',
+          admin: {
+            ...backgroundColor.admin,
+            description: 'Optional button color. Blank keeps the default yellow. Text turns white on dark colors.',
+          },
         },
       ],
     },

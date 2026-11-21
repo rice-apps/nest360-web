@@ -4,12 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { isDarkColor } from "@/lib/colors";
 import type { Header } from "@/payload-types";
 
 type Props = {
     logo: { url: string; alt: string; width?: number | null; height?: number | null } | null;
     navItems: NonNullable<Header["navItems"]>;
-    donate: { label: string; url: string } | null;
+    donate: { label: string; url: string; color?: string | null } | null;
 };
 
 // On desktop (md and up) the menu sits in a row, with dropdowns on hover or keyboard focus.
@@ -17,6 +18,10 @@ type Props = {
 export function HeaderNav({ logo, navItems, donate }: Props) {
     const [open, setOpen] = useState(false);
     const close = () => setOpen(false); // close the panel after a link is tapped
+    // Donate button color picked in Payload (Header → Donate → Color); without one, the yellow classes below apply
+    const donateStyle = donate?.color
+        ? { backgroundColor: donate.color, color: isDarkColor(donate.color) ? "#ffffff" : undefined }
+        : undefined;
 
     return (
         <header className="relative border-b border-nest-neutral-200 bg-white text-nest-blue">
@@ -39,14 +44,31 @@ export function HeaderNav({ logo, navItems, donate }: Props) {
 
                 {/* Desktop menu */}
                 <nav aria-label="Main" className="hidden items-center gap-6 md:flex">
-                    {navItems.map((item) => (
-                        <div key={item.id} className="group relative">
+                    {navItems.map((item) => {
+                        const hasDropdown = Boolean(item.children && item.children.length > 0);
+                        return (
+                        <div key={item.id} className="group relative flex items-center gap-1">
                             {item.url ? (
                                 <Link href={item.url} className="font-medium hover:text-nest-light-blue">{item.label}</Link>
                             ) : (
                                 <button type="button" className="font-medium hover:text-nest-light-blue">{item.label}</button>
                             )}
-                            {item.children && item.children.length > 0 && (
+                            {/* Down arrow on items that have dropdown links; flips up while the dropdown is open */}
+                            {hasDropdown && (
+                                <svg
+                                    aria-hidden="true"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="h-4 w-4 transition-transform group-hover:rotate-180 group-hover:text-nest-light-blue group-focus-within:rotate-180"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            )}
+                            {hasDropdown && item.children && (
                                 <ul className="invisible absolute left-0 top-full z-20 min-w-48 rounded-md bg-white p-2 shadow-lg group-hover:visible group-focus-within:visible">
                                     {item.children.map((child) => (
                                         <li key={child.id}>
@@ -58,13 +80,15 @@ export function HeaderNav({ logo, navItems, donate }: Props) {
                                 </ul>
                             )}
                         </div>
-                    ))}
+                        );
+                    })}
                 </nav>
 
                 <div className="flex items-center gap-3">
                     {donate && (
                         <Link
                             href={donate.url}
+                            style={donateStyle}
                             className="hidden rounded-full bg-nest-yellow px-5 py-2 font-semibold text-nest-blue md:inline-block"
                         >
                             {donate.label}
@@ -112,6 +136,7 @@ export function HeaderNav({ logo, navItems, donate }: Props) {
                         <Link
                             href={donate.url}
                             onClick={close}
+                            style={donateStyle}
                             className="mt-4 inline-block rounded-full bg-nest-yellow px-5 py-2 font-semibold"
                         >
                             {donate.label}
