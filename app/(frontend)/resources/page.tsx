@@ -37,6 +37,8 @@ export default async function ResourcesPage({
     const matchedSlugs = matches ? new Set(matches.map((match) => match.slug)) : null;
 
     listed = entries
+      // Publications have their own gallery at /publications, so here they only show up in search results
+      .filter((entry) => q || entry.resourceType !== 'publication')
       .filter((entry) => !matchedSlugs || matchedSlugs.has(entry.slug))
       .map((entry) => ({
         resource: resourceToCard(entry),

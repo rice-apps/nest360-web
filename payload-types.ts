@@ -399,7 +399,7 @@ export interface Resource {
   summary: string;
   resourceType: 'document' | 'video' | 'link' | 'publication';
   /**
-   * The uploaded file. A publication needs this or an external URL.
+   * The uploaded file. Optional for a publication: visitors are sent to its external URL.
    */
   document?: (number | null) | Document;
   /**
@@ -407,11 +407,11 @@ export interface Resource {
    */
   videoUrl?: string | null;
   /**
-   * Full web address, starting with https://
+   * Full web address, starting with https://. For a publication, the paper's page (e.g. Springer, Google Scholar), which the Research Publications card opens.
    */
   externalUrl?: string | null;
   /**
-   * Optional. PDFs already get a preview of their first page; set this to use a different picture.
+   * Optional. PDFs already get a preview of their first page; set this to use a different picture. Publications without either show a plain color block in the Research Publications gallery.
    */
   thumbnail?: (number | null) | Media;
   language: 'en' | 'fr' | 'pt' | 'sw';

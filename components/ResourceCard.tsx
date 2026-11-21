@@ -28,6 +28,7 @@ export function ResourceCard({
   publishedDate,
   lastModified,
   linkUrl,
+  opensInNewTab,
 }: ResourceCardProps) {
   const picture = image
     ? typeof image === 'string'
@@ -100,6 +101,7 @@ export function ResourceCard({
             <Link
               href={linkUrl}
               data-card-link
+              {...(opensInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               className="rounded group-hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
               {title}
@@ -118,7 +120,7 @@ export function ResourceCard({
         <div className="mt-auto flex flex-col gap-3 pt-3">
           {displayDate && (
             <span className="cursor-text self-start text-xs text-nest-neutral-500">
-              Updated: {formatMonthYear(displayDate)}
+              {lastModified ? 'Updated' : 'Published'}: {formatMonthYear(displayDate)}
             </span>
           )}
 

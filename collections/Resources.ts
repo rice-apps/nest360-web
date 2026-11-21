@@ -107,14 +107,10 @@ export const Resources: CollectionConfig = {
       relationTo: 'documents',
       admin: {
         condition: showFor('document', 'publication'),
-        description: 'The uploaded file. A publication needs this or an external URL.',
+        description: 'The uploaded file. Optional for a publication: visitors are sent to its external URL.',
       },
-      validate: (value: unknown, { siblingData }: { siblingData: Sibling & { externalUrl?: string } }) => {
-        if (siblingData?.resourceType === 'document' && !value) return 'Choose or upload a file.'
-        if (siblingData?.resourceType === 'publication' && !value && !siblingData.externalUrl)
-          return 'A publication needs a file or an external URL.'
-        return true
-      },
+      validate: (value: unknown, { siblingData }: { siblingData: Sibling }) =>
+        siblingData?.resourceType === 'document' && !value ? 'Choose or upload a file.' : true,
     },
     {
       name: 'videoUrl',
@@ -131,17 +127,24 @@ export const Resources: CollectionConfig = {
       type: 'text',
       admin: {
         condition: showFor('link', 'publication'),
-        description: 'Full web address, starting with https://',
+        description:
+          'Full web address, starting with https://. For a publication, the paper\'s page (e.g. Springer, Google Scholar), which the Research Publications card opens.',
       },
-      validate: (value: unknown, { siblingData }: { siblingData: Sibling }) =>
-        siblingData?.resourceType === 'link' && !value ? 'Enter the web address.' : true,
+      validate: (value: unknown, { siblingData }: { siblingData: Sibling }) => {
+        if ((siblingData?.resourceType === 'link' || siblingData?.resourceType === 'publication') && !value)
+          return 'Enter the web address.'
+        // Only real web addresses: visitors click this, so "www.…" (a broken link) or "javascript:" is refused
+        if (value && !/^https?:\/\/\S+$/i.test(String(value))) return 'Start the address with https://'
+        return true
+      },
     },
     {
       name: 'thumbnail',
       type: 'upload',
       relationTo: 'media',
       admin: {
-        description: 'Optional. PDFs already get a preview of their first page; set this to use a different picture.',
+        description:
+          'Optional. PDFs already get a preview of their first page; set this to use a different picture. Publications without either show a plain color block in the Research Publications gallery.',
       },
     },
 
