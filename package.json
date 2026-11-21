@@ -18,6 +18,8 @@
     "seed:technologies": "payload run scripts/seed-technologies.ts",
     "staff:setup-admin": "payload run scripts/setup-admin.ts",
     "test:staff-access": "payload run tests/staff-access.integration.ts",
+    "test:search": "payload run tests/search.integration.ts",
+    "test:article-page": "playwright install chromium && payload run tests/article-page.e2e.ts",
     "migration:prepare": "python3 scripts/migration/prepare.py",
     "migration:import": "payload run scripts/migration/run.ts",
     "test:migration": "python3 -m unittest discover -s tests/migration -p \"test_*.py\" && payload run tests/migration/import.integration.ts"

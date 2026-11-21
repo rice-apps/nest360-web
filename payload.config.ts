@@ -89,7 +89,9 @@ export default buildConfig({
         },
       })
     : sqliteAdapter({
-        client: { url: `file:${path.resolve(dirname, 'local.db')}` },
+        // PAYLOAD_SQLITE_FILE points the site at another SQLite file; tests use it for a throwaway
+        // database (see tests/article-page.e2e.ts). Unset, it's local.db as usual.
+        client: { url: `file:${path.resolve(dirname, process.env.PAYLOAD_SQLITE_FILE || 'local.db')}` },
       }),
   sharp,
   plugins: [
