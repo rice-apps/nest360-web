@@ -7,7 +7,7 @@ import { ResourceFiltersPanel } from '@/components/ResourceFiltersPanel';
 import { ResourceSearchBox } from '@/components/ResourceSearchBox';
 import { getResources, resourceToCard } from '@/lib/data/resources';
 import { search } from '@/lib/data/search';
-import { applyFilters, parseFilters, type Listed } from '@/lib/resourceFilters';
+import { TOPICS, applyFilters, parseFilters, type Listed } from '@/lib/resourceFilters';
 
 const sortedUnique = (values: string[]) =>
   [...new Set(values)].sort((a, b) => a.localeCompare(b));
@@ -50,9 +50,13 @@ export default async function ResourcesPage({
   const filters = { ...parseFilters(params), audiences: [] };
   // The search index already narrowed by q (including body text), so don't search again here
   const resources = applyFilters(listed, { ...filters, query: '' });
-  // Only offer choices that match at least one resource, A–Z
-  const allTags = sortedUnique(listed.flatMap(({ resource }) => resource.tags ?? []));
-  const allTopics = sortedUnique(listed.flatMap(({ resource }) => resource.topics ?? []));
+    // Offer only tags that some matching resource has, A–Z. Tags named like a topic go under
+  // Topic / Focus; every other tag goes under Content Type, so no tag is left out.
+  const allTags = [...new Set(listed.flatMap(({ resource }) => resource.tags ?? []))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+  const isTopic = (tag: string) =>
+    TOPICS.some((topic) => topic.toLowerCase() === tag.toLowerCase());
 
   const filteredView = Boolean(q) || filters.tags.length > 0 || filters.topics.length > 0;
 
@@ -78,9 +82,10 @@ export default async function ResourcesPage({
             and FILTER_FORM_ID must only appear once on the page */}
         <aside className="mb-8 rounded-[10px] border border-gray-200 bg-white md:sticky md:top-6 md:mb-0 md:w-60 md:shrink-0">
           <ResourceFiltersPanel
-            // Remounts when the URL changes (Back button, search), so the boxes match the URL
             key={JSON.stringify(filters)}
             initial={filters}
+            contentTypes={allTags.filter((tag) => !isTopic(tag))}
+            topics={allTags.filter(isTopic)}
           />
         </aside>
 

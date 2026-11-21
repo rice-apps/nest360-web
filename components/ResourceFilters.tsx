@@ -153,31 +153,35 @@ export function ResourceFilters({
           </Group>
         )}
 
-        <Group title="Filter by Content Type">
-          {contentTypes.map((tag) => (
-            <Option
-              key={tag}
-              name="tag"
-              value={tag}
-              label={tag}
-              checked={selected.tags.includes(tag)}
-              onChange={() => onToggle('tags', tag)}
-            />
-          ))}
-        </Group>
+        {contentTypes.length > 0 && (
+          <Group title="Filter by Content Type">
+            {contentTypes.map((tag) => (
+              <Option
+                key={tag}
+                name="tag"
+                value={tag}
+                label={tag}
+                checked={selected.tags.includes(tag)}
+                onChange={() => onToggle('tags', tag)}
+              />
+            ))}
+          </Group>
+        )}
 
-        <Group title="Filter by Topic / Focus">
-          {topics.map((topic) => (
-            <Option
-              key={topic}
-              name="topic"
-              value={topic}
-              label={topic}
-              checked={selected.topics.includes(topic)}
-              onChange={() => onToggle('topics', topic)}
-            />
-          ))}
-        </Group>
+        {topics.length > 0 && (
+          <Group title="Filter by Topic / Focus">
+            {topics.map((topic) => (
+              <Option
+                key={topic}
+                name="topic"
+                value={topic}
+                label={topic}
+                checked={selected.topics.includes(topic)}
+                onChange={() => onToggle('topics', topic)}
+              />
+            ))}
+          </Group>
+        )}
 
         <div className="px-4 py-5">
           <button

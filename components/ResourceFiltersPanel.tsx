@@ -9,9 +9,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState, useTransition } from 'react';
 import { ResourceFilters } from '@/components/ResourceFilters';
 import {
-  CONTENT_TYPES,
   NO_FILTERS,
-  TOPICS,
   USER_TYPES,
   filtersToQuery,
   type Filters,
@@ -19,11 +17,19 @@ import {
 
 interface ResourceFiltersPanelProps {
   initial: Filters;
+  contentTypes: readonly string[];
+  topics: readonly string[];
   // Off until resources in the CMS have a category to filter on
   showUserTypes?: boolean;
 }
 
-export function ResourceFiltersPanel({ initial, showUserTypes = false }: ResourceFiltersPanelProps) {
+export function ResourceFiltersPanel({
+  initial,
+  contentTypes,
+  topics,
+  showUserTypes = false,
+}: ResourceFiltersPanelProps) {
+
   const router = useRouter();
   const [filters, setFilters] = useState(initial);
   const [isPending, startTransition] = useTransition();
@@ -39,8 +45,8 @@ export function ResourceFiltersPanel({ initial, showUserTypes = false }: Resourc
   return (
     <ResourceFilters
       userTypes={showUserTypes ? USER_TYPES : []}
-      contentTypes={CONTENT_TYPES}
-      topics={TOPICS}
+      contentTypes={contentTypes}
+      topics={topics}
       selected={{ audiences: filters.audiences, tags: filters.tags, topics: filters.topics }}
       q={filters.query}
       isPending={isPending}
