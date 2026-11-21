@@ -46,10 +46,10 @@ export default async function ResourcesPage({
     console.error('Failed to load /resources', error);
     failed = true;
   }
-
-  // Resources have no audience, so any stale ?audience= in the URL is ignored
+    // Resources have no audience, so any stale ?audience= in the URL is ignored
   const filters = { ...parseFilters(params), audiences: [] };
-  const resources = applyFilters(listed, filters);
+  // The search index already narrowed by q (including body text), so don't search again here
+  const resources = applyFilters(listed, { ...filters, query: '' });
   // Only offer choices that match at least one resource, A–Z
   const allTags = sortedUnique(listed.flatMap(({ resource }) => resource.tags ?? []));
   const allTopics = sortedUnique(listed.flatMap(({ resource }) => resource.topics ?? []));
@@ -79,13 +79,8 @@ export default async function ResourcesPage({
         <aside className="mb-8 rounded-[10px] border border-gray-200 bg-white md:sticky md:top-6 md:mb-0 md:w-60 md:shrink-0">
           <ResourceFiltersPanel
             // Remounts when the URL changes (Back button, search), so the boxes match the URL
-            key={JSON.stringify({ filters, q })}
-            userTypes={[]}
-            contentTypes={allTags}
-            topics={allTopics}
-            initialSelected={{ audiences: [], tags: filters.tags, topics: filters.topics }}
-            q={q}
-            sort={sort}
+            key={JSON.stringify(filters)}
+            initial={filters}
           />
         </aside>
 
