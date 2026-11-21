@@ -275,6 +275,7 @@ await project({
           resourceType: 'publication',
           summary: 'Market report on newborn care technologies.',
           document: await pdf('Newborn Technology Market Report'),
+          externalUrl: 'https://scholar.google.com/scholar?q=newborn+technology+market+report',
           language: 'en',
           tags: [biomedical],
           authors: 'NEST360 Mock Team',

@@ -13,6 +13,7 @@
     "seed": "payload run scripts/seed.ts",
     "seed:sample": "payload run scripts/seed-sample.ts",
     "seed:resources": "payload run scripts/seed-resources.ts",
+    "seed:publications": "payload run scripts/seed-publications.ts",
     "staff:setup-admin": "payload run scripts/setup-admin.ts",
     "test:staff-access": "payload run tests/staff-access.integration.ts"
   },

@@ -2,6 +2,7 @@ import React from 'react';
 import { connection } from 'next/server';
 import { ResourceBrowser } from '@/components/ResourceBrowser';
 import { getProjects, projectToResource } from '@/lib/data/projects';
+import { getPublications, publicationToListed } from '@/lib/data/resources';
 import { parseFilters } from '@/lib/resourceFilters';
 import type { Resource } from './types';
 
@@ -89,6 +90,9 @@ export default async function ResourcesPage({
       const resource = projectToResource(project);
       return { resource, date: resource.lastModified };
     }),
+    // Publications have their own gallery at /publications (the same records). Here they only appear in
+    // search results, so the library's default view shows just its own resources.
+    ...(await getPublications()).map((publication) => ({ ...publicationToListed(publication), searchOnly: true })),
     ...RESOURCES_DATA.map((resource) => ({
       resource,
       date: resource.lastModified,

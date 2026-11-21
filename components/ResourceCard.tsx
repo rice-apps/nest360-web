@@ -26,6 +26,7 @@ export function ResourceCard({
   publishedDate,
   lastModified,
   linkUrl,
+  opensInNewTab,
 }: ResourceCardProps) {
   const picture = image
     ? typeof image === 'string'
@@ -33,7 +34,7 @@ export function ResourceCard({
       : { ...image, alt: image.alt ?? title }
     : null;
 
-  const audience = AUDIENCE_TAGS[category];
+  const audience = category ? AUDIENCE_TAGS[category] : undefined;
   const displayDate = lastModified ?? publishedDate;
 
   return (
@@ -42,7 +43,8 @@ export function ResourceCard({
       {linkUrl && (
         <Link
           href={linkUrl}
-          aria-label={`View ${title}`}
+          aria-label={`View ${title}${opensInNewTab ? ' (opens in a new tab)' : ''}`}
+          {...(opensInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
           className="absolute inset-0 z-10 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         />
       )}
@@ -108,7 +110,7 @@ export function ResourceCard({
         <div className="mt-auto flex flex-col gap-3 pt-3">
           {displayDate && (
             <span className="text-xs text-nest-neutral-500">
-              Updated: {formatMonthYear(displayDate)}
+              {lastModified ? 'Updated' : 'Published'}: {formatMonthYear(displayDate)}
             </span>
           )}
 

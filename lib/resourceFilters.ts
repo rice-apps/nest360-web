@@ -37,6 +37,8 @@ export const USER_TYPES: { value: ResourceCategory; label: string }[] = [
 export interface Listed {
   resource: Resource;
   date?: string;
+  // Shown only while something is typed in the search box (e.g. publications on /resources)
+  searchOnly?: boolean;
 }
 
 export interface Filters {
@@ -102,6 +104,8 @@ function matchesQuery(resource: Resource, query: string) {
   const text = lower([
     resource.title,
     resource.description,
+    resource.authorOrOrganization ?? '',
+    resource.searchText ?? '',
     ...(resource.tags ?? []),
   ].join(' '));
 
@@ -122,10 +126,12 @@ export function applyFilters(
   items: Listed[],
   { query, sort, audiences, tags, topics }: Filters,
 ): Resource[] {
+  const searching = query.trim() !== '';
   const kept = items.filter(
-    ({ resource }) =>
+    ({ resource, searchOnly }) =>
+      (!searchOnly || searching) &&
       matchesQuery(resource, query) &&
-      (!audiences.length || audiences.includes(resource.category)) &&
+      (!audiences.length || (resource.category !== undefined && audiences.includes(resource.category))) &&
       hasAnyTag(resource, tags) &&
       hasAnyTag(resource, topics),
   );
