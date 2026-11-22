@@ -24,11 +24,14 @@ export interface Resource {
   icon?: string;
 
   linkUrl?: string;
+  opensInNewTab?: boolean; // for files and outside links, rather than pages on this site
   downloadUrl?: string;
   publishedDate?: string;
   lastModified?: string; // ISO date of the last change in the admin, shown on the card as "Month Year"
   authorOrOrganization?: string;
   tags?: string[];
+
+  searchText?: string; // extra words the search box matches but the card doesn't show (e.g. a paper's authors and DOI)
 
   contentTypes?: string[];
   topics?: string[];

@@ -6,7 +6,7 @@
 // production builds, so it can't run against the deployed site.
 //
 //   npm run dev                       (in another terminal)
-//   npm run test:search:browser       (BASE_URL=http://localhost:3001 to use another address)
+//   npm run test:search-failure:browser       (BASE_URL=http://localhost:3001 to use another address)
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright'
 
 import { SIMULATE_FAILURE_COOKIE, type SimulatedFailure } from '../lib/searchLoaders'

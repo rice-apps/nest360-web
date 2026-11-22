@@ -102,6 +102,8 @@ function matchesQuery(resource: Resource, query: string) {
   const text = lower([
     resource.title,
     resource.description,
+    resource.authorOrOrganization ?? '',
+    resource.searchText ?? '',
     ...(resource.tags ?? []),
   ].join(' '));
 

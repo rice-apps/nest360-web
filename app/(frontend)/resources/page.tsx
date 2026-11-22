@@ -34,10 +34,13 @@ export default async function ResourcesPage({
   );
   const failed = !loaded.ok;
   const listed: Listed[] = loaded.ok
-    ? loaded.data.map((entry) => ({
-        resource: resourceToCard(entry),
-        date: entry.publicationDate ?? entry.createdAt,
-      }))
+    ? loaded.data
+        // Publications have their own gallery at /publications, so here they only show up in search results
+        .filter((entry) => q || entry.resourceType !== 'publication')
+        .map((entry) => ({
+          resource: resourceToCard(entry),
+          date: entry.publicationDate ?? entry.createdAt,
+        }))
     : [];
   // Try again reloads exactly this address, so the search and filters are kept
   const query = new URLSearchParams(

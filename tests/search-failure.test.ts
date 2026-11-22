@@ -2,7 +2,7 @@
 // is used or touched. The loaders are in lib/searchLoaders.ts; the pages show SearchError when they report a
 // failure. The browser test (tests/search-failure.browser.ts) checks the same thing on the real pages.
 //
-//   npm run test:search
+//   npm run test:search-failure
 import assert from 'node:assert/strict'
 
 import {
