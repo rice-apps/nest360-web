@@ -19,6 +19,8 @@
     "staff:setup-admin": "payload run scripts/setup-admin.ts",
     "test:staff-access": "payload run tests/staff-access.integration.ts",
     "test:search": "payload run tests/search.integration.ts",
+    "test:search-failure": "payload run tests/search-failure.test.ts",
+    "test:search-failure:browser": "playwright install chromium && payload run tests/search-failure.browser.ts",
     "test:article-page": "playwright install chromium && payload run tests/article-page.e2e.ts",
     "migration:prepare": "python3 scripts/migration/prepare.py",
     "migration:import": "payload run scripts/migration/run.ts",

@@ -1,10 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { SearchBox } from "@/components/SearchBox";
+import { SearchError } from "@/components/SearchError";
 import { StoryCard } from "@/components/StoryCard";
-import { StorySearchBox } from "@/components/StorySearchBox";
 import { getPublishedArticles } from "@/lib/data/articles";
 import { search } from "@/lib/data/search";
+import { loadStories, withSimulatedFailure } from "@/lib/searchLoaders";
+import { simulatedFailure } from "@/lib/simulatedFailure";
 import { storiesHref } from "@/lib/storiesHref";
 import type { Article, Tag } from "@/payload-types";
 
@@ -30,23 +33,16 @@ export default async function StoriesPage({ searchParams }: PageProps<"/stories"
     const query = typeof params.q === "string" ? params.q.trim() : "";
     const tag = typeof params.tag === "string" ? params.tag : "";
 
-    let articles: Article[] = []; // every published article (also the source of the tag buttons)
-    let shown: Article[] = []; // the ones matching the search and tag
-    let failed = false;
-    try {
-        articles = await getPublishedArticles();
-        shown = articles;
-        if (query || tag) {
-            // The site search (lib/data/search.ts) only holds published articles, so drafts can't match.
-            // It returns slugs; the cards come from the full list so they keep the newest-first order.
-            const results = await search({ query, tags: tag ? [tag] : [], collections: ["articles"], limit: 200 });
-            const slugs = new Set(results.map((result) => result.slug));
-            shown = articles.filter((article) => slugs.has(article.slug));
-        }
-    } catch (error) {
-        console.error("Couldn't load stories", error);
-        failed = true;
-    }
+    // Every published article (also the source of the tag buttons), and the ones matching the search and tag.
+    // If the database or the search index fails or doesn't answer in time, `loaded` says so and the page shows
+    // an error with Try again instead of "no stories" (lib/searchLoaders.ts). In development the failure can
+    // be simulated.
+    const loaded = await loadStories(
+        { query, tag },
+        withSimulatedFailure({ getPublishedArticles, search }, await simulatedFailure()),
+    );
+    const articles: Article[] = loaded.ok ? loaded.data.articles : [];
+    const shown: Article[] = loaded.ok ? loaded.data.shown : [];
 
     const tags = tagsOf(articles);
 
@@ -67,8 +63,14 @@ export default async function StoriesPage({ searchParams }: PageProps<"/stories"
                 </div>
             </div>
 
-            {/* Search: applies the typed text after a short pause, keeping the chosen tag (see StorySearchBox) */}
-            <StorySearchBox initialQuery={query} tag={tag} />
+            {/* Search: applies the typed text after a short pause, keeping the chosen tag (see SearchBox) */}
+            <div className="mb-10 px-4">
+                <SearchBox
+                    initialQuery={query}
+                    placeholder="Search stories, topics or authors..."
+                    label="Search stories"
+                />
+            </div>
 
             {/* Tag filters: links, so the chosen one is in the URL and can be shared */}
             {tags.length > 0 && (
@@ -100,11 +102,12 @@ export default async function StoriesPage({ searchParams }: PageProps<"/stories"
             </div>
 
             <div className="max-w-6xl mx-auto px-4 py-8">
-                {failed ? (
-                    // Error state: Payload or the database didn't answer
-                    <p role="alert" className="py-16 text-center text-gray-600">
-                        Stories couldn&apos;t load right now. Please try again in a moment.
-                    </p>
+                {!loaded.ok ? (
+                    // Error state: the data couldn't be loaded, which is different from "nothing matched".
+                    // Try again reloads exactly this address, so the search and tag are kept.
+                    <div className="mx-auto max-w-2xl py-8">
+                        <SearchError noun="stories" failure={loaded.failure} retryHref={storiesHref(query, tag)} />
+                    </div>
                 ) : articles.length === 0 ? (
                     // Empty state: nothing published yet
                     <p className="py-16 text-center text-gray-600">No stories yet. Check back soon.</p>
